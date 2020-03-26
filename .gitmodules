@@ -1,0 +1,3 @@
+[submodule "PyMaLi"]
+	path = PyMaLi
+	url = https://github.com/Tomev/PyMaLi.git

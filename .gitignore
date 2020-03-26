@@ -1,0 +1,5 @@
+.spyproject/
+.idea/
+QConfig.py
+.ipynb_checkpoints/
+__pycache__/
