@@ -6,14 +6,8 @@ Created on Fri Jan 18 14:58:06 2019
 @author: Filip Maciejewski
 email: filip.b.maciejewski@gmail.com
 
-@author: Tomasz Rybotycki
-email: TODO: Tomek if you wish, add your email
-
 #TODO FBM: Some functions used here come from other packages - we probably need to identify them and copy to some
     "helper_functions_QDT" repository
-
-from povms_qi import povm_data_tools as pdt
-
 """
 
 import povmtools
@@ -146,6 +140,8 @@ def detector_tomography_circuits(qubit_indices,
     # while all the other are fixed. See function description for details.
     indices_for_circuits = get_list_of_lists_indices_qdt(qubit_indices, len(unitaries))
 
+    print(indices_for_circuits)
+
     qrs = max(qubit_indices) + 1
 
     # outer loop is for copies of QDT experiment
@@ -201,4 +197,69 @@ def detector_tomography_circuits(qubit_indices,
                 circuit.measure(qreg[qubit_indices[i]], creg[i])
 
             tomography_circuits.append(circuit)
+    return tomography_circuits
+
+
+
+from PyMaLi import GeneralTensorCalculator
+
+def gtc_tensor_calculating_function(arguments: list):
+    result = []
+
+    for a in arguments:
+        result.append(a)
+
+    return result
+
+
+
+def detector_tomography_circuits_pymali(qubit_indices, probe_kets):
+    """
+    Analogical version of the circuits preparing method utilizing pymali general tensor calculator.
+    """
+
+    qubit_indices = sorted(qubit_indices)  # Sort to ensure, that results can easily be interpreted.
+    tomography_circuits = []
+    unitaries = [povmtools.get_unitary_change_ket_qubit(ket) for ket in probe_kets]
+
+    # create nice list with proper ordering of circuits. In first step, last qubit in list qubit_indices is iterated
+    # while all the other are fixed. See function description for details.
+    gtc = GeneralTensorCalculator.GeneralTensorCalculator(gtc_tensor_calculating_function)
+    unitaries_lists_for_tensor_calculator = [unitaries.copy() for i in range(len(qubit_indices))]
+    list_of_unitaries_sets = gtc.calculate_tensor_to_increasing_list(unitaries_lists_for_tensor_calculator)
+    qrs = max(qubit_indices) + 1
+
+    # inner loop goes through all circuits in QDT experiments and prepares them
+    for unitaries_set in list_of_unitaries_sets:
+
+        qreg = QuantumRegister(qrs)
+        creg = ClassicalRegister(len(qubit_indices))
+
+        circuit = QuantumCircuit(qreg, creg)
+        circuit.barrier()  # To prevent compiler from making changes.
+
+        for j in range(len(unitaries_set)):
+
+            current_angles = povmtools.get_su2_parametrizing_angles(unitaries_set[j])
+
+            # TODO TR: I believe there may be more "special" cases. If so, then this should be placed in other method
+            #  or in get_su2_ ... method.
+            if current_angles[0] == 'id':
+                print("I")
+                break
+            if current_angles[0] == 'x':
+                print("X")
+                circuit.x(qreg[qubit_indices[j]])
+                break
+
+            # implement unitary
+            circuit.u3(current_angles[0],
+                       current_angles[1],
+                       current_angles[2], qreg[qubit_indices[j]])
+
+        # Add measurements
+        for i in range(len(qubit_indices)):
+            circuit.measure(qreg[qubit_indices[i]], creg[i])
+
+        tomography_circuits.append(circuit)
     return tomography_circuits
