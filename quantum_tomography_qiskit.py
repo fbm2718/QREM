@@ -24,6 +24,7 @@ def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
     detectors.
 
     # TODO FBM: Maybe GeneralTensor could be used for it?
+    # TR: It now is -- check it out ;)
 
     :param qubits_indices: (list of ints) labels of qubits for QDT
     :param unitaries_amount: (int) number of unitaries you want to implement.
@@ -140,8 +141,6 @@ def detector_tomography_circuits(qubit_indices,
     # while all the other are fixed. See function description for details.
     indices_for_circuits = get_list_of_lists_indices_qdt(qubit_indices, len(unitaries))
 
-    print(indices_for_circuits)
-
     qrs = max(qubit_indices) + 1
 
     # outer loop is for copies of QDT experiment
@@ -200,8 +199,8 @@ def detector_tomography_circuits(qubit_indices,
     return tomography_circuits
 
 
-
 from PyMaLi import GeneralTensorCalculator
+
 
 def gtc_tensor_calculating_function(arguments: list):
     result = []
@@ -210,7 +209,6 @@ def gtc_tensor_calculating_function(arguments: list):
         result.append(a)
 
     return result
-
 
 
 def detector_tomography_circuits_pymali(qubit_indices, probe_kets):
@@ -245,12 +243,11 @@ def detector_tomography_circuits_pymali(qubit_indices, probe_kets):
             # TODO TR: I believe there may be more "special" cases. If so, then this should be placed in other method
             #  or in get_su2_ ... method.
             if current_angles[0] == 'id':
-                print("I")
-                break
+                circuit.iden(qreg[qubit_indices[j]])
+                continue
             if current_angles[0] == 'x':
-                print("X")
                 circuit.x(qreg[qubit_indices[j]])
-                break
+                continue
 
             # implement unitary
             circuit.u3(current_angles[0],
