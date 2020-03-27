@@ -1,6 +1,5 @@
 # QREM
-QREM - Quantum Readout Errors Mitigation, an open-source package for implementing techniques of measurement error mitigation on quantum devices.
-  
+**QREM** - **Q**uantum **R**eadout **E**rrors **M**itigation, an open-source package for implementing techniques of measurement error mitigation on quantum devices.
   
   
   
