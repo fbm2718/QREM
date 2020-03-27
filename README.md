@@ -4,6 +4,16 @@
   
   
   
+
+
+
+## Code Style
+We use PEP8 as a code style for this project.
+
+According to PEP8 style guide all function and variable names should be in lower case. In mathematics matrices
+are usually named using capital letters, for better distinction. In order for both of these obligations to be satisfied
+we will use prefix _m__, to mark all matrices.
+
   
 **The workflow of this package is mainly based on the work**:
   
@@ -25,14 +35,6 @@ Hewlett-Packard Labs (2003).
 
 [5] John A. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", Phys. Rev. Lett. 108, 070502
 (2012), https://arxiv.org/abs/1106.5458
-
-
-## Code Style
-We use PEP8 as a code style for this project.
-
-According to PEP8 style guide all function and variable names should be in lower case. In mathematics matrices
-are usually named using capital letters, for better distinction. In order for both of these obligations to be satisfied
-we will use prefix _m__, to mark all matrices.
 
 ## Authors
 
