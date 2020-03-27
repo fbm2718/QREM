@@ -1,17 +1,18 @@
 # QREM
 QREM - Quantum Readout Errors Mitigation, an open-source package for implementing techniques of measurement error mitigation on quantum devices.
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
 **The workflow of this package is mainly based on the work**:
+  
 [0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec, "Mitigation of readout noise in near-term quantum devices
 by classical post-processing based on detector tomography", arxiv preprint, https://arxiv.org/abs/1907.08518 (2019)
-
+  
 **Important quantum information ideas appearing in the code are, to a higher or lower degree, described in detail in following references:**
-
+  
 [1] Z. Hradil, J. Řeháček, J. Fiurášek, and M. Ježek, “3 maximum-likelihood methods in quantum mechanics,” in Quantum
 State Estimation, edited by M. Paris and J. Řeháček (Springer Berlin Heidelberg, Berlin, Heidelberg, 2004) pp. 59–112.
 [2] J. Fiurášek, Physical Review A 64, 024102 (2001), arXiv:quant-ph/0101027 [quant-ph].
