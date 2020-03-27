@@ -283,7 +283,7 @@ class DetectorTomographyFitter:
 
     #TODO TR: This method may need to be revisited and possibly reduced into several smaller ones.
     @staticmethod
-    def join_povms(povms: List[List[np.ndarray]], qubit_indices_lists: List[List[int]]):
+    def join_povms(povms: List[List[np.ndarray]], qubit_indices_lists: List[List[int]]) -> List[np.ndarray]:
         """
         Description:
             Generates a POVM from given list of POVMs and qubit indices.
@@ -299,7 +299,7 @@ class DetectorTomographyFitter:
 
         swapped_povms = []
 
-        for i in range(len((qubit_indices_lists))):
+        for i in range(len(qubit_indices_lists)):
             indices_now = qubit_indices_lists[i]
             povm_now = povms[i]
 
