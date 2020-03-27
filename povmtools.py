@@ -88,27 +88,6 @@ def ket_to_bra(ket):
     return bra
 
 
-def get_unitary_change_state(state):
-    if check_if_projector_is_in_computational_basis(state):
-        if state[0][0] == 1:
-            return np.eye(2)
-        elif state[1][1] == 1:
-            return anf.pauli_sigmas['X']
-        else:
-            raise ValueError('error')
-    else:
-        m_a, m_u = anf.spectral_decomposition(state)
-
-        d = m_u.shape[0]
-        determinant = np.linalg.det(m_a)
-
-        delta = c.phase(determinant) / d
-
-        m_u = c.exp(-1j * delta) * m_u
-
-        return np.matrix.getH(m_u)
-
-
 # TODO TR: Intentions behind the method and comments inside the function should be provided.
 # TODO FBM: So this is some old shitty function for creating list of indices (which by the way was imitating something
 #  like your Tensor).I have added new function for this in quantum_tomography_qiskit, please take a look at that (it
