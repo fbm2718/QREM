@@ -38,7 +38,7 @@ class QDTErrorMitigator:
         self._transition_matrix = None
         self._correction_matrix = None
         self._coherent_error_bound = None
-        self._statistical_errors_bounds = []  # Possibly there are several frequencies (especially for qiskit job).
+        self._statistical_errors_bounds = []  # Possibly there are several frequencies.
         self.statistical_error_mistake_probability = 0.01  # Can be accessed and changed at will.
         self._qubit_indices_lists = []
         self._distances_from_closest_probability_vector = []
@@ -46,13 +46,10 @@ class QDTErrorMitigator:
     def prepare_mitigator(self, povm: List[np.ndarray], qubit_indices_lists: List[List[int]]):
         """
         Description:
-            This method, aside from getters, is main method of the class. It's main purpose is to calculate all members
-             of the class in order for them to be used in later computation or just to mitigate the errors from
-             given statistics.
+            This method is main method of the class. It is used to prepare the mitigation matrix from POVM. Other methods allow to calculate errors. 
 
         Parameters:
-            :param povm: POVM describing the detector used in measurements of which statistics are meant to be
-             corrected. This method assumes that
+            :param povm: POVM describing the detector.
             :param qubit_indices_lists: Indices for which QDT was performed. Elements of this list should correspond to
             elements in povms_list. They will be used in statistics correction.
 
@@ -64,7 +61,7 @@ class QDTErrorMitigator:
         self._povm = povm
         self.__construct_transition_matrix()
         self.__construct_correction_matrix()
-        # self.__calculate_coherent_error_bound()
+        
         
 
     def __construct_transition_matrix(self) -> None:
@@ -161,9 +158,9 @@ class QDTErrorMitigator:
                 print(statistics)
                 statistics = statistics / norm
 
-            #TODO FBM: added here accounting for reversed register in qiskit
+           
             if qiskit_register_convention:
-                #reverse statistics for time of correction
+                #reverse ordering of statistics for time of correction
                 statistics=povmtools.reorder_probabilities(statistics,range(number_of_qubits)[::-1])
 
 
@@ -377,3 +374,6 @@ class QDTErrorMitigator:
                 (number_of_measurement_outcomes * np.log(2) - np.log(
                     self.statistical_error_mistake_probability)) / 2 / number_of_samples
             )
+
+	
+
