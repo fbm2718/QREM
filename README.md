@@ -3,7 +3,7 @@
 
   
 ## Status of development
-This package is under development and new functionalities and notebooks are expected to be added in the future. Currently, the methods for quantum detector tomography and measurement error mitigation based on that tomography are working properly. Soon tutorial for using mitigation funcionalities will be added.
+This package is under development and new functionalities and notebooks are expected to be added in the future. Currently, the methods for quantum detector tomography and measurement error mitigation based on that tomography are working properly. *Soon tutorial for using mitigation funcionalities will be added.*
   
 ## Dependencies
 To work properly,  the following libraries should be installed:
@@ -27,7 +27,7 @@ git clone https://github.com/fbm2718/QREM
 Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the package, we recomend to take a look at tutorials in jupyter notebooks:
 1. [Tutorial for implementing Quantum Detector Tomography](QDT_Tutorial.ipynb)
 
-
+*Soon tutorial for using mitigation funcionalities will be added.*
 
 ## Code Style
 We use PEP8 as a code style for this project.
