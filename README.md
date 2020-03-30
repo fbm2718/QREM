@@ -1,9 +1,31 @@
 # QREM
 **QREM** - **Q**uantum **R**eadout **E**rrors **M**itigation, an open-source package for implementing techniques of measurement error mitigation on quantum devices.
+
   
+## Status of development
+This package is under development and new functionalities and notebooks are expected to be added in the future. Currently, the methods for quantum detector tomography and measurement error mitigation based on that tomography are working properly. Soon tutorial for using mitigation funcionalities will be added.
   
-  
-  
+## Dependencies
+To work properly,  the following libraries should be installed:
+* numpy
+* scipy
+* cmath
+* math
+* copy
+* itertools
+* enum
+* typing
+* qiskit
+
+## Installing 
+The best way to install and use this package is to simply clone the repository:
+```
+git clone https://github.com/fbm2718/QREM
+```
+
+## Jupyter tutorials
+Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the package, we recomend to take a look at tutorials in jupyter notebooks:
+1. [Tutorial for implementing Quantum Detector Tomography](QDT_Tutorial.ipynb)
 
 
 
