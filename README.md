@@ -26,8 +26,8 @@ git clone https://github.com/fbm2718/QREM
 ## Workflow
 The workflow for the main functionalities is following:
 
-1. Characterize detector in terms of QDT using [DetectorTomographyFitter](DetectorTomographyFitter.py).
-2. Use the data from QDT to mitigate errors on any experiments using [QDTErrorMitigator](QDTErrorMitigator.py).
+1. Characterize detector via Quantum Detector Tomography (QDT) using [DetectorTomographyFitter](DetectorTomographyFitter.py).
+2. Use the data from QDT to mitigate errors on any experiment using [QDTErrorMitigator](QDTErrorMitigator.py).
 
 ## Jupyter tutorials
 Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the package, we recomend to take a look at tutorials in jupyter notebooks:
