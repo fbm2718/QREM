@@ -152,19 +152,17 @@ def detector_tomography_circuits(qubit_indices,
             # index of set of qubits+unitaries for current step
             current_set = indices_for_circuits[index_for_set]
 
-            print()
-            print(current_set)
-
 
             # create quantum register
             qreg = QuantumRegister(qrs)
             creg = ClassicalRegister(len(qubit_indices))
 
-            # create quantum circuit
-            circuit = QuantumCircuit(qreg, creg, name = "QDT-id"+str(current_set[0])+str(current_set[1])+'-no-'+str(number))
+            # create quantum circuit with nice names
+            set_string = ''.join(['u'+str(st) for st in current_set[0]])
+            qubits_string = ''.join(['q'+str(st) for st in qubit_indices])
 
-            print(circuit.name)
-            raise KeyError
+            circuit = QuantumCircuit(qreg, creg, name = "QDT-"+qubits_string+"-id-"+set_string+'-no-'+str(number))
+
             # get barrier to prevent compiler from making changes
             circuit.barrier()
 
