@@ -26,13 +26,13 @@ from qiskit.result import Result
 
 class QDTErrorMitigator:
     """
-        This class is used to mitigate errors in qiskit jobs using via use of QDT.
+        This class is used to mitigate errors in qiskit jobs using data from QDT.
     """
 
     def __init__(self):
         """
         Description:
-            Constructor of the class. This should initialize all the variables to None.
+            Constructor of the class. 
         """
         self._povm = None
         self._transition_matrix = None
