@@ -15,11 +15,16 @@ import scipy as sc
 import copy
 from math import log
 
-from povmtools import get_density_matrix, permute_matrix, reorder_classical_register, sort_things, reorder_probabilities
+try:
+    from QREM.povmtools import get_density_matrix, permute_matrix, reorder_classical_register, sort_things, reorder_probabilities
+    from QREM.PyMaLi.GeneralTensorCalculator import GeneralTensorCalculator
+except ModuleNotFoundError:
+    from povmtools import get_density_matrix, permute_matrix, reorder_classical_register, sort_things, reorder_probabilities
+    from PyMaLi.GeneralTensorCalculator import GeneralTensorCalculator
+
 from qiskit.result import Result
 from typing import List
 
-from PyMaLi.GeneralTensorCalculator import GeneralTensorCalculator
 
 
 def gtc_tensor_counting_function(arguments: list):
@@ -65,6 +70,8 @@ class DetectorTomographyFitter:
         Returns
             Maximum likelihood estimator of POVM describing a detector.
         """
+        
+        
 
         probe_states = self.__get_probe_states(results_list, probe_kets)
 
@@ -80,24 +87,30 @@ class DetectorTomographyFitter:
 
         # Threshold is dynamic, thus another variable
         threshold = self.algorithmConvergenceThreshold
+     
 
         i = 0
         current_difference = 1
         while abs(current_difference) >= threshold:
             i += 1
-
+            
             if i % 50 == 0:
                 last_step_povm = copy.copy(povm)
 
             r_matrices = [self.__get_r_operator(povm[j], j, frequencies_array, probe_states)
                           for j in range(number_of_probe_states)]
             lagrange_matrix = self.__get_lagrange_matrix(r_matrices, povm)
+            
             povm = [self.__calculate_symmetric_m(lagrange_matrix, r_matrices[j], povm[j])
                     for j in range(number_of_probe_states)]
+            
+            
 
             if i % 50 == 0:  # calculate the convergence test only sometimes to make the code faster
                 current_difference = sum([np.linalg.norm(povm[k] - last_step_povm[k], ord=2)
                                           for k in range(number_of_probe_states)])
+                
+      
 
             elif i > 5e5:  # make sure it does not take too long, sometimes convergence might not be so good
                 threshold = 1e-3
@@ -122,8 +135,11 @@ class DetectorTomographyFitter:
             have used tensor products of single-qubit states, then one needs to give here those tensor products. Order
             needs to fit this of results.results.
         """
-
-        circuits_number = sum(len(results.results) for results in results_list)
+        #either list of results or list of counts dicts
+        try:
+            circuits_number = sum(len(results.results) for results in results_list)
+        except(AttributeError):
+            circuits_number = sum(len(results) for results in results_list)
 
         # This is a little elaborate, but necessary.
         qubits_number = int(log(circuits_number, len(probe_kets)))
@@ -158,24 +174,41 @@ class DetectorTomographyFitter:
         Notes:
             Possible states are numbered increasingly from |00000 ... 0>, |10000 ... 0> up to |1111 ... 1>.
         """
-
-        all_circuits_number = sum(len(results.results) for results in results_list)
+        try:
+            all_circuits_number = sum(len(results.results) for results in results_list)
+            # The length of a state describes how many qubits were used during experiment.
+            states_len = len(next(iter(results_list[0].get_counts(0).keys())))
+            
+        except(AttributeError):
+            all_circuits_number = sum(len(results) for results in results_list)
+            # The length of a state describes how many qubits were used during experiment.
+            states_len = len(next(iter(results_list[0][0].keys())))
 
         if all_circuits_number == 0:
             return np.ndarray(shape=0)
 
-        # The length of a state describes how many qubits were used during experiment.
-        states_len = len(next(iter(results_list[0].get_counts(0).keys())))
+
 
         possible_states = ["{0:b}".format(i).zfill(states_len) for i in range(2 ** states_len)]
         frequencies_array = np.ndarray(shape=(all_circuits_number, len(possible_states)))
 
         # TODO TR: This has to be rewritten as it's too nested.
         for results in results_list:
-            number_of_circuits_in_results = len(results.results)
+            #either list of results or list of counts dicts
+            try:
+                number_of_circuits_in_results = len(results.results)
+            except(AttributeError):
+                number_of_circuits_in_results=len(results)
+                
             for i in range(number_of_circuits_in_results):
-                counts = results.get_counts(i)
-                shots_number = results.results[i].shots
+                
+                #either list of results or list of counts dicts
+                try:
+                    counts = results.get_counts(i)
+                    shots_number = results.results[i].shots
+                except(AttributeError):
+                    counts=results[i]
+                    shots_number = sum(counts.values())
                 
                 #TODO FBM: added here accounting for reversed register in qiskit
                 normal_order = []
@@ -191,7 +224,7 @@ class DetectorTomographyFitter:
                     frequencies = normal_order
                 
                 frequencies_array[i][:]=frequencies[:]
-                
+
         return frequencies_array
 
     @staticmethod
@@ -217,7 +250,7 @@ class DetectorTomographyFitter:
         d = probe_states[0].shape[0]
 
         m_r = np.zeros((d, d), dtype=complex)
-
+        
         for probe_state_index in range(number_of_probe_states):
             expectation_value_on_probe_state = np.trace(m_m @ probe_states[probe_state_index])
 

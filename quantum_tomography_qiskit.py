@@ -14,7 +14,7 @@ import povmtools
 import numpy as np
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 import itertools
-
+from PyMaLi import GeneralTensorCalculator
 
 # TODO: not finished
 def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
@@ -163,7 +163,6 @@ def detector_tomography_circuits(qubit_indices,
             circuit.barrier()
 
             for qubit_unitary_pair_index in range(len(current_set)):
-
                 # take qubit+unitary pair
                 pair_now = current_set[qubit_unitary_pair_index]
 
@@ -191,15 +190,13 @@ def detector_tomography_circuits(qubit_indices,
 
             # Add measurements
             for i in range(len(qubit_indices)):
-        
-                
                 circuit.measure(qreg[qubit_indices[i]], creg[i])
 
             tomography_circuits.append(circuit)
     return tomography_circuits
 
 
-from PyMaLi import GeneralTensorCalculator
+
 
 
 def gtc_tensor_calculating_function(arguments: list):
@@ -209,6 +206,19 @@ def gtc_tensor_calculating_function(arguments: list):
         result.append(a)
 
     return result
+
+
+def gtc_tensor_string(arguments: list):
+    result = []
+
+    x=''
+    
+    
+    # for a in arguments:
+    #     x.join()
+
+    return result
+
 
 
 def detector_tomography_circuits_pymali(qubit_indices, probe_kets):

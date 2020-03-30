@@ -88,40 +88,6 @@ def ket_to_bra(ket):
     return bra
 
 
-# TODO TR: Intentions behind the method and comments inside the function should be provided.
-# TODO FBM: So this is some old shitty function for creating list of indices (which by the way was imitating something
-#  like your Tensor).I have added new function for this in quantum_tomography_qiskit, please take a look at that (it
-#  might use simplifiactions). Function here can be deleted.
-def indices_array(m_as, k=2, x=[], p=0):
-    # ONLY k=2 so far
-    # A - set of matrices
-    # k - counter
-    # x - recursive array
-    # p - logical help, do not change
-
-    # returns ordered array of size (k**(len(A)))
-    # element i,j,k means Ai otimes Aj otimes Ak etc
-
-    if k == 1:
-        return m_as
-    elif k < 1:
-        raise ValueError()
-
-    elif p == 0:
-        start = np.array([[[a, b] for b in m_as] for a in m_as])
-        if k == 2:
-            return start
-        else:
-            return anf.tensor_array(m_as, k - 1, start, 1)
-
-    elif p == 1 and k > 2:
-        more = np.array([[[a, b.flatten()] for b in x] for a in m_as])
-        return anf.tensor_array(m_as, k - 1, more, 1)
-
-    elif p == 1 and k == 2:
-        return np.array([[[a, b] for b in x] for a in m_as])
-
-
 def euler_angles_1q(unitary_matrix):
     # TODO FBM: This is slightly modified copied qiskit function
     _CUTOFF_PRECISION = 10 ** (-7)
@@ -578,6 +544,41 @@ def operational_distance_POVMs(M,P,method='direct'):
         return biggest_norm
 
 
+
+
+
+
+
+def calculate_statistical_error_bound(number_of_measurement_outcomes: int,
+                                      number_of_samples: int,
+                                      statistical_error_mistake_probability: float) -> float:
+        """
+        Description:
+            Get upper bound for tv-distance of estimated probability distribution from ideal one. See Ref. [3] for details.
+
+        Parameters:
+            :param number_of_measurement_outcomes: number of outcomes, it is the dimension of Hilber space for projective measurement in standard basis
+            :param number_of_samples: number of samples for the experiment
+            :param statistical_error_mistake_probability: probability for which upper bound might be violated
+
+        Return:
+            Statistical error upper bound in total variance distance.
+        """
+
+
+
+        if number_of_measurement_outcomes < 16:
+            # for small number of outcomes "-2" factor is not negligible
+            return np.sqrt(
+                (np.log(2 ** number_of_measurement_outcomes - 2)
+                 - np.log(statistical_error_mistake_probability)) / 2 / number_of_samples
+            )
+            # for high number of outcomes "-2" factor is negligible
+        else:
+            return np.sqrt(
+                (number_of_measurement_outcomes * np.log(2) - np.log(
+                    statistical_error_mistake_probability)) / 2 / number_of_samples
+            )
 
 
 
