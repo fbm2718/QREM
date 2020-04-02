@@ -64,8 +64,6 @@ class QDTErrorMitigator:
         self._povm = povm
         self.__construct_transition_matrix()
         self.__construct_correction_matrix()
-        # self.__calculate_coherent_error_bound()
-        
 
     def __construct_transition_matrix(self) -> None:
         """
@@ -96,21 +94,22 @@ class QDTErrorMitigator:
             vec_p = np.array([np.real(current_povm_effect[i, i]) for i in range(dimension)])
 
             # Add vector to transition matrix.
-            #TODO FBM: changed here because there was mistake
-            self._transition_matrix[k,:] = vec_p[:]
+            self._transition_matrix[k, :] = vec_p[:]
 
     def __construct_correction_matrix(self) -> None:
         """
         Description:
-            Given classical description of the detector (i.e., matrix representation of POVM's elements), get the correction
-            matrix based on classical part of the noise. ASSUMING that ideal measurement is the von Neumann measurement in
-            computational basis. See Ref. [1] for details. In Ref. [1] this matrix is denoted as \Lambda^{-1}.
+            Given classical description of the detector (i.e., matrix representation of POVM's elements), get the
+            correction matrix based on classical part of the noise. ASSUMING that ideal measurement is the von Neumann
+            measurement in computational basis. See Ref. [1] for details. In Ref. [1] this matrix is denoted as
+            \Lambda^{-1}.
 
         Parameters:
             -
 
         Returns:
-            :correction_matrix: numpy array representing correction matrix. It is the inverse of transition_matrix returned by function construct_transition_matrix
+            :correction_matrix: numpy array representing correction matrix. It is the inverse of transition_matrix
+            returned by function construct_transition_matrix
         """
 
         try:
@@ -120,7 +119,7 @@ class QDTErrorMitigator:
             print(self._transition_matrix)
             self._correction_matrix = np.eye(np.shape(self._transition_matrix[0]))
 
-    def apply_correction_to_qiskit_job(self, results: Result, qiskit_register_convention = True) -> List[np.ndarray]:
+    def apply_correction_to_qiskit_job(self, results: Result, qiskit_register_convention=True) -> List[np.ndarray]:
         """
         Description:
             Given correction matrix and vector of relative frequencies, correct the statistics via multiplication by
@@ -133,69 +132,61 @@ class QDTErrorMitigator:
 
         Parameters:
             :param results: Qiskit job results for which statistics should be corrected.
+            :param results:
 
         Returns:
             Corrected statistics.
         """
 
         number_of_povm_outcomes = self._correction_matrix[0].shape[0]
-        
+
         number_of_qubits = int(np.log2(number_of_povm_outcomes))
-        
+
         # create new object to avoid conflicts
         statistics_array = self.__get_frequencies_array_from_results(results)
         corrected_frequencies = []
         self._distances_from_closest_probability_vector = []
-        
-
 
         for statistics in statistics_array:
             # make sure statistics have proper format
             statistics = np.array(statistics).reshape(number_of_povm_outcomes, 1)
-            
-            
-            # check norm
+
+            # Check if given statistics are normalized.
             norm = sum(statistics)
             if abs(norm - 1) >= 10 ** (-9):
                 print('Warning: Frequencies are not normalized. We normalize them. They looked like this:')
                 print(statistics)
                 statistics = statistics / norm
 
-            #TODO FBM: added here accounting for reversed register in qiskit
             if qiskit_register_convention:
-                #reverse statistics for time of correction
-                statistics=povmtools.reorder_probabilities(statistics,range(number_of_qubits)[::-1])
-
+                # reverse statistics for time of correction
+                statistics = povmtools.reorder_probabilities(statistics, range(number_of_qubits)[::-1])
 
                 # make sure statistics have proper format
                 statistics = np.array(statistics).reshape(number_of_povm_outcomes, 1)
 
             # corrected statistics by multiplication via correction matrix
             corrected_statistics = self._correction_matrix.dot(statistics)
-            
-            
-            if qiskit_register_convention:
-                #go back to standard convention 
-                corrected_statistics=povmtools.reorder_probabilities(corrected_statistics,range(number_of_qubits)[::-1])
-                
-                # make sure statistics have proper format
-                corrected_statistics=np.array(corrected_statistics).reshape(number_of_povm_outcomes,1)
 
+            if qiskit_register_convention:
+                # go back to standard convention
+                corrected_statistics = povmtools.reorder_probabilities(corrected_statistics,
+                                                                       range(number_of_qubits)[::-1])
+
+                # make sure statistics have proper format
+                corrected_statistics = np.array(corrected_statistics).reshape(number_of_povm_outcomes, 1)
 
             if povmtools.is_valid_probability_vector(list(corrected_statistics[:, 0])):
                 corrected_frequencies.append(corrected_statistics)
                 self._distances_from_closest_probability_vector.append(0)
             else:
-                closest_physical_statistics = np.array(povmtools.find_closest_prob_vector(corrected_statistics)).reshape(number_of_povm_outcomes,1)
+                closest_physical_statistics = np.array(
+                    povmtools.find_closest_prob_vector(corrected_statistics)).reshape(number_of_povm_outcomes, 1)
                 corrected_frequencies.append(closest_physical_statistics)
                 self._distances_from_closest_probability_vector.append(
                     povmtools.calculate_total_variation_distance(corrected_statistics, closest_physical_statistics)
                 )
-        # print()
-        # print(self._distances_from_closest_probability_vector)
-                
-                
-                
+
         return corrected_frequencies
 
     @staticmethod
@@ -226,11 +217,10 @@ class QDTErrorMitigator:
         if circuits_number == 0:
             return np.ndarray(shape=0)
 
-        
         # states_len = len(next(iter(results.get_counts(0).keys())))
-        # The length of a state describes how many qubits were used during experiment. Assuming that all results have are on the same number of qubits.
-        states_len=np.max([len(list(key)) for key in results.get_counts(0).keys()])
-        
+        # The length of a state describes how many qubits were used during experiment. Assuming that all results have
+        # are on the same number of qubits.
+        states_len = np.max([len(list(key)) for key in results.get_counts(0).keys()])
 
         possible_states = ["{0:b}".format(i) for i in range(2 ** states_len)]
 
@@ -240,44 +230,39 @@ class QDTErrorMitigator:
 
         frequencies_array = np.ndarray(shape=(circuits_number, len(possible_states)))
 
-
         def fix_fromat_counts_leading_zeros(cnts):
-            #TODO FBM: I encountered some problems with test objects due to HEXADECIMAL formatting in qiskit... Here I fix it. We may probably remove it later
-            keys=list(cnts.keys())
-            
-            string_lengths=np.unique([len(list(key)) for key in keys])
-            
-            new_cnts={}
-            if len(string_lengths)!=1:
-                proper_length=np.max(string_lengths)
+            # TODO FBM: I encountered some problems with test objects due to HEXADECIMAL formatting in qiskit...
+            #  Here I fix it. We may probably remove it later
+            keys = list(cnts.keys())
+
+            string_lengths = np.unique([len(list(key)) for key in keys])
+
+            new_cnts = {}
+            if len(string_lengths) != 1:
+                proper_length = np.max(string_lengths)
 
                 for key in keys:
-                    if len(list(key))!=proper_length:
-                        new_count=bin(int(key,2))[2:].zfill(proper_length)
-                        new_cnts[new_count]=cnts[key]
+                    if len(list(key)) != proper_length:
+                        new_count = bin(int(key, 2))[2:].zfill(proper_length)
+                        new_cnts[new_count] = cnts[key]
                     else:
-                        new_cnts[key]=cnts[key]
+                        new_cnts[key] = cnts[key]
 
-                
                 return new_cnts
             else:
                 print('good format')
                 return cnts
-            
 
         for i in range(circuits_number):
             counts = results.get_counts(i)
             counts = fix_fromat_counts_leading_zeros(counts)
-          
-                
+
             shots_number = results.results[i].shots
             for j in range(len(possible_states)):
                 if possible_states[j] in counts.keys():
                     frequencies_array[i][j] = counts[possible_states[j]] / shots_number
                 else:
                     frequencies_array[i][j] = 0
-                
-                
 
         return frequencies_array
 
@@ -330,50 +315,5 @@ class QDTErrorMitigator:
 
         return frequencies_array
 
-    def __calculate_coherent_error_bound(self) -> None:
-        """
-        Description:
-            Get distance between diagonal part of the POVM and the whole POVM. This quantity might be interpreted as a
-            measure of "non-classicality" or coherence present in measurement noise. See Ref. [1] for details.
 
-        Parameters:
-            -
-        Return:
-            -
-        """
 
-        self._coherent_error_bound = povmtools.operational_distance_POVMs(self._povm,
-                                                                          povmtools.get_diagonal_povm_part(self._povm))
-
-    @staticmethod
-    def __calculate_statistical_error_bound(self, counts: np.ndarray) -> float:
-        """
-        Description:
-            Get upper bound for tv-distance of estimated probability distribution from ideal one. See Ref. [3] for
-            details.
-
-        Parameters:
-            :param counts: Counts for experiment for which statistical error bound is being calculated.
-
-        Return:
-            Statistical error upper bound in total variance distance.
-        """
-
-        number_of_measurement_outcomes = len(counts)
-        number_of_samples = 0
-
-        for count in counts:
-            number_of_samples += count
-
-        if number_of_measurement_outcomes < 16:
-            # for small number of outcomes "-2" factor is not negligible
-            return np.sqrt(
-                (np.log(2 ** number_of_measurement_outcomes - 2)
-                 - np.log(self.statistical_error_mistake_probability)) / 2 / number_of_samples
-            )
-            # for high number of outcomes "-2" factor is negligible
-        else:
-            return np.sqrt(
-                (number_of_measurement_outcomes * np.log(2) - np.log(
-                    self.statistical_error_mistake_probability)) / 2 / number_of_samples
-            )

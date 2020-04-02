@@ -266,6 +266,7 @@ def calculate_total_variation_distance(p: np.array, q: np.array) -> float:
 
     return np.linalg.norm(p - q, ord=1) / 2
 
+
 # Done
 def get_off_diagonal_from_matrix(matrix: np.ndarray) -> np.ndarray:
     """
@@ -474,6 +475,7 @@ def sort_bitstring(string, new_order):
 
     return ''.join([s for s in sorted_string])
 
+
 def reorder_probabilities(probabilities, new_order):
     # sort elements of probabilities vector according to new_order defined for bits
 
@@ -494,116 +496,145 @@ def reorder_probabilities(probabilities, new_order):
         return sorted_probs
 
 
-def get_CBT_norm(J,n,m,rev=False):
-    #Get completely bounded trace norm of Choi-matrix J representing quantum channel from n-dimensional space to m-dimensional space
-    J=cvx.matrix(J)    
-    prob= pic.Problem(verbose=0)    
-    X=prob.add_variable("X", (n*m,n*m),vtype='complex')
-    
-    I = pic.new_param('I',np.eye(m))
+def get_CBT_norm(J, n, m, rev=False):
+    # Get completely bounded trace norm of Choi-matrix J representing quantum channel from n-dimensional space to m-dimensional space
+    J = cvx.matrix(J)
+    prob = pic.Problem(verbose=0)
+    X = prob.add_variable("X", (n * m, n * m), vtype='complex')
 
-    
-    rho0=prob.add_variable("rho0",(n,n),vtype='hermitian')
-    rho1=prob.add_variable("rho1",(n,n),vtype='hermitian')
-    prob.add_constraint(rho0>>0)
-    prob.add_constraint(rho1>>0)
-    
-    prob.add_constraint(pic.trace(rho0)==1)
-    prob.add_constraint(pic.trace(rho1)==1)
-    
-    
-    if(rev==True):
-        #TODO FBM: test which conention is good.
-        #TODO FBM: add reference to paper
-        
-        #This is convention REVERSED with respect to the paper,
-        #and seems that this is a proper one????
-        C0=pic.kron(rho0,I)
-        C1=pic.kron(rho1,I)
+    I = pic.new_param('I', np.eye(m))
+
+    rho0 = prob.add_variable("rho0", (n, n), vtype='hermitian')
+    rho1 = prob.add_variable("rho1", (n, n), vtype='hermitian')
+    prob.add_constraint(rho0 >> 0)
+    prob.add_constraint(rho1 >> 0)
+
+    prob.add_constraint(pic.trace(rho0) == 1)
+    prob.add_constraint(pic.trace(rho1) == 1)
+
+    if (rev == True):
+        # TODO FBM: test which conention is good.
+        # TODO FBM: add reference to paper
+
+        # This is convention REVERSED with respect to the paper,
+        # and seems that this is a proper one????
+        C0 = pic.kron(rho0, I)
+        C1 = pic.kron(rho1, I)
     else:
-        C0=pic.kron(I,rho0)
-        C1=pic.kron(I,rho1)
+        C0 = pic.kron(I, rho0)
+        C1 = pic.kron(I, rho1)
 
-    F=pic.trace((J.H)*X)+pic.trace(J*(X.H))
+    F = pic.trace((J.H) * X) + pic.trace(J * (X.H))
 
+    prob.add_constraint(((C0 & X) // (X.H & C1)) >> 0)
 
-    
-    prob.add_constraint(((C0 & X) // (X.H & C1))>>0 )
+    prob.set_objective('max', F)
 
-    prob.set_objective('max',F)
-    
+    prob.solve(verbose=0)
 
-    prob.solve(verbose = 0)
-        
     if prob.status.count("optimal") > 0:
-    #        print('solution optimal')
+        #        print('solution optimal')
         1
-    elif(prob.status.count("optimal")==0):
+    elif (prob.status.count("optimal") == 0):
         print('uknown_if_solution_optimal')
-    
+
     else:
         print('solution not found')
 
-    cbt_norm=prob.obj_value()/2
+    cbt_norm = prob.obj_value() / 2
 
-    if(abs(np.imag(cbt_norm))>=0.00001):
+    if (abs(np.imag(cbt_norm)) >= 0.00001):
         raise ValueError
     else:
-        cbt_norm=np.real(cbt_norm)
+        cbt_norm = np.real(cbt_norm)
 
     return cbt_norm
-    
-    
-def get_POVM_choi(POVM):       
-    #get Choi matrix of POVM channel
-    d=POVM[0].shape[0]
-    n=len(POVM)
-    J=np.zeros((n*d,n*d),dtype=complex)
+
+
+def get_POVM_choi(POVM):
+    # get Choi matrix of POVM channel
+    d = POVM[0].shape[0]
+    n = len(POVM)
+    J = np.zeros((n * d, n * d), dtype=complex)
 
     for i in range(n):
-        J[i*d:(i+1)*d,i*d:(i+1)*d]=(POVM[i].T)[:,:]        
-    
+        J[i * d:(i + 1) * d, i * d:(i + 1) * d] = (POVM[i].T)[:, :]
+
     return J
-        
-    
-    
-    
-def operational_distance_POVMs(M,P,method='direct'):
-    m=len(M)
 
-    difference=([M[i]-P[i] for i in range(m)])
-    
 
-    if(method=='CBTN'):
-        #this calculates completely bounded trace norm of the channel which is the upper bound for operational distance
-        n=M[0].shape[0]        
-        J=get_POVM_choi(difference)      
-        cbt_norm=get_CBT_norm(J,n,m)
-        
-        return cbt_norm/2
+def operational_distance_POVMs(M, P, method='direct'):
+    m = len(M)
 
-        
-    elif(method=='direct'):     
-        #calculate operational distance directly via bruteforce search over subsets of outcomes
-        biggest_norm=0
+    difference = ([M[i] - P[i] for i in range(m)])
+
+    if (method == 'CBTN'):
+        # this calculates completely bounded trace norm of the channel which is the upper bound for operational distance
+        n = M[0].shape[0]
+        J = get_POVM_choi(difference)
+        cbt_norm = get_CBT_norm(J, n, m)
+
+        return cbt_norm / 2
+
+
+    elif (method == 'direct'):
+        # calculate operational distance directly via bruteforce search over subsets of outcomes
+        biggest_norm = 0
         for k in list(range(m))[::-1]:
-            current_list=list(itertools.combinations(difference, k+1))      
+            current_list = list(itertools.combinations(difference, k + 1))
 
             for l in current_list:
-                current_sum=sum(l)
-                current_norm=np.linalg.norm(current_sum,ord=2)
+                current_sum = sum(l)
+                current_norm = np.linalg.norm(current_sum, ord=2)
 
-                if(current_norm>biggest_norm):
-                    biggest_norm=current_norm                   
+                if (current_norm > biggest_norm):
+                    biggest_norm = current_norm
 
         return biggest_norm
 
+    def get_statistical_error_bound(counts: np.ndarray, statistical_error_mistake_probability: float) -> float:
+        """
+        Description:
+            Get upper bound for tv-distance of estimated probability distribution from ideal one. See Ref. [3] for
+            details.
 
+        Parameters:
+            :param counts: Counts for experiment for which statistical error bound is being calculated.
+            :param statistical_error_mistake_probability: Parameter describing infidelity of returned error bound.
 
+        Return:
+            Statistical error upper bound in total variance distance.
+        """
 
+        number_of_measurement_outcomes = len(counts)
+        number_of_samples = 0
 
+        for count in counts:
+            number_of_samples += count
 
+        if number_of_measurement_outcomes < 16:
+            # for small number of outcomes "-2" factor is not negligible
+            return np.sqrt(
+                (np.log(2 ** number_of_measurement_outcomes - 2)
+                 - np.log(statistical_error_mistake_probability)) / 2 / number_of_samples
+            )
+            # for high number of outcomes "-2" factor is negligible
+        else:
+            return np.sqrt(
+                (number_of_measurement_outcomes * np.log(2) - np.log(
+                    statistical_error_mistake_probability)) / 2 / number_of_samples
+            )
 
+    def get_coherent_error_bound(povm: np.ndarray) -> float:
+        """
+        Description:
+            Get distance between diagonal part of the POVM and the whole POVM. This quantity might be interpreted as a
+            measure of "non-classicality" or coherence present in measurement noise. See Ref. [1] for details.
 
+        Parameters:
+            :param povm: A POVM for which non-classicality will be determined.
+        Return:
+            Coherent error bound for given POVM.
+        """
 
-
+        return operational_distance_POVMs(povm, get_diagonal_povm_part(povm))
