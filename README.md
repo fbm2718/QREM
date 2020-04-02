@@ -6,7 +6,7 @@
 This package is under development and new functionalities and notebooks are expected to be added in the future. Currently, the methods for quantum detector tomography and measurement error mitigation based on that tomography are working properly. *Soon tutorial for using mitigation funcionalities will be added.*
   
 ## Dependencies
-To work properly,  the following libraries should be installed:
+For QREM to work properly,  the following libraries should be installed:
 * numpy
 * scipy
 * cmath
