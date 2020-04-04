@@ -22,6 +22,12 @@ The best way to install and use this package is to simply clone the repository:
 ```
 git clone https://github.com/fbm2718/QREM
 ```
+In order for it to work properly one also have to initialize its' submodules. To do that, execute following commands
+the repository folder:
+```
+git submodule init
+git submodule update
+```
 
 ## Workflow
 The workflow for the main functionalities is following:
@@ -46,7 +52,7 @@ we will use prefix _m__, to mark all matrices.
 ## Authors
 
 - Filip Maciejewski, contact: filip.b.maciejewski@gmail.com
-- Tomasz Rybotycki
+- Tomasz Rybotycki, [Tomev](https://github.com/Tomev)
 
 
  ## References
