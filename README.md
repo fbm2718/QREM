@@ -51,8 +51,8 @@ we will use prefix _m__, to mark all matrices.
 
 ## Authors
 
-- Filip Maciejewski, contact: filip.b.maciejewski@gmail.com
-- Tomasz Rybotycki, [Tomev](https://github.com/Tomev)
+- [Filip Maciejewski](filip.b.maciejewski@gmail.com)
+- [Tomasz Rybotycki](https://github.com/Tomev)
 
 
  ## References
