@@ -51,7 +51,7 @@ we will use prefix _m__, to mark all matrices.
 
 ## Authors
 
-- [Filip Maciejewski](filip.b.maciejewski@gmail.com)
+- [Filip Maciejewski](https://github.com/fbm2718) (contact: filip.b.maciejewski@gmail.com)
 - [Tomasz Rybotycki](https://github.com/Tomev)
 
 
