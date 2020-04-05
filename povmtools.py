@@ -657,6 +657,7 @@ def get_coherent_error_bound(povm: np.ndarray) -> float:
 
 
 def get_correction_error_bound_from_data(povm: List[np.ndarray],
+                                         correction_matrix: np.ndarray,
                                          number_of_samples: int,
                                          error_probability: float,
                                          alpha: float = 0) -> float:
@@ -675,6 +676,7 @@ def get_correction_error_bound_from_data(povm: List[np.ndarray],
 
     Parameters:
         :param povm: POVM representing measurement device.
+        :param correction_matrix: Correction matrix obtained via out Error Mitigator object.
         :param number_of_samples: number of samples (in qiskit language number of "shots").
         :param error_probability: probability with which statistical upper bound is not correct. In other word, 1-mu is
         confidence with which we state the upper bound. See Ref. [3] for details.
@@ -689,8 +691,6 @@ def get_correction_error_bound_from_data(povm: List[np.ndarray],
     """
     dimension = povm[0].shape[0]
 
-    correction_matrix = construct_correction_matrix(povm)
-
     norm_of_correction_matrix = np.linalg.norm(correction_matrix, ord=1)
 
     statistical_error_bound = get_statistical_error_bound(dimension, number_of_samples, error_probability)
@@ -702,10 +702,12 @@ def get_correction_error_bound_from_data(povm: List[np.ndarray],
 def get_correction_error_bound_from_parameters(norm_of_correction_matrix: float,
                                                statistical_error_bound: float,
                                                coherent_error_bound: float,
-                                               alpha: float = 0):
+                                               alpha: float = 0) -> float:
     """
     Description:
-        See description of function "get_correction_error_bound_from_data". This function can be used if one has the proper parameters already calculated and wishes to not repeat it (for example, in case of calculating something in the loop).
+        See description of function "get_correction_error_bound_from_data". This function can be used if one has the
+        proper parameters already calculated and wishes to not repeat it (for example, in case of calculating something
+        in the loop).
 
     Parameters:
         :param norm_of_correction_matrix : 1->1 norm of correction matrix (it is not trace norm!), see Ref. [1],
