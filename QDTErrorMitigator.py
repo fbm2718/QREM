@@ -34,16 +34,13 @@ class QDTErrorMitigator:
         Description:
             Constructor of the class. This should initialize all the variables to None.
         """
-        self._povm = None
-        self._transition_matrix = None
-        self._correction_matrix = None
-        self._coherent_error_bound = None
-        self._statistical_errors_bounds = []  # Possibly there are several frequencies (especially for qiskit job).
-        self.statistical_error_mistake_probability = 0.01  # Can be accessed and changed at will.
-        self._qubit_indices_lists = []
-        self._distances_from_closest_probability_vector = []
+        self.povm = None
+        self.transition_matrix = None
+        self.correction_matrix = None
+        self.distances_from_closest_probability_vector = []
+        self.qiskit_register_convention = True
 
-    def prepare_mitigator(self, povm: List[np.ndarray], qubit_indices_lists: List[List[int]]):
+    def prepare_mitigator(self, povm: List[np.ndarray]) -> None:
         """
         Description:
             This method, aside from getters, is main method of the class. It's main purpose is to calculate all members
@@ -52,16 +49,13 @@ class QDTErrorMitigator:
 
         Parameters:
             :param povm: POVM describing the detector used in measurements of which statistics are meant to be
-             corrected. This method assumes that
-            :param qubit_indices_lists: Indices for which QDT was performed. Elements of this list should correspond to
-            elements in povms_list. They will be used in statistics correction.
+             corrected.
 
         Returns:
             -
 
         """
-        self._qubit_indices_lists = qubit_indices_lists
-        self._povm = povm
+        self.povm = povm
         self.__construct_transition_matrix()
         self.__construct_correction_matrix()
 
@@ -81,20 +75,20 @@ class QDTErrorMitigator:
             A matrix representing classical part of the noise.
         """
 
-        number_of_povm_outcomes = len(self._povm)
-        dimension = self._povm[0].shape[0]
+        number_of_povm_outcomes = len(self.povm)
+        dimension = self.povm[0].shape[0]
 
-        self._transition_matrix = np.zeros((number_of_povm_outcomes, number_of_povm_outcomes), dtype=float)
+        self.transition_matrix = np.zeros((number_of_povm_outcomes, number_of_povm_outcomes), dtype=float)
 
         for k in range(number_of_povm_outcomes):
-            current_povm_effect = self._povm[k]
+            current_povm_effect = self.povm[k]
 
             # Get diagonal part of the effect. Here we remove eventual 0 imaginary part to avoid format conflicts
             # (diagonal elements of Hermitian matrices are real).
             vec_p = np.array([np.real(current_povm_effect[i, i]) for i in range(dimension)])
 
             # Add vector to transition matrix.
-            self._transition_matrix[k, :] = vec_p[:]
+            self.transition_matrix[k, :] = vec_p[:]
 
     def __construct_correction_matrix(self) -> None:
         """
@@ -113,13 +107,13 @@ class QDTErrorMitigator:
         """
 
         try:
-            self._correction_matrix = np.linalg.inv(self._transition_matrix)
+            self.correction_matrix = np.linalg.inv(self.transition_matrix)
         except np.linalg.LinAlgError:
             print('Noise matrix is not invertible. Returning identity. Got:')
-            print(self._transition_matrix)
-            self._correction_matrix = np.eye(np.shape(self._transition_matrix[0]))
+            print(self.transition_matrix)
+            self.correction_matrix = np.eye(np.shape(self.transition_matrix[0]))
 
-    def apply_correction_to_qiskit_job(self, results: Result, qiskit_register_convention=True) -> List[np.ndarray]:
+    def apply_correction_to_qiskit_job(self, results: Result) -> List[np.ndarray]:
         """
         Description:
             Given correction matrix and vector of relative frequencies, correct the statistics via multiplication by
@@ -138,14 +132,14 @@ class QDTErrorMitigator:
             Corrected statistics.
         """
 
-        number_of_povm_outcomes = self._correction_matrix[0].shape[0]
+        number_of_povm_outcomes = self.correction_matrix[0].shape[0]
 
         number_of_qubits = int(np.log2(number_of_povm_outcomes))
 
         # create new object to avoid conflicts
         statistics_array = self.__get_frequencies_array_from_results(results)
         corrected_frequencies = []
-        self._distances_from_closest_probability_vector = []
+        self.distances_from_closest_probability_vector = []
 
         for statistics in statistics_array:
             # make sure statistics have proper format
@@ -158,7 +152,7 @@ class QDTErrorMitigator:
                 print(statistics)
                 statistics = statistics / norm
 
-            if qiskit_register_convention:
+            if self.qiskit_register_convention:
                 # reverse statistics for time of correction
                 statistics = povmtools.reorder_probabilities(statistics, range(number_of_qubits)[::-1])
 
@@ -166,9 +160,9 @@ class QDTErrorMitigator:
                 statistics = np.array(statistics).reshape(number_of_povm_outcomes, 1)
 
             # corrected statistics by multiplication via correction matrix
-            corrected_statistics = self._correction_matrix.dot(statistics)
+            corrected_statistics = self.correction_matrix.dot(statistics)
 
-            if qiskit_register_convention:
+            if self.qiskit_register_convention:
                 # go back to standard convention
                 corrected_statistics = povmtools.reorder_probabilities(corrected_statistics,
                                                                        range(number_of_qubits)[::-1])
@@ -178,12 +172,12 @@ class QDTErrorMitigator:
 
             if povmtools.is_valid_probability_vector(list(corrected_statistics[:, 0])):
                 corrected_frequencies.append(corrected_statistics)
-                self._distances_from_closest_probability_vector.append(0)
+                self.distances_from_closest_probability_vector.append(0)
             else:
                 closest_physical_statistics = np.array(
                     povmtools.find_closest_prob_vector(corrected_statistics)).reshape(number_of_povm_outcomes, 1)
                 corrected_frequencies.append(closest_physical_statistics)
-                self._distances_from_closest_probability_vector.append(
+                self.distances_from_closest_probability_vector.append(
                     povmtools.calculate_total_variation_distance(corrected_statistics, closest_physical_statistics)
                 )
 
@@ -230,10 +224,10 @@ class QDTErrorMitigator:
 
         frequencies_array = np.ndarray(shape=(circuits_number, len(possible_states)))
 
-        def fix_fromat_counts_leading_zeros(cnts):
+        def fix_format_counts_leading_zeros(counts):
             # TODO FBM: I encountered some problems with test objects due to HEXADECIMAL formatting in qiskit...
             #  Here I fix it. We may probably remove it later
-            keys = list(cnts.keys())
+            keys = list(counts.keys())
 
             string_lengths = np.unique([len(list(key)) for key in keys])
 
@@ -244,18 +238,18 @@ class QDTErrorMitigator:
                 for key in keys:
                     if len(list(key)) != proper_length:
                         new_count = bin(int(key, 2))[2:].zfill(proper_length)
-                        new_cnts[new_count] = cnts[key]
+                        new_cnts[new_count] = counts[key]
                     else:
-                        new_cnts[key] = cnts[key]
+                        new_cnts[key] = counts[key]
 
                 return new_cnts
             else:
                 print('good format')
-                return cnts
+                return counts
 
         for i in range(circuits_number):
             counts = results.get_counts(i)
-            counts = fix_fromat_counts_leading_zeros(counts)
+            counts = fix_format_counts_leading_zeros(counts)
 
             shots_number = results.results[i].shots
             for j in range(len(possible_states)):
