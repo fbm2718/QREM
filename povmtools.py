@@ -656,6 +656,43 @@ def get_coherent_error_bound(povm: np.ndarray) -> float:
     return operational_distance_POVMs(povm, get_diagonal_povm_part(povm))
 
 
+def get_correction_error_bound_from_data_and_statistical_error(povm: List[np.ndarray],
+                                         correction_matrix: np.ndarray,
+                                         statistical_error_bound: float,
+                                         alpha: float = 0) -> float:
+    """
+        Description:
+            Get upper bound for the correction error using classical error-mitigation via "correction matrix".
+
+            Error arises from three factors - non-classical part of the noise, statistical fluctuations and eventual
+            unphysical "first-guess" (quasi-)probability vector after the correction.
+
+            This upper bound tells us quantitatively what is the maximal TV-distance of the corrected probability vector
+            from the ideal probability distribution that one would have obtained if there were no noise and the
+            infinite-size statistics.
+
+            See Ref. [1] for details.
+
+        Parameters:
+            :param povm: POVM representing measurement device.
+            :param correction_matrix: Correction matrix obtained via out Error Mitigator object.
+            :param statistical_error_bound: Statistical error bound (epsilon in paper).
+            confidence with which we state the upper bound. See Ref. [3] for details.
+            :param alpha: distance between eventual unphysical "first-guess" quasiprobability vector and the closest
+            physical one. default is 0 (which corresponds to situation in which corrected vector was proper probability
+            vector).
+
+
+        Return:
+            Upper bound for correction error.
+
+        """
+
+    norm_of_correction_matrix = np.linalg.norm(correction_matrix, ord=1)
+    coherent_error_bound = get_coherent_error_bound(povm)
+    return norm_of_correction_matrix * (coherent_error_bound + statistical_error_bound) + alpha
+
+
 def get_correction_error_bound_from_data(povm: List[np.ndarray],
                                          correction_matrix: np.ndarray,
                                          number_of_samples: int,
