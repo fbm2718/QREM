@@ -661,6 +661,7 @@ def get_correction_error_bound_from_data(povm: List[np.ndarray],
                                          number_of_samples: int,
                                          error_probability: float,
                                          alpha: float = 0) -> float:
+    
     """
     Description:
         Get upper bound for the correction error using classical error-mitigation via "correction matrix".
