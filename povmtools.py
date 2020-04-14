@@ -776,14 +776,14 @@ def counts_dict_to_frequencies_vector(count_dict: dict) -> list:
     frequencies = []
 
     qubits_number = len(list(count_dict.keys())[0])  # Number of qubits in given experiment counts.
-    possible_measurements = get_possible_n_qubit_measurements(qubits_number)
+    possible_outcomes = get_possible_n_qubit_outcomes(qubits_number)
     dict_keys = count_dict.keys()  # So we don't call the method every time.
     counts_sum = 0
 
-    for possible_measurement in possible_measurements:
-        if dict_keys.__contains__(possible_measurement):
-            frequencies.append(count_dict[possible_measurement])
-            counts_sum += count_dict[possible_measurement]
+    for outcome in possible_outcomes:
+        if dict_keys.__contains__(outcome):
+            frequencies.append(count_dict[outcome])
+            counts_sum += count_dict[outcome]
         else:
             frequencies.append(0)
 
@@ -793,7 +793,7 @@ def counts_dict_to_frequencies_vector(count_dict: dict) -> list:
     return frequencies
 
 
-def get_possible_n_qubit_measurements(n: int) -> list:
+def get_possible_n_qubit_outcomes(n: int) -> list:
     """
     Description:
         For given number of qubits n generates a list of possible outcome states (as strings) and returns them in
@@ -802,9 +802,9 @@ def get_possible_n_qubit_measurements(n: int) -> list:
     :return: List of possible outcomes as strings.
     """
     max_value = pow(2, n)
-    possible_measurements = []
+    possible_outcomes = []
 
     for i in range(max_value):
-        possible_measurements.append(bin(i)[2:].zfill(n))
+        possible_outcomes.append(bin(i)[2:].zfill(n))
 
-    return possible_measurements
+    return possible_outcomes
