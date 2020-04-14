@@ -763,3 +763,48 @@ def get_correction_error_bound_from_parameters(norm_of_correction_matrix: float,
     """
 
     return norm_of_correction_matrix * (coherent_error_bound + statistical_error_bound) + alpha
+
+
+def counts_dict_to_frequencies_vector(count_dict: dict) -> list:
+    """
+    Description:
+        Generates and returns vector of frequencies basing on given counts dict. Mostly used with qiskit data.
+    :param count_dict: Counts dict. Possibly from qiskit job.
+    :return frequencies: Frequencies list for possible states in ascending order.
+    """
+
+    frequencies = []
+
+    qubits_number = len(list(count_dict.keys())[0])  # Number of qubits in given experiment counts.
+    possible_measurements = get_possible_n_qubit_measurements(qubits_number)
+    dict_keys = count_dict.keys()  # So we don't call the method every time.
+    counts_sum = 0
+
+    for possible_measurement in possible_measurements:
+        if dict_keys.__contains__(possible_measurement):
+            frequencies.append(count_dict[possible_measurement])
+            counts_sum += count_dict[possible_measurement]
+        else:
+            frequencies.append(0)
+
+    for i in range(len(frequencies)):
+        frequencies[i] = frequencies[i] / counts_sum
+
+    return frequencies
+
+
+def get_possible_n_qubit_measurements(n: int) -> list:
+    """
+    Description:
+        For given number of qubits n generates a list of possible outcome states (as strings) and returns them in
+        ascending order. All states len is n.
+    :param n: Number of qubits.
+    :return: List of possible outcomes as strings.
+    """
+    max_value = pow(2, n)
+    possible_measurements = []
+
+    for i in range(max_value):
+        possible_measurements.append(bin(i)[2:].zfill(n))
+
+    return possible_measurements
