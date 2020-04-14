@@ -71,6 +71,46 @@ class DetectorTomographyFitter:
 
         frequencies_array = self.__get_frequencies_array_from_results(results_list, qiskit_register_convention)
 
+        # FROM THIS MOMENT IT WILL BE REMOVED WHEN GENERAL METHODS ARE CREATED!
+        probe_states = self.__get_probe_states(results_list, probe_kets)
+        number_of_probe_states = frequencies_array.shape[1]
+        dimension = probe_states[0].shape[0]
+
+        povm = []
+
+        for j in range(number_of_probe_states):
+            povm.append(np.identity(dimension) / number_of_probe_states)
+
+        # Threshold is dynamic, thus another variable
+        threshold = self.algorithmConvergenceThreshold
+
+        i = 0
+        current_difference = 1
+        while abs(current_difference) >= threshold:
+            i += 1
+
+            if i % 50 == 0:
+                last_step_povm = copy.copy(povm)
+
+            r_matrices = [self.__get_r_operator(povm[j], j, frequencies_array, probe_states)
+                          for j in range(number_of_probe_states)]
+            lagrange_matrix = self.__get_lagrange_matrix(r_matrices, povm)
+            povm = [self.__calculate_symmetric_m(lagrange_matrix, r_matrices[j], povm[j])
+                    for j in range(number_of_probe_states)]
+
+            if i % 50 == 0:  # calculate the convergence test only sometimes to make the code faster
+                current_difference = sum([np.linalg.norm(povm[k] - last_step_povm[k], ord=2)
+                                          for k in range(number_of_probe_states)])
+
+            elif i > 5e5:  # make sure it does not take too long, sometimes convergence might not be so good
+                threshold = 1e-3
+
+            elif i > 1e5:  # make sure it does not take too long, sometimes convergence might not be so good
+                threshold = 1e-4
+
+        return povm
+
+
     def __get_maximum_likelihood_povm_from_frequencies(self, frequencies_array: np.ndarray,
                                                        probe_kets: List[np.array]) \
             -> List[np.ndarray]:
