@@ -52,7 +52,8 @@ class DetectorTomographyFitter:
         self.algorithmConvergenceThreshold = algorithm_convergence_threshold
 
     def get_maximum_likelihood_povm_estimator(self, results_list: List[Result],
-                                              probe_kets: List[np.array], qiskit_register_convention = True) -> List[np.ndarray]:
+                                              probe_kets: List[np.array], qiskit_register_convention=True) \
+            -> List[np.ndarray]:
         """
         Description:
             Given results of Quantum Detector Tomography experiments and list of probe states, return the Maximum
@@ -61,15 +62,20 @@ class DetectorTomographyFitter:
         Parameters:
             :param results_list: List of results obtained from executing qiskit jobs.
             :param probe_kets: A set of probe kets used to perform tomography.
+            :param qiskit_register_convention: Qiskit register convention is reverse to what we usually work with.
+            This solves the problem.
 
         Returns
             Maximum likelihood estimator of POVM describing a detector.
         """
 
-        probe_states = self.__get_probe_states(results_list, probe_kets)
-
         frequencies_array = self.__get_frequencies_array_from_results(results_list, qiskit_register_convention)
 
+    def __get_maximum_likelihood_povm_from_frequencies(self, frequencies_array: np.ndarray,
+                                                       probe_kets: List[np.array]) \
+            -> List[np.ndarray]:
+
+        probe_states = self.__get_probe_states(results_list, probe_kets)
         number_of_probe_states = frequencies_array.shape[1]
         dimension = probe_states[0].shape[0]
 
@@ -176,22 +182,22 @@ class DetectorTomographyFitter:
             for i in range(number_of_circuits_in_results):
                 counts = results.get_counts(i)
                 shots_number = results.results[i].shots
-                
-                #TODO FBM: added here accounting for reversed register in qiskit
+
+                # TODO FBM: added here accounting for reversed register in qiskit
                 normal_order = []
                 for j in range(len(possible_states)):
                     if possible_states[j] in counts.keys():
                         normal_order.append(counts[possible_states[j]] / shots_number)
                     else:
                         normal_order.append(0)
-               
+
                 if qiskit_register_convention:
-                    frequencies = reorder_probabilities(normal_order,range(states_len)[::-1])
+                    frequencies = reorder_probabilities(normal_order, range(states_len)[::-1])
                 else:
                     frequencies = normal_order
-                
-                frequencies_array[i][:]=frequencies[:]
-                
+
+                frequencies_array[i][:] = frequencies[:]
+
         return frequencies_array
 
     @staticmethod
@@ -281,7 +287,7 @@ class DetectorTomographyFitter:
 
         return symmetric_m
 
-    #TODO TR: This method may need to be revisited and possibly reduced into several smaller ones.
+    # TODO TR: This method may need to be revisited and possibly reduced into several smaller ones.
     @staticmethod
     def join_povms(povms: List[List[np.ndarray]], qubit_indices_lists: List[List[int]]) -> List[np.ndarray]:
         """
