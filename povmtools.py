@@ -465,6 +465,18 @@ def qubit_swap(n, transposition=(1, 1)):
     return transformation
 
 
+U24 = qubit_swap(4, (2, 4))
+U23 = qubit_swap(4, (2, 3))
+U34 = qubit_swap(4,(3,4))
+
+from povms_qi import ancillary_functions as anf
+
+# anf.ptr(U13)
+# anf.ptr(U24 - U34@U23@np.matrix.getH(U34))
+# anf.ptr(U14)
+
+anf.ptr(np.kron(np.eye(2),np.array([[1,0],[0,-1]])))
+anf.ptr(np.kron(np.array([[1,0],[0,-1]]),np.eye(2)))
 def reorder_classical_register(new_order):
     # reorder classical register according to new_order.
     n = len(new_order)
@@ -657,9 +669,9 @@ def get_coherent_error_bound(povm: np.ndarray) -> float:
 
 
 def get_correction_error_bound_from_data_and_statistical_error(povm: List[np.ndarray],
-                                         correction_matrix: np.ndarray,
-                                         statistical_error_bound: float,
-                                         alpha: float = 0) -> float:
+                                                               correction_matrix: np.ndarray,
+                                                               statistical_error_bound: float,
+                                                               alpha: float = 0) -> float:
     """
         Description:
             Get upper bound for the correction error using classical error-mitigation via "correction matrix".
@@ -698,7 +710,6 @@ def get_correction_error_bound_from_data(povm: List[np.ndarray],
                                          number_of_samples: int,
                                          error_probability: float,
                                          alpha: float = 0) -> float:
-    
     """
     Description:
         Get upper bound for the correction error using classical error-mitigation via "correction matrix".
