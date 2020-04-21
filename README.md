@@ -45,7 +45,7 @@ The workflow for the main functionalities is following:
 Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the
 package, we recommend to take a look at tutorials in jupyter notebooks:
 1. [Tutorial for implementing Quantum Detector Tomography](QDT_Tutorial.ipynb)
-2. [Tutorial for mitigatin readout noise based on QDT](Error_Mitigation_Tutorial.ipynb)
+2. [Tutorial for mitigating readout noise based on QDT](Error_Mitigation_Tutorial.ipynb)
 
 
 ## Code Style
