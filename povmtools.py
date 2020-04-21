@@ -464,7 +464,6 @@ def qubit_swap(n, transposition=(1, 1)):
 
     return transformation
 
-
 def reorder_classical_register(new_order):
     # reorder classical register according to new_order.
     n = len(new_order)
@@ -657,9 +656,9 @@ def get_coherent_error_bound(povm: np.ndarray) -> float:
 
 
 def get_correction_error_bound_from_data_and_statistical_error(povm: List[np.ndarray],
-                                         correction_matrix: np.ndarray,
-                                         statistical_error_bound: float,
-                                         alpha: float = 0) -> float:
+                                                               correction_matrix: np.ndarray,
+                                                               statistical_error_bound: float,
+                                                               alpha: float = 0) -> float:
     """
         Description:
             Get upper bound for the correction error using classical error-mitigation via "correction matrix".
@@ -698,7 +697,6 @@ def get_correction_error_bound_from_data(povm: List[np.ndarray],
                                          number_of_samples: int,
                                          error_probability: float,
                                          alpha: float = 0) -> float:
-    
     """
     Description:
         Get upper bound for the correction error using classical error-mitigation via "correction matrix".
