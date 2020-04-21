@@ -16,7 +16,6 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 import itertools
 from PyMaLi import GeneralTensorCalculator
 
-# TODO: not finished
 def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
     """
     Description:

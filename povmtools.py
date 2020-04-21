@@ -3,9 +3,23 @@
 Created on Fri Feb 23 02:08:17 2018
 
 @author: Filip Maciejewski
-
 email: filip.b.maciejewski@gmail.com
+
+References:
+[1] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec, "Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography", arxiv preprint, https://arxiv.org/abs/1907.08518 (2019)
+
+[2] Zbigniew Puchała, Łukasz Pawela, Aleksandra Krawiec, Ryszard Kukulski, "Strategies for optimal single-shot
+discrimination of quantum measurements", Phys. Rev. A 98, 042103 (2018), https://arxiv.org/abs/1804.05856
+
+[3] T. Weissman, E. Ordentlich, G. Seroussi, S. Verdul, and M. J. Weinberger, Technical Report HPL-2003-97R1,
+Hewlett-Packard Labs (2003).
+
+
+[4] John A. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", Phys. Rev. Lett. 108, 070502
+(2012), https://arxiv.org/abs/1106.5458
 """
+
 import cmath as c
 import numpy as np
 import math
@@ -86,6 +100,61 @@ def get_density_matrix(ket):
 def ket_to_bra(ket):
     bra = np.matrix.getH(ket)
     return bra
+
+
+def get_unitary_change_state(state):
+    if check_if_projector_is_in_computational_basis(state):
+        if state[0][0] == 1:
+            return np.eye(2)
+        elif state[1][1] == 1:
+            return anf.pauli_sigmas['X']
+        else:
+            raise ValueError('error')
+    else:
+        m_a, m_u = anf.spectral_decomposition(state)
+
+        d = m_u.shape[0]
+        determinant = np.linalg.det(m_a)
+
+        delta = c.phase(determinant) / d
+
+        m_u = c.exp(-1j * delta) * m_u
+
+        return np.matrix.getH(m_u)
+
+
+# TODO TR: Intentions behind the method and comments inside the function should be provided.
+# TODO FBM: So this is some old shitty function for creating list of indices (which by the way was imitating something
+#  like your Tensor). I have added new function for this in quantum_tomography_qiskit, please take a look at that (it
+#  might use simplifiactions). Function here can be deleted.
+def indices_array(m_as, k=2, x=[], p=0):
+    # ONLY k=2 so far
+    # A - set of matrices
+    # k - counter
+    # x - recursive array
+    # p - logical help, do not change
+
+    # returns ordered array of size (k**(len(A)))
+    # element i,j,k means Ai otimes Aj otimes Ak etc
+
+    if k == 1:
+        return m_as
+    elif k < 1:
+        raise ValueError()
+
+    elif p == 0:
+        start = np.array([[[a, b] for b in m_as] for a in m_as])
+        if k == 2:
+            return start
+        else:
+            return anf.tensor_array(m_as, k - 1, start, 1)
+
+    elif p == 1 and k > 2:
+        more = np.array([[[a, b.flatten()] for b in x] for a in m_as])
+        return anf.tensor_array(m_as, k - 1, more, 1)
+
+    elif p == 1 and k == 2:
+        return np.array([[[a, b] for b in x] for a in m_as])
 
 
 def euler_angles_1q(unitary_matrix):
@@ -210,6 +279,7 @@ def calculate_total_variation_distance(p: np.array, q: np.array) -> float:
     """
 
     return np.linalg.norm(p - q, ord=1) / 2
+
 
 # Done
 def get_off_diagonal_from_matrix(matrix: np.ndarray) -> np.ndarray:
@@ -394,7 +464,6 @@ def qubit_swap(n, transposition=(1, 1)):
 
     return transformation
 
-
 def reorder_classical_register(new_order):
     # reorder classical register according to new_order.
     n = len(new_order)
@@ -419,6 +488,7 @@ def sort_bitstring(string, new_order):
 
     return ''.join([s for s in sorted_string])
 
+
 def reorder_probabilities(probabilities, new_order):
     # sort elements of probabilities vector according to new_order defined for bits
 
@@ -439,151 +509,300 @@ def reorder_probabilities(probabilities, new_order):
         return sorted_probs
 
 
-def get_CBT_norm(J,n,m,rev=False):
-    #Get completely bounded trace norm of Choi-matrix J representing quantum channel from n-dimensional space to m-dimensional space
-    J=cvx.matrix(J)    
-    prob= pic.Problem(verbose=0)    
-    X=prob.add_variable("X", (n*m,n*m),vtype='complex')
-    
-    I = pic.new_param('I',np.eye(m))
+def get_CBT_norm(J, n, m, rev=False):
+    # Get completely bounded trace norm of Choi-matrix J representing quantum channel from n-dimensional space to m-dimensional space
+    J = cvx.matrix(J)
+    prob = pic.Problem(verbose=0)
+    X = prob.add_variable("X", (n * m, n * m), vtype='complex')
 
-    
-    rho0=prob.add_variable("rho0",(n,n),vtype='hermitian')
-    rho1=prob.add_variable("rho1",(n,n),vtype='hermitian')
-    prob.add_constraint(rho0>>0)
-    prob.add_constraint(rho1>>0)
-    
-    prob.add_constraint(pic.trace(rho0)==1)
-    prob.add_constraint(pic.trace(rho1)==1)
-    
-    
-    if(rev==True):
-        #TODO FBM: test which conention is good.
-        #TODO FBM: add reference to paper
-        
-        #This is convention REVERSED with respect to the paper,
-        #and seems that this is a proper one????
-        C0=pic.kron(rho0,I)
-        C1=pic.kron(rho1,I)
+    I = pic.new_param('I', np.eye(m))
+
+    rho0 = prob.add_variable("rho0", (n, n), vtype='hermitian')
+    rho1 = prob.add_variable("rho1", (n, n), vtype='hermitian')
+    prob.add_constraint(rho0 >> 0)
+    prob.add_constraint(rho1 >> 0)
+
+    prob.add_constraint(pic.trace(rho0) == 1)
+    prob.add_constraint(pic.trace(rho1) == 1)
+
+    if (rev == True):
+        # TODO FBM: test which conention is good.
+        # TODO FBM: add reference to paper
+
+        # This is convention REVERSED with respect to the paper,
+        # and seems that this is a proper one????
+        C0 = pic.kron(rho0, I)
+        C1 = pic.kron(rho1, I)
     else:
-        C0=pic.kron(I,rho0)
-        C1=pic.kron(I,rho1)
+        C0 = pic.kron(I, rho0)
+        C1 = pic.kron(I, rho1)
 
-    F=pic.trace((J.H)*X)+pic.trace(J*(X.H))
+    F = pic.trace((J.H) * X) + pic.trace(J * (X.H))
 
+    prob.add_constraint(((C0 & X) // (X.H & C1)) >> 0)
 
-    
-    prob.add_constraint(((C0 & X) // (X.H & C1))>>0 )
+    prob.set_objective('max', F)
 
-    prob.set_objective('max',F)
-    
+    prob.solve(verbose=0)
 
-    prob.solve(verbose = 0)
-        
     if prob.status.count("optimal") > 0:
-    #        print('solution optimal')
+        #        print('solution optimal')
         1
-    elif(prob.status.count("optimal")==0):
+    elif (prob.status.count("optimal") == 0):
         print('uknown_if_solution_optimal')
-    
+
     else:
         print('solution not found')
 
-    cbt_norm=prob.obj_value()/2
+    cbt_norm = prob.obj_value() / 2
 
-    if(abs(np.imag(cbt_norm))>=0.00001):
+    if (abs(np.imag(cbt_norm)) >= 0.00001):
         raise ValueError
     else:
-        cbt_norm=np.real(cbt_norm)
+        cbt_norm = np.real(cbt_norm)
 
     return cbt_norm
-    
-    
-def get_POVM_choi(POVM):       
-    #get Choi matrix of POVM channel
-    d=POVM[0].shape[0]
-    n=len(POVM)
-    J=np.zeros((n*d,n*d),dtype=complex)
+
+
+def get_POVM_choi(POVM):
+    # get Choi matrix of POVM channel
+    d = POVM[0].shape[0]
+    n = len(POVM)
+    J = np.zeros((n * d, n * d), dtype=complex)
 
     for i in range(n):
-        J[i*d:(i+1)*d,i*d:(i+1)*d]=(POVM[i].T)[:,:]        
-    
+        J[i * d:(i + 1) * d, i * d:(i + 1) * d] = (POVM[i].T)[:, :]
+
     return J
-        
-    
-    
-    
-def operational_distance_POVMs(M,P,method='direct'):
-    m=len(M)
 
-    difference=([M[i]-P[i] for i in range(m)])
-    
 
-    if(method=='CBTN'):
-        #this calculates completely bounded trace norm of the channel which is the upper bound for operational distance
-        n=M[0].shape[0]        
-        J=get_POVM_choi(difference)      
-        cbt_norm=get_CBT_norm(J,n,m)
-        
-        return cbt_norm/2
+def operational_distance_POVMs(M, P, method='direct'):
+    m = len(M)
 
-        
-    elif(method=='direct'):     
-        #calculate operational distance directly via bruteforce search over subsets of outcomes
-        biggest_norm=0
+    difference = ([M[i] - P[i] for i in range(m)])
+
+    if (method == 'CBTN'):
+        # this calculates completely bounded trace norm of the channel which is the upper bound for operational distance
+        n = M[0].shape[0]
+        J = get_POVM_choi(difference)
+        cbt_norm = get_CBT_norm(J, n, m)
+
+        return cbt_norm / 2
+
+
+    elif (method == 'direct'):
+        # calculate operational distance directly via bruteforce search over subsets of outcomes
+        biggest_norm = 0
         for k in list(range(m))[::-1]:
-            current_list=list(itertools.combinations(difference, k+1))      
+            current_list = list(itertools.combinations(difference, k + 1))
 
             for l in current_list:
-                current_sum=sum(l)
-                current_norm=np.linalg.norm(current_sum,ord=2)
+                current_sum = sum(l)
+                current_norm = np.linalg.norm(current_sum, ord=2)
 
-                if(current_norm>biggest_norm):
-                    biggest_norm=current_norm                   
+                if (current_norm > biggest_norm):
+                    biggest_norm = current_norm
 
         return biggest_norm
 
 
+def get_statistical_error_bound(counts: np.ndarray, statistical_error_mistake_probability: float) -> float:
+    """
+    Description:
+        Get upper bound for tv-distance of estimated probability distribution from ideal one. See Ref. [3] for
+        details.
+
+    Parameters:
+        :param counts: Counts for experiment for which statistical error bound is being calculated.
+        :param statistical_error_mistake_probability: Parameter describing infidelity of returned error bound.
+
+    Return:
+        Statistical error upper bound in total variance distance.
+    """
+
+    number_of_measurement_outcomes = len(counts)
+    number_of_samples = 0
+
+    for count in counts:
+        number_of_samples += count
+
+    if number_of_measurement_outcomes < 16:
+        # for small number of outcomes "-2" factor is not negligible
+        return np.sqrt(
+            (np.log(2 ** number_of_measurement_outcomes - 2)
+             - np.log(statistical_error_mistake_probability)) / 2 / number_of_samples
+        )
+        # for high number of outcomes "-2" factor is negligible
+    else:
+        return np.sqrt(
+            (number_of_measurement_outcomes * np.log(2) - np.log(
+                statistical_error_mistake_probability)) / 2 / number_of_samples
+        )
 
 
+def get_coherent_error_bound(povm: np.ndarray) -> float:
+    """
+    Description:
+        Get distance between diagonal part of the POVM and the whole POVM. This quantity might be interpreted as a
+        measure of "non-classicality" or coherence present in measurement noise. See Ref. [1] for details.
+
+    Parameters:
+        :param povm: A POVM for which non-classicality will be determined.
+    Return:
+        Coherent error bound for given POVM.
+    """
+
+    return operational_distance_POVMs(povm, get_diagonal_povm_part(povm))
 
 
-
-def calculate_statistical_error_bound(number_of_measurement_outcomes: int,
-                                      number_of_samples: int,
-                                      statistical_error_mistake_probability: float) -> float:
-        """
+def get_correction_error_bound_from_data_and_statistical_error(povm: List[np.ndarray],
+                                                               correction_matrix: np.ndarray,
+                                                               statistical_error_bound: float,
+                                                               alpha: float = 0) -> float:
+    """
         Description:
-            Get upper bound for tv-distance of estimated probability distribution from ideal one. See Ref. [3] for details.
+            Get upper bound for the correction error using classical error-mitigation via "correction matrix".
+
+            Error arises from three factors - non-classical part of the noise, statistical fluctuations and eventual
+            unphysical "first-guess" (quasi-)probability vector after the correction.
+
+            This upper bound tells us quantitatively what is the maximal TV-distance of the corrected probability vector
+            from the ideal probability distribution that one would have obtained if there were no noise and the
+            infinite-size statistics.
+
+            See Ref. [1] for details.
 
         Parameters:
-            :param number_of_measurement_outcomes: number of outcomes, it is the dimension of Hilber space for projective measurement in standard basis
-            :param number_of_samples: number of samples for the experiment
-            :param statistical_error_mistake_probability: probability for which upper bound might be violated
+            :param povm: POVM representing measurement device.
+            :param correction_matrix: Correction matrix obtained via out Error Mitigator object.
+            :param statistical_error_bound: Statistical error bound (epsilon in paper).
+            confidence with which we state the upper bound. See Ref. [3] for details.
+            :param alpha: distance between eventual unphysical "first-guess" quasiprobability vector and the closest
+            physical one. default is 0 (which corresponds to situation in which corrected vector was proper probability
+            vector).
+
 
         Return:
-            Statistical error upper bound in total variance distance.
+            Upper bound for correction error.
+
         """
 
+    norm_of_correction_matrix = np.linalg.norm(correction_matrix, ord=1)
+    coherent_error_bound = get_coherent_error_bound(povm)
+    return norm_of_correction_matrix * (coherent_error_bound + statistical_error_bound) + alpha
 
 
-        if number_of_measurement_outcomes < 16:
-            # for small number of outcomes "-2" factor is not negligible
-            return np.sqrt(
-                (np.log(2 ** number_of_measurement_outcomes - 2)
-                 - np.log(statistical_error_mistake_probability)) / 2 / number_of_samples
-            )
-            # for high number of outcomes "-2" factor is negligible
+def get_correction_error_bound_from_data(povm: List[np.ndarray],
+                                         correction_matrix: np.ndarray,
+                                         number_of_samples: int,
+                                         error_probability: float,
+                                         alpha: float = 0) -> float:
+    """
+    Description:
+        Get upper bound for the correction error using classical error-mitigation via "correction matrix".
+
+        Error arises from three factors - non-classical part of the noise, statistical fluctuations and eventual
+        unphysical "first-guess" (quasi-)probability vector after the correction.
+
+        This upper bound tells us quantitatively what is the maximal TV-distance of the corrected probability vector
+        from the ideal probability distribution that one would have obtained if there were no noise and the
+        infinite-size statistics.
+
+        See Ref. [1] for details.
+
+    Parameters:
+        :param povm: POVM representing measurement device.
+        :param correction_matrix: Correction matrix obtained via out Error Mitigator object.
+        :param number_of_samples: number of samples (in qiskit language number of "shots").
+        :param error_probability: probability with which statistical upper bound is not correct. In other word, 1-mu is
+        confidence with which we state the upper bound. See Ref. [3] for details.
+        :param alpha: distance between eventual unphysical "first-guess" quasiprobability vector and the closest
+        physical one. default is 0 (which corresponds to situation in which corrected vector was proper probability
+        vector).
+
+
+    Return:
+        Upper bound for correction error.
+
+    """
+    dimension = povm[0].shape[0]
+
+    norm_of_correction_matrix = np.linalg.norm(correction_matrix, ord=1)
+
+    statistical_error_bound = get_statistical_error_bound(dimension, number_of_samples, error_probability)
+    coherent_error_bound = get_coherent_error_bound(povm)
+
+    return norm_of_correction_matrix * (coherent_error_bound + statistical_error_bound) + alpha
+
+
+def get_correction_error_bound_from_parameters(norm_of_correction_matrix: float,
+                                               statistical_error_bound: float,
+                                               coherent_error_bound: float,
+                                               alpha: float = 0) -> float:
+    """
+    Description:
+        See description of function "get_correction_error_bound_from_data". This function can be used if one has the
+        proper parameters already calculated and wishes to not repeat it (for example, in case of calculating something
+        in the loop).
+
+    Parameters:
+        :param norm_of_correction_matrix : 1->1 norm of correction matrix (it is not trace norm!), see Ref. [1],
+        or definition of np.linalg.norm(X,ord=1)
+        :param statistical_error_bound: upper bound for statistical errors. Can be calculated using function
+        get_statistical_error_bound.
+        :param coherent_error_bound: magnitude of coherent part of the noise. Can be calculated using function
+        get_coherent_error_bound.
+        :param alpha: distance between eventual unphysical "first-guess" quasi-probability vector and the closest
+        physical one. default is 0 (which corresponds to situation in which corrected vector was proper probability
+        vector)
+
+    Return:
+        Upper bound for correction error.
+    """
+
+    return norm_of_correction_matrix * (coherent_error_bound + statistical_error_bound) + alpha
+
+
+def counts_dict_to_frequencies_vector(count_dict: dict) -> list:
+    """
+    Description:
+        Generates and returns vector of frequencies basing on given counts dict. Mostly used with qiskit data.
+    :param count_dict: Counts dict. Possibly from qiskit job.
+    :return frequencies: Frequencies list for possible states in ascending order.
+    """
+
+    frequencies = []
+
+    qubits_number = len(list(count_dict.keys())[0])  # Number of qubits in given experiment counts.
+    possible_outcomes = get_possible_n_qubit_outcomes(qubits_number)
+    dict_keys = count_dict.keys()  # So we don't call the method every time.
+    counts_sum = 0
+
+    for outcome in possible_outcomes:
+        if dict_keys.__contains__(outcome):
+            frequencies.append(count_dict[outcome])
+            counts_sum += count_dict[outcome]
         else:
-            return np.sqrt(
-                (number_of_measurement_outcomes * np.log(2) - np.log(
-                    statistical_error_mistake_probability)) / 2 / number_of_samples
-            )
+            frequencies.append(0)
+
+    for i in range(len(frequencies)):
+        frequencies[i] = frequencies[i] / counts_sum
+
+    return frequencies
 
 
+def get_possible_n_qubit_outcomes(n: int) -> list:
+    """
+    Description:
+        For given number of qubits n generates a list of possible outcome states (as strings) and returns them in
+        ascending order. All states len is n.
+    :param n: Number of qubits.
+    :return: List of possible outcomes as strings.
+    """
+    max_value = pow(2, n)
+    possible_outcomes = []
 
+    for i in range(max_value):
+        possible_outcomes.append(bin(i)[2:].zfill(n))
 
-
-
-
-
+    return possible_outcomes

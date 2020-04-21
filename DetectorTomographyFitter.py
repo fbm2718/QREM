@@ -57,7 +57,8 @@ class DetectorTomographyFitter:
         self.algorithmConvergenceThreshold = algorithm_convergence_threshold
 
     def get_maximum_likelihood_povm_estimator(self, results_list: List[Result],
-                                              probe_kets: List[np.array], qiskit_register_convention = True) -> List[np.ndarray]:
+                                              probe_kets: List[np.array], qiskit_register_convention=True) \
+            -> List[np.ndarray]:
         """
         Description:
             Given results of Quantum Detector Tomography experiments and list of probe states, return the Maximum
@@ -66,6 +67,8 @@ class DetectorTomographyFitter:
         Parameters:
             :param results_list: List of results obtained from executing qiskit jobs.
             :param probe_kets: A set of probe kets used to perform tomography.
+            :param qiskit_register_convention: Qiskit register convention is reverse to what we usually work with.
+            This solves the problem.
 
         Returns
             Maximum likelihood estimator of POVM describing a detector.
@@ -73,10 +76,53 @@ class DetectorTomographyFitter:
         
         
 
-        probe_states = self.__get_probe_states(results_list, probe_kets)
-
         frequencies_array = self.__get_frequencies_array_from_results(results_list, qiskit_register_convention)
 
+        # FROM THIS MOMENT IT WILL BE REMOVED WHEN GENERAL METHODS ARE CREATED!
+        probe_states = self.__get_probe_states(results_list, probe_kets)
+        number_of_probe_states = frequencies_array.shape[1]
+        dimension = probe_states[0].shape[0]
+
+        povm = []
+
+        for j in range(number_of_probe_states):
+            povm.append(np.identity(dimension) / number_of_probe_states)
+
+        # Threshold is dynamic, thus another variable
+        threshold = self.algorithmConvergenceThreshold
+
+        i = 0
+        current_difference = 1
+        while abs(current_difference) >= threshold:
+            i += 1
+
+            if i % 50 == 0:
+                last_step_povm = copy.copy(povm)
+
+            r_matrices = [self.__get_r_operator(povm[j], j, frequencies_array, probe_states)
+                          for j in range(number_of_probe_states)]
+            lagrange_matrix = self.__get_lagrange_matrix(r_matrices, povm)
+            povm = [self.__calculate_symmetric_m(lagrange_matrix, r_matrices[j], povm[j])
+                    for j in range(number_of_probe_states)]
+
+            if i % 50 == 0:  # calculate the convergence test only sometimes to make the code faster
+                current_difference = sum([np.linalg.norm(povm[k] - last_step_povm[k], ord=2)
+                                          for k in range(number_of_probe_states)])
+
+            elif i > 5e5:  # make sure it does not take too long, sometimes convergence might not be so good
+                threshold = 1e-3
+
+            elif i > 1e5:  # make sure it does not take too long, sometimes convergence might not be so good
+                threshold = 1e-4
+
+        return povm
+
+
+    def __get_maximum_likelihood_povm_from_frequencies(self, frequencies_array: np.ndarray,
+                                                       probe_kets: List[np.array]) \
+            -> List[np.ndarray]:
+
+        probe_states = self.__get_probe_states(results_list, probe_kets)
         number_of_probe_states = frequencies_array.shape[1]
         dimension = probe_states[0].shape[0]
 
@@ -201,29 +247,23 @@ class DetectorTomographyFitter:
                 number_of_circuits_in_results=len(results)
                 
             for i in range(number_of_circuits_in_results):
-                
-                #either list of results or list of counts dicts
-                try:
-                    counts = results.get_counts(i)
-                    shots_number = results.results[i].shots
-                except(AttributeError):
-                    counts=results[i]
-                    shots_number = sum(counts.values())
-                
-                #TODO FBM: added here accounting for reversed register in qiskit
+                counts = results.get_counts(i)
+                shots_number = results.results[i].shots
+
+                # TODO FBM: added here accounting for reversed register in qiskit
                 normal_order = []
                 for j in range(len(possible_states)):
                     if possible_states[j] in counts.keys():
                         normal_order.append(counts[possible_states[j]] / shots_number)
                     else:
                         normal_order.append(0)
-               
+
                 if qiskit_register_convention:
-                    frequencies = reorder_probabilities(normal_order,range(states_len)[::-1])
+                    frequencies = reorder_probabilities(normal_order, range(states_len)[::-1])
                 else:
                     frequencies = normal_order
-                
-                frequencies_array[i][:]=frequencies[:]
+
+                frequencies_array[i][:] = frequencies[:]
 
         return frequencies_array
 
@@ -314,7 +354,7 @@ class DetectorTomographyFitter:
 
         return symmetric_m
 
-    #TODO TR: This method may need to be revisited and possibly reduced into several smaller ones.
+    # TODO TR: This method may need to be revisited and possibly reduced into several smaller ones.
     @staticmethod
     def join_povms(povms: List[List[np.ndarray]], qubit_indices_lists: List[List[int]]) -> List[np.ndarray]:
         """
