@@ -1,9 +1,12 @@
 # QREM
-**QREM** - **Q**uantum **R**eadout **E**rrors **M**itigation, an open-source package for implementing techniques of measurement error mitigation on quantum devices.
+**QREM** - **Q**uantum **R**eadout **E**rrors **M**itigation, an open-source package for implementing techniques of
+measurement error mitigation on quantum devices.
 
   
 ## Status of development
-This package is under development and new functionalities and notebooks are expected to be added in the future. Currently, the methods for quantum detector tomography and measurement error mitigation based on that tomography are working properly. 
+This package is under development and new functionalities and notebooks are expected to be added in the future.
+Currently, the methods for quantum detector tomography and measurement error mitigation based on that tomography are
+working properly. 
   
 ## Dependencies
 For QREM to work properly,  the following libraries should be installed:
@@ -33,11 +36,14 @@ git submodule update
 ## Workflow
 The workflow for the main functionalities is following:
 
-1. Characterize detector via Quantum Detector Tomography (QDT) using [DetectorTomographyFitter](DetectorTomographyFitter.py).
-2. Use the data from QDT to mitigate errors on any experiment using [QDTErrorMitigator](QDTErrorMitigator.py).
+1. Characterize detector via Quantum Detector Tomography (QDT) using
+[DetectorTomographyFitter](DetectorTomographyFitter.py).
+2. Use the data from QDT to mitigate errors on any experiment using
+[QDTErrorMitigator](QDTErrorMitigator.py).
 
 ## Jupyter tutorials
-Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the package, we recomend to take a look at tutorials in jupyter notebooks:
+Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the
+package, we recommend to take a look at tutorials in jupyter notebooks:
 1. [Tutorial for implementing Quantum Detector Tomography](QDT_Tutorial.ipynb)
 2. [Tutorial for mitigatin readout noise based on QDT](Error_Mitigation_Tutorial.ipynb)
 
