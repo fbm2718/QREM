@@ -66,22 +66,22 @@ we will use prefix _m__, to mark all matrices.
 **The workflow of this package is mainly based on the work**:
   
 [0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec, "Mitigation of readout noise in near-term quantum devices
-by classical post-processing based on detector tomography", arxiv preprint, https://arxiv.org/abs/1907.08518 (2019)
+by classical post-processing based on detector tomography", [Quantum 4, 257 (2020)](https://quantum-journal.org/papers/q-2020-04-24-257/)
   
 **Important quantum information ideas appearing in the code are, to a higher or lower degree, described in following references:**
   
 [1] Z. Hradil, J. Řeháček, J. Fiurášek, and M. Ježek, “3 maximum-likelihood methods in quantum mechanics,” in Quantum
 State Estimation, edited by M. Paris and J. Řeháček (Springer Berlin Heidelberg, Berlin, Heidelberg, 2004) pp. 59–112.
 
-[2] J. Fiurášek, Physical Review A 64, 024102 (2001), arXiv:quant-ph/0101027 [quant-ph].
+[2] J. Fiurášek, [Phys. Rev. A 64, 024102 (2001)](https://arxiv.org/abs/quant-ph/0101027v2).
 
 [3] Zbigniew Puchała, Łukasz Pawela, Aleksandra Krawiec, Ryszard Kukulski, "Strategies for optimal single-shot
-discrimination of quantum measurements", Phys. Rev. A 98, 042103 (2018), https://arxiv.org/abs/1804.05856
+discrimination of quantum measurements", [Phys. Rev. A 98, 042103 (2018)](https://arxiv.org/abs/1804.05856).
 
 [4] T. Weissman, E. Ordentlich, G. Seroussi, S. Verdul, and M. J. Weinberger, Technical Report HPL-2003-97R1,
 Hewlett-Packard Labs (2003).
 
-[5] John A. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", Phys. Rev. Lett. 108, 070502
-(2012), https://arxiv.org/abs/1106.5458
+[5] John A. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", [Phys. Rev. Lett. 108, 070502
+(2012)](https://arxiv.org/abs/1106.5458).
 
 
