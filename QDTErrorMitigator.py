@@ -26,13 +26,13 @@ from qiskit.result import Result
 
 class QDTErrorMitigator:
     """
-        This class is used to mitigate errors in qiskit jobs using via use of QDT.
+        This class is used to mitigate errors in qiskit jobs using data from QDT.
     """
 
     def __init__(self):
         """
         Description:
-            Constructor of the class. This should initialize all the variables to None.
+            Constructor of the class. 
         """
         self.povm = None
         self.transition_matrix = None
@@ -43,9 +43,8 @@ class QDTErrorMitigator:
     def prepare_mitigator(self, povm: List[np.ndarray]) -> None:
         """
         Description:
-            This method, aside from getters, is main method of the class. It's main purpose is to calculate all members
-             of the class in order for them to be used in later computation or just to mitigate the errors from
-             given statistics.
+            This method is main method of the class. It is used to prepare the mitigation matrix from POVM. Other
+            methods allow to calculate errors.
 
         Parameters:
             :param povm: POVM describing the detector used in measurements of which statistics are meant to be

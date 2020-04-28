@@ -1,9 +1,7 @@
 """
 Created on Wed Aug  8 21:40:15 2018
-
 @author: Filip Maciejewski
 email: filip.b.maciejewski@gmail.com
-
 References:
 [1] Z. Hradil, J. Řeháček, J. Fiurášek, and M. Ježek, “3 maximum-likelihood methods in quantum mechanics,” in Quantum
 State Estimation, edited by M. Paris and J. Řeháček (Springer Berlin Heidelberg, Berlin, Heidelberg, 2004) pp. 59–112.
@@ -99,18 +97,13 @@ class QDTCalibrationSetup:
         Description:
             Creates an array of frequencies from given qiskit job results. This method is is working with
             qiskit 0.16. The shape of the array is
-
                 c x 2 ** q,
-
             where c denotes circuits number and q denotes number of qubits.
-
         Parameters:
             :param results_list: List of qiskit jobs results.
-
         Returns:
             np.ndarray with shape=0 if there were no circuits in the job, or with shape c x 2 ** q
             containing frequencies data for each possible state.
-
         Notes:
             Possible states are numbered increasingly from |00000 ... 0>, |10000 ... 0> up to |1111 ... 1>.
         """
@@ -162,10 +155,8 @@ class DetectorTomographyFitter:
         Description:
             Given results of Quantum Detector Tomography experiments and list of probe states, return the Maximum
             Likelihood estimation of POVM describing a detector. Uses recursive method from [1]. See also [2].
-
         Parameters:
             :param calibration_setup:
-
         Returns
             Maximum likelihood estimator of POVM describing a detector.
         """
@@ -214,14 +205,12 @@ class DetectorTomographyFitter:
         """
         Description:
             This method calculates R operator as defined in Ref. [1].
-
         Parameters:
             :param m_m: Effect for which R operator is calculated.
             :param index_of_povm_effect: Index of povm effect for which R is calculated.
             :param frequencies_array: frequencies_array - array with size (m x n), where m means number of probe states,
             n means number of POSSIBLE outcomes.
             :param probe_states: A list of probe states density matrices.
-
         Returns:
             The R operator as described in Ref. [1].
         """
@@ -251,11 +240,9 @@ class DetectorTomographyFitter:
         """
         Description:
             Calculates Lagrange matrix used in Lagrange multipliers optimization method.
-
         Parameters:
             :param r_matrices: A list of R matrices described in a method generating them.
             :param povms: A list of effects for which Lagrange matrix will be calculated.
-
         Returns:
            Lagrange matrix for given parameters.
         """
@@ -275,12 +262,10 @@ class DetectorTomographyFitter:
         """
         Description:
             A method used for calculating symmetric m matrix.
-
         Parameters:
             :param m_m: A matrix of which symmetric version will be calculated.
             :param m_r: Previously calculated R operator.
             :param m_lagrange_matrix:
-
         Returns:
             Symmetric m matrix.
         """
@@ -301,11 +286,9 @@ def join_povms(povms: List[List[np.ndarray]], qubit_indices_lists: List[List[int
     """
     Description:
         Generates a POVM from given list of POVMs and qubit indices.
-
     Parameter:
         :param povms: List of POVMs corresponding to qubits indices.
         :param qubit_indices_lists: Indices of qubits for which POVMs were calculated.
-
     Return:
         POVM describing whole detector.
     """

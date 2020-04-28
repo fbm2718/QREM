@@ -14,6 +14,7 @@ import povmtools
 import numpy as np
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 import itertools
+from PyMaLi import GeneralTensorCalculator
 
 
 def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
@@ -155,14 +156,17 @@ def detector_tomography_circuits(qubit_indices,
             qreg = QuantumRegister(qrs)
             creg = ClassicalRegister(len(qubit_indices))
 
-            # create quantum circuit
-            circuit = QuantumCircuit(qreg, creg)
+            # create quantum circuit with nice names
+            set_string = ''.join(['u' + str(st) for st in current_set[0]])
+            qubits_string = ''.join(['q' + str(st) for st in qubit_indices])
+
+            circuit = QuantumCircuit(qreg, creg,
+                                     name="QDT-" + qubits_string + "-id-" + set_string + '-no-' + str(number))
 
             # get barrier to prevent compiler from making changes
             circuit.barrier()
 
             for qubit_unitary_pair_index in range(len(current_set)):
-
                 # take qubit+unitary pair
                 pair_now = current_set[qubit_unitary_pair_index]
 
@@ -172,7 +176,8 @@ def detector_tomography_circuits(qubit_indices,
                 # make sure that chosen quantum state is not one of the states in computational basis
                 # TODO: this might not be necessary anymore, it's an old code, I had some problems long time ago with
                 #  those guys because qiskit compiler went crazy if I defined identity or x gate using u3 unitary.
-                if povmtools.check_if_projector_is_in_computational_basis(povmtools.get_density_matrix(probe_kets[u_now_index])):
+                if povmtools.check_if_projector_is_in_computational_basis(
+                        povmtools.get_density_matrix(probe_kets[u_now_index])):
                     if povmtools.get_density_matrix(probe_kets[u_now_index])[0][0] == 1:
                         circuit.iden(qreg[q_now_index])
                     elif povmtools.get_density_matrix(probe_kets[u_now_index])[1][1] == 1:
@@ -190,15 +195,10 @@ def detector_tomography_circuits(qubit_indices,
 
             # Add measurements
             for i in range(len(qubit_indices)):
-        
-                
                 circuit.measure(qreg[qubit_indices[i]], creg[i])
 
             tomography_circuits.append(circuit)
     return tomography_circuits
-
-
-from PyMaLi import GeneralTensorCalculator
 
 
 def gtc_tensor_calculating_function(arguments: list):
