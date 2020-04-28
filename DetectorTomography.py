@@ -22,6 +22,7 @@ from typing import List
 from PyMaLi.GeneralTensorCalculator import GeneralTensorCalculator
 
 
+# GTC stands for General Tensor Calculator.
 def gtc_tensor_counting_function(arguments: list):
     result = 1
 
@@ -45,7 +46,8 @@ def gtc_matrix_product_counting_function(arguments: list):
 
 class DetectorTomographyFitter:
     """
-        This class is meant to resemble qiskit's state tomography and process tomography fitters and to calculate the maximum likelihood povm estimator describing a detector basing on QDT job results and used probe states.
+        This class is meant to resemble qiskit's state tomography and process tomography fitters and to calculate the
+        maximum likelihood povm estimator describing a detector basing on QDT job results and used probe states.
     """
 
     def __init__(self, algorithm_convergence_threshold=1e-6):
@@ -109,7 +111,6 @@ class DetectorTomographyFitter:
                 threshold = 1e-4
 
         return povm
-
 
     def __get_maximum_likelihood_povm_from_frequencies(self, frequencies_array: np.ndarray,
                                                        probe_kets: List[np.array]) \
@@ -379,3 +380,9 @@ class DetectorTomographyFitter:
         sorted_povm = sort_things(povm, new_classical_register)
 
         return sorted_povm
+
+
+class QDTCalibrationSetup:
+
+    def __init__(self, qubits_number: int, ):
+        self.qubits_number = qubits_number
