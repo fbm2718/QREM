@@ -43,8 +43,20 @@ def gtc_matrix_product_counting_function(arguments: list):
 
 
 class QDTCalibrationSetup:
-
+    """
+        This class contains information required by DetectorTomographyFitter object to properly calculate
+        maximum-likelihood POVM. This class shouldn't have any accessible methods and should only store and transfer
+        data to the DetectorTomographyFitter class instances.
+    """
     def __init__(self, qubits_number: int, probe_kets: List[np.array], frequencies_array: np.ndarray):
+        """
+        Description:
+            This is default constructor for QDTCalibrationSetup objects. It requires all necessary information, that is
+            later used in the QDT process using DetectorTomographyFitter object.
+        :param qubits_number: Number of qubits used in the circuits.
+        :param probe_kets: Kets upon which circuits were build.
+        :param frequencies_array: Results of circuits execution presented as frequencies.
+        """
         self.qubits_number = qubits_number
         self.probe_kets = probe_kets
         self.probe_states = self.__get_probe_states(qubits_number, probe_kets)
@@ -156,7 +168,8 @@ class DetectorTomographyFitter:
             Given results of Quantum Detector Tomography experiments and list of probe states, return the Maximum
             Likelihood estimation of POVM describing a detector. Uses recursive method from [1]. See also [2].
         Parameters:
-            :param calibration_setup:
+            :param calibration_setup: QDTCalibrationSetup object that consists data upon which maximum likelihood POVM
+            estimator should be calculated.
         Returns
             Maximum likelihood estimator of POVM describing a detector.
         """
