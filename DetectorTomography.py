@@ -2,6 +2,7 @@
 Created on Wed Aug  8 21:40:15 2018
 @author: Filip Maciejewski
 email: filip.b.maciejewski@gmail.com
+
 References:
 [1] Z. Hradil, J. Řeháček, J. Fiurášek, and M. Ježek, “3 maximum-likelihood methods in quantum mechanics,” in Quantum
 State Estimation, edited by M. Paris and J. Řeháček (Springer Berlin Heidelberg, Berlin, Heidelberg, 2004) pp. 59–112.
@@ -13,9 +14,10 @@ import scipy as sc
 import copy
 from math import log
 
-from povmtools import get_density_matrix, permute_matrix, reorder_classical_register, sort_things, reorder_probabilities
+from povmtools import get_density_matrix, permute_matrix, reorder_classical_register, sort_things
 from qiskit.result import Result
 from typing import List
+from qiskit_utilities import get_frequencies_array_from_results
 
 from PyMaLi.GeneralTensorCalculator import GeneralTensorCalculator
 
@@ -73,7 +75,7 @@ class QDTCalibrationSetup:
         :param probe_kets: Prove kets (in form of list of np.arrays) used to generate calibration circuits.
         :return: Instance of QDT calibration setup from given job.
         """
-        frequencies_array = cls.__get_frequencies_array_from_results(results_list)
+        frequencies_array = get_frequencies_array_from_results(results_list)
         # This qubits_number calculation is a little elaborate, but necessary.
         circuits_number = sum(len(results.results) for results in results_list)
         qubits_number = int(log(circuits_number, len(probe_kets)))
@@ -102,55 +104,6 @@ class QDTCalibrationSetup:
         general_tensor_calculator = GeneralTensorCalculator(gtc_tensor_counting_function)
 
         return general_tensor_calculator.calculate_tensor_to_increasing_list(probe_states)
-
-    @staticmethod
-    def __get_frequencies_array_from_results(results_list: List[Result]) -> np.ndarray:
-        """
-        Description:
-            Creates an array of frequencies from given qiskit job results. This method is is working with
-            qiskit 0.16. The shape of the array is
-                c x 2 ** q,
-            where c denotes circuits number and q denotes number of qubits.
-        Parameters:
-            :param results_list: List of qiskit jobs results.
-        Returns:
-            np.ndarray with shape=0 if there were no circuits in the job, or with shape c x 2 ** q
-            containing frequencies data for each possible state.
-        Notes:
-            Possible states are numbered increasingly from |00000 ... 0>, |10000 ... 0> up to |1111 ... 1>.
-        """
-
-        all_circuits_number = sum(len(results.results) for results in results_list)
-
-        if all_circuits_number == 0:
-            return np.ndarray(shape=0)
-
-        # The length of a state describes how many qubits were used during experiment.
-        states_len = len(next(iter(results_list[0].get_counts(0).keys())))
-
-        possible_states = ["{0:b}".format(i).zfill(states_len) for i in range(2 ** states_len)]
-        frequencies_array = np.ndarray(shape=(all_circuits_number, len(possible_states)))
-
-        # TODO TR: This has to be rewritten as it's too nested.
-        for results in results_list:
-            number_of_circuits_in_results = len(results.results)
-            for i in range(number_of_circuits_in_results):
-                counts = results.get_counts(i)
-                shots_number = results.results[i].shots
-
-                # TODO FBM: added here accounting for reversed register in qiskit
-                normal_order = []
-                for j in range(len(possible_states)):
-                    if possible_states[j] in counts.keys():
-                        normal_order.append(counts[possible_states[j]] / shots_number)
-                    else:
-                        normal_order.append(0)
-
-                frequencies = reorder_probabilities(normal_order, range(states_len)[::-1])
-
-                frequencies_array[i][:] = frequencies[:]
-
-        return frequencies_array
 
 
 class DetectorTomographyFitter:
