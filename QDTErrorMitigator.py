@@ -203,6 +203,6 @@ class QDTErrorMitigator:
         """
 
         # Create new object to avoid conflicts
-        statistics_array = get_frequencies_array_from_results(results)
+        statistics_array = get_frequencies_array_from_results([results])
         return self.apply_correction_to_statistics(statistics_array)
 
