@@ -44,7 +44,7 @@ def gtc_matrix_product_counting_function(arguments: list):
 
 class QDTCalibrationSetup:
 
-    def __init__(self, qubits_number: int, probe_kets: List[np.array], frequencies_array: np.ndarray ):
+    def __init__(self, qubits_number: int, probe_kets: List[np.array], frequencies_array: np.ndarray):
         self.qubits_number = qubits_number
         self.probe_kets = probe_kets
         self.probe_states = self.__get_probe_states(qubits_number, probe_kets)
