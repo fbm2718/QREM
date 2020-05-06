@@ -179,7 +179,7 @@ def detector_tomography_circuits(qubit_indices,
                 if povmtools.check_if_projector_is_in_computational_basis(
                         povmtools.get_density_matrix(probe_kets[u_now_index])):
                     if povmtools.get_density_matrix(probe_kets[u_now_index])[0][0] == 1:
-                        circuit.iden(qreg[q_now_index])
+                        circuit.i(qreg[q_now_index])
                     elif povmtools.get_density_matrix(probe_kets[u_now_index])[1][1] == 1:
                         circuit.x(qreg[q_now_index])
                     else:
@@ -242,7 +242,7 @@ def detector_tomography_circuits_pymali(qubit_indices, probe_kets):
             # TODO TR: I believe there may be more "special" cases. If so, then this should be placed in other method
             #  or in get_su2_ ... method.
             if current_angles[0] == 'id':
-                circuit.iden(qreg[qubit_indices[j]])
+                circuit.i(qreg[qubit_indices[j]])
                 continue
             if current_angles[0] == 'x':
                 circuit.x(qreg[qubit_indices[j]])

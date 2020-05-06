@@ -40,7 +40,7 @@ class QDTErrorMitigator:
         self.transition_matrix = None
         self.correction_matrix = None
         self.distances_from_closest_probability_vector = []
-        self.qiskit_register_convention = True
+        self.qiskit_register_convention = False
 
         if povm is not None:
             self.prepare_mitigator(povm)
