@@ -20,8 +20,10 @@ Hewlett-Packard Labs (2003).
 
 import numpy as np
 import povmtools
+
 from typing import List
 from qiskit.result import Result
+from qiskit_utilities import get_frequencies_array_from_results
 
 
 class QDTErrorMitigator:
@@ -29,21 +31,25 @@ class QDTErrorMitigator:
         This class is used to mitigate errors in qiskit jobs using data from QDT.
     """
 
-    def __init__(self):
+    def __init__(self, povm=None):
         """
         Description:
-            Constructor of the class. 
+            Constructor of the class. If povm is None, then it should be prepared before use (using prepare_mitigator)!
         """
         self.povm = None
         self.transition_matrix = None
         self.correction_matrix = None
         self.distances_from_closest_probability_vector = []
-        self.qiskit_register_convention = True
+        self.qiskit_register_convention = False
+
+        if povm is not None:
+            self.prepare_mitigator(povm)
 
     def prepare_mitigator(self, povm: List[np.ndarray]) -> None:
         """
         Description:
-            This method is main method of the class. It is used to prepare the mitigation matrix from POVM. Other methods allow to calculate errors. 
+            This method is main method of the class. It is used to prepare the mitigation matrix from POVM. Other
+            methods allow to calculate errors.
 
         Parameters:
             :param povm: POVM describing the detector used in measurements of which statistics are meant to be
@@ -111,7 +117,7 @@ class QDTErrorMitigator:
             print(self.transition_matrix)
             self.correction_matrix = np.eye(np.shape(self.transition_matrix[0]))
 
-    def apply_correction_to_qiskit_job(self, results: Result) -> List[np.ndarray]:
+    def apply_correction_to_statistics(self, statistics_array: np.ndarray):
         """
         Description:
             Given correction matrix and vector of relative frequencies, correct the statistics via multiplication by
@@ -123,8 +129,7 @@ class QDTErrorMitigator:
             Ref.[1], such distance is denoted as \alpha.
 
         Parameters:
-            :param results: Qiskit job results for which statistics should be corrected.
-            :param results:
+            :param statistics_array: Statistics for which correction should be performed.
 
         Returns:
             Corrected statistics.
@@ -134,8 +139,6 @@ class QDTErrorMitigator:
 
         number_of_qubits = int(np.log2(number_of_povm_outcomes))
 
-        # create new object to avoid conflicts
-        statistics_array = self.__get_frequencies_array_from_results(results)
         corrected_frequencies = []
         self.distances_from_closest_probability_vector = []
 
@@ -181,131 +184,25 @@ class QDTErrorMitigator:
 
         return corrected_frequencies
 
-    @staticmethod
-    # TODO TR: This is duplicate code. Consider placing this in another file.
-    def __get_frequencies_array_from_results(results: Result) -> np.ndarray:
+    def apply_correction_to_qiskit_job(self, results: Result) -> List[np.ndarray]:
         """
         Description:
-            Creates an array of frequencies from given qiskit job results. This method is is working with
-            qiskit 0.16. The shape of the array is
+            Given correction matrix and vector of relative frequencies, correct the statistics via multiplication by
+            correction_matrix.
 
-                c x 2 ** q,
-
-            where c denotes circuits number and q denotes number of qubits.
-
-        Parameters:
-            :param results: qiskit jobs results
-
-        Returns:
-            ndarray with shape=0 if there were no circuits in the job, or with shape c x 2 ** q
-            containing frequencies data for each possible state.
-
-        Notes:
-            Possible states are numbered increasingly from |00000 ... 0>, |10000 ... 0> up to |1111 ... 1>.
-        """
-
-        circuits_number = len(results.results)
-
-        if circuits_number == 0:
-            return np.ndarray(shape=0)
-
-        # states_len = len(next(iter(results.get_counts(0).keys())))
-        # The length of a state describes how many qubits were used during experiment. Assuming that all results have
-        # are on the same number of qubits.
-        states_len = np.max([len(list(key)) for key in results.get_counts(0).keys()])
-
-        possible_states = ["{0:b}".format(i) for i in range(2 ** states_len)]
-
-        for i in range(len(possible_states)):
-            while len(possible_states[i]) < states_len:
-                possible_states[i] = '0' + possible_states[i]
-
-        frequencies_array = np.ndarray(shape=(circuits_number, len(possible_states)))
-
-        def fix_format_counts_leading_zeros(counts):
-            # TODO FBM: I encountered some problems with test objects due to HEXADECIMAL formatting in qiskit...
-            #  Here I fix it. We may probably remove it later
-            keys = list(counts.keys())
-
-            string_lengths = np.unique([len(list(key)) for key in keys])
-
-            new_cnts = {}
-            if len(string_lengths) != 1:
-                proper_length = np.max(string_lengths)
-
-                for key in keys:
-                    if len(list(key)) != proper_length:
-                        new_count = bin(int(key, 2))[2:].zfill(proper_length)
-                        new_cnts[new_count] = counts[key]
-                    else:
-                        new_cnts[key] = counts[key]
-
-                return new_cnts
-            else:
-                print('good format')
-                return counts
-
-        for i in range(circuits_number):
-            counts = results.get_counts(i)
-            counts = fix_format_counts_leading_zeros(counts)
-
-            shots_number = results.results[i].shots
-            for j in range(len(possible_states)):
-                if possible_states[j] in counts.keys():
-                    frequencies_array[i][j] = counts[possible_states[j]] / shots_number
-                else:
-                    frequencies_array[i][j] = 0
-
-        return frequencies_array
-
-    @staticmethod
-    # TODO TR: This is similar to frequencies array creation. Should be refactored.
-    def __get_counts_array_from_results(results: Result) -> np.ndarray:
-        """
-        Description:
-            Creates an array of frequencies from given qiskit job results. This method is working with
-            qiskit 0.16. The shape of the array is
-
-                c x 2 ** q,
-
-            where c denotes circuits number and q denotes number of qubits.
+            In case of obtaining quasiprobability vector after such correction, it is possible to find closest physical
+            one (in Euclidean norm). Total Variation distance between quasi probability vector and closest physical one
+            is the upper bound for the correction error resulting from this unphysicality. See Ref. [1] for details. In
+            Ref.[1], such distance is denoted as \alpha.
 
         Parameters:
-            :param results: qiskit jobs results
+            :param results: Qiskit job results for which statistics should be corrected.
 
         Returns:
-            ndarray with shape=0 if there were no circuits in the job, or with shape c x 2 ** q
-            containing frequencies data for each possible state.
-
-        Notes:
-            Possible states are numbered increasingly from |00000 ... 0>, |10000 ... 0> up to |1111 ... 1>.
+            Corrected statistics.
         """
 
-        circuits_number = len(results.results)
-
-        if circuits_number == 0:
-            return np.ndarray(shape=0)
-
-        # The length of a state describes how many qubits were used during experiment.
-        states_len = len(next(iter(results.get_counts(0).keys())))
-
-        possible_states = ["{0:b}".format(i) for i in range(2 ** states_len)]
-
-        for i in range(len(possible_states)):
-            while len(possible_states[i]) < states_len:
-                possible_states[i] = '0' + possible_states[i]
-
-        frequencies_array = np.ndarray(shape=(circuits_number, len(possible_states)))
-
-        for i in range(circuits_number):
-            counts = results.get_counts(i)
-            for j in range(len(possible_states)):
-                if possible_states[j] in counts.keys():
-                    frequencies_array[i][j] = counts[possible_states[j]]
-                else:
-                    frequencies_array[i][j] = 0
-
-        return frequencies_array
-
-
+        # Create new object to avoid conflicts
+        statistics_array = get_frequencies_array_from_results([results])
+        return self.apply_correction_to_statistics(statistics_array)
 

@@ -37,7 +37,7 @@ git submodule update
 The workflow for the main functionalities is following:
 
 1. Characterize detector via Quantum Detector Tomography (QDT) using
-[DetectorTomographyFitter](DetectorTomographyFitter.py).
+[DetectorTomographyFitter](DetectorTomography.py).
 2. Use the data from QDT to mitigate errors on any experiment using
 [QDTErrorMitigator](QDTErrorMitigator.py).
 
@@ -66,9 +66,11 @@ we will use prefix _m__, to mark all matrices.
 **The workflow of this package is mainly based on the work**:
   
 [0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec, "Mitigation of readout noise in near-term quantum devices
-by classical post-processing based on detector tomography", [Quantum 4, 257 (2020)](https://quantum-journal.org/papers/q-2020-04-24-257/)
+by classical post-processing based on detector tomography", 
+[Quantum 4, 257 (2020)](https://quantum-journal.org/papers/q-2020-04-24-257/)
   
-**Important quantum information ideas appearing in the code are, to a higher or lower degree, described in following references:**
+**Important quantum information ideas appearing in the code are, to a higher or lower degree, described in following 
+references:**
   
 [1] Z. Hradil, J. Řeháček, J. Fiurášek, and M. Ježek, “3 maximum-likelihood methods in quantum mechanics,” in Quantum
 State Estimation, edited by M. Paris and J. Řeháček (Springer Berlin Heidelberg, Berlin, Heidelberg, 2004) pp. 59–112.

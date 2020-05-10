@@ -16,6 +16,7 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 import itertools
 from PyMaLi import GeneralTensorCalculator
 
+
 def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
     """
     Description:
@@ -151,16 +152,16 @@ def detector_tomography_circuits(qubit_indices,
             # index of set of qubits+unitaries for current step
             current_set = indices_for_circuits[index_for_set]
 
-
             # create quantum register
             qreg = QuantumRegister(qrs)
             creg = ClassicalRegister(len(qubit_indices))
 
             # create quantum circuit with nice names
-            set_string = ''.join(['u'+str(st) for st in current_set[0]])
-            qubits_string = ''.join(['q'+str(st) for st in qubit_indices])
+            set_string = ''.join(['u' + str(st) for st in current_set[0]])
+            qubits_string = ''.join(['q' + str(st) for st in qubit_indices])
 
-            circuit = QuantumCircuit(qreg, creg, name = "QDT-"+qubits_string+"-id-"+set_string+'-no-'+str(number))
+            circuit = QuantumCircuit(qreg, creg,
+                                     name="QDT-" + qubits_string + "-id-" + set_string + '-no-' + str(number))
 
             # get barrier to prevent compiler from making changes
             circuit.barrier()
@@ -175,9 +176,10 @@ def detector_tomography_circuits(qubit_indices,
                 # make sure that chosen quantum state is not one of the states in computational basis
                 # TODO: this might not be necessary anymore, it's an old code, I had some problems long time ago with
                 #  those guys because qiskit compiler went crazy if I defined identity or x gate using u3 unitary.
-                if povmtools.check_if_projector_is_in_computational_basis(povmtools.get_density_matrix(probe_kets[u_now_index])):
+                if povmtools.check_if_projector_is_in_computational_basis(
+                        povmtools.get_density_matrix(probe_kets[u_now_index])):
                     if povmtools.get_density_matrix(probe_kets[u_now_index])[0][0] == 1:
-                        circuit.iden(qreg[q_now_index])
+                        circuit.i(qreg[q_now_index])
                     elif povmtools.get_density_matrix(probe_kets[u_now_index])[1][1] == 1:
                         circuit.x(qreg[q_now_index])
                     else:
@@ -199,9 +201,6 @@ def detector_tomography_circuits(qubit_indices,
     return tomography_circuits
 
 
-
-
-
 def gtc_tensor_calculating_function(arguments: list):
     result = []
 
@@ -209,19 +208,6 @@ def gtc_tensor_calculating_function(arguments: list):
         result.append(a)
 
     return result
-
-
-def gtc_tensor_string(arguments: list):
-    result = []
-
-    x=''
-    
-    
-    # for a in arguments:
-    #     x.join()
-
-    return result
-
 
 
 def detector_tomography_circuits_pymali(qubit_indices, probe_kets):
@@ -256,7 +242,7 @@ def detector_tomography_circuits_pymali(qubit_indices, probe_kets):
             # TODO TR: I believe there may be more "special" cases. If so, then this should be placed in other method
             #  or in get_su2_ ... method.
             if current_angles[0] == 'id':
-                circuit.iden(qreg[qubit_indices[j]])
+                circuit.i(qreg[qubit_indices[j]])
                 continue
             if current_angles[0] == 'x':
                 circuit.x(qreg[qubit_indices[j]])
