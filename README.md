@@ -89,6 +89,7 @@ Hewlett-Packard Labs (2003).
 
 ## Citation
 The following bibtex entry can be used to cite this repository:
+
 @misc{qrem,
    url={https://github.com/fbm2718/QREM},
    title = {Quantum Readout Errors Mitigation (QREM) -- open source GitHub repository},
