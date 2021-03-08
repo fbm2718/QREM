@@ -265,10 +265,6 @@ def detector_tomography_circuits_rigetti(qubit_indices,
             # take index of qubit and index of unitary
             q_now_index, u_now_index = pair_now[0], pair_now[1]
 
-            # make sure that chosen quantum state is not one of the states in computational basis
-            # TODO: this might not be necessary anymore, it's an old code, I had some problems long time ago with
-            #  those guys because qiskit compiler went crazy if I defined identity or x gate using u3 unitary.
-
             if u_now_index == 0:
                 program+=pyq.gates.I(q_now_index)
             elif u_now_index == 1:
