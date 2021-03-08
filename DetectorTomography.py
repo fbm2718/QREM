@@ -20,7 +20,7 @@ from typing import List
 from qiskit_utilities import get_frequencies_array_from_results
 
 from PyMaLi.GeneralTensorCalculator import GeneralTensorCalculator
-
+import time
 
 # GTC stands for General Tensor Calculator.
 def gtc_tensor_counting_function(arguments: list):
@@ -127,41 +127,61 @@ class DetectorTomographyFitter:
             Maximum likelihood estimator of POVM describing a detector.
         """
 
-        number_of_probe_states = calibration_setup.frequencies_array.shape[1]
+        number_of_probe_states = calibration_setup.frequencies_array.shape[0]
+        number_of_outcomes = calibration_setup.frequencies_array.shape[1]
+
         dimension = calibration_setup.probe_states[0].shape[0]
 
         povm = []
 
-        for j in range(number_of_probe_states):
-            povm.append(np.identity(dimension) / number_of_probe_states)
 
+        for j in range(number_of_outcomes):
+            povm.append(np.identity(dimension) / number_of_outcomes)
+
+
+        # print(np.round(sum(povm),3))
+        # # print(calibration_setup.frequencies_array.shape)
+        # raise KeyError
         # Threshold is dynamic, thus another variable
         threshold = self.algorithmConvergenceThreshold
 
         i = 0
         current_difference = 1
-        while abs(current_difference) >= threshold:
-            i += 1
 
-            if i % 50 == 0:
-                last_step_povm = copy.copy(povm)
+        t0 = time.time()
 
-            r_matrices = [self.__get_r_operator(povm[j], j, calibration_setup.frequencies_array,
-                                                calibration_setup.probe_states)
-                          for j in range(number_of_probe_states)]
-            lagrange_matrix = self.__get_lagrange_matrix(r_matrices, povm)
-            povm = [self.__calculate_symmetric_m(lagrange_matrix, r_matrices[j], povm[j])
-                    for j in range(number_of_probe_states)]
+        try:
+            while abs(current_difference) >= threshold:
+                i += 1
 
-            if i % 50 == 0:  # calculate the convergence test only sometimes to make the code faster
-                current_difference = sum([np.linalg.norm(povm[k] - last_step_povm[k], ord=2)
-                                          for k in range(number_of_probe_states)])
+                if i % 50 == 0:
+                    last_step_povm = copy.copy(povm)
 
-            elif i > 5e5:  # make sure it does not take too long, sometimes convergence might not be so good
-                threshold = 1e-3
+                r_matrices = [self.__get_r_operator(povm[j], j, calibration_setup.frequencies_array,
+                                                    calibration_setup.probe_states)
+                              for j in range(number_of_outcomes)]
+                lagrange_matrix = self.__get_lagrange_matrix(r_matrices, povm)
+                povm = [self.__calculate_symmetric_m(lagrange_matrix, r_matrices[j], povm[j])
+                        for j in range(number_of_outcomes)]
 
-            elif i > 1e5:  # make sure it does not take too long, sometimes convergence might not be so good
-                threshold = 1e-4
+                if i % 100 == 0:  # calculate the convergence test only sometimes to make the code faster
+                    current_difference = sum([np.linalg.norm(povm[k] - last_step_povm[k], ord=2)
+                                              for k in range(number_of_outcomes)])
+
+
+
+
+                elif (time.time()-t0)/60 > 30:  # make sure it does not take too long, sometimes convergence might not be so good
+                    threshold = 1e-3
+
+                elif (time.time()-t0)/60 > 10:  # make sure it does not take too long, sometimes convergence might not be so good
+                    threshold = 1e-4
+
+                if i%1000==0:
+                    print('iteration:',i,', with current difference: ',current_difference)
+        except(KeyboardInterrupt):
+            pass
+
 
         return povm
 
@@ -182,6 +202,7 @@ class DetectorTomographyFitter:
         """
 
         number_of_probe_states = frequencies_array.shape[0]
+
 
         d = probe_states[0].shape[0]
 
@@ -212,11 +233,11 @@ class DetectorTomographyFitter:
         Returns:
            Lagrange matrix for given parameters.
         """
-        number_of_povms = len(povms)
+        number_of_outcomes = len(povms)
         dimension = povms[0].shape[0]
         second_power_of_lagrange_matrix = np.zeros((dimension, dimension), dtype=complex)
 
-        for j in range(number_of_povms):
+        for j in range(number_of_outcomes):
             second_power_of_lagrange_matrix += r_matrices[j] @ povms[j] @ r_matrices[j]
 
         lagrange_matrix = sc.linalg.sqrtm(second_power_of_lagrange_matrix)

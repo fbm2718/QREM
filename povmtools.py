@@ -222,7 +222,9 @@ def get_su2_parametrizing_angles(m_a):
     delta = c.phase(determinant) / 2
     m_a = c.exp(-1j * delta) * m_a
 
-    euler_theta_phi_lambda = qiskit.quantum_info.synthesis.euler_angles_1q(m_a)
+    decomposer = qiskit.quantum_info.synthesis.one_qubit_decompose.OneQubitEulerDecomposer()
+
+    euler_theta_phi_lambda = decomposer.angles(m_a)
 
     angles = [euler_theta_phi_lambda[0], euler_theta_phi_lambda[1], euler_theta_phi_lambda[2]]
 
@@ -262,6 +264,49 @@ def get_unitary_change_ket_qubit(ket):
         U = c.exp(-1j * delta) * U
 
         return U
+
+def get_enumerated_rev_map_from_indices(indices):
+
+    #TODO: move this function somewhere else
+    enumerated_dict = dict(enumerate(indices))
+    rev_map = {}
+    for k, v in enumerated_dict.items():
+        rev_map[v]=k
+    return rev_map
+
+
+def register_names_qubits(qs,
+                          qrs,
+                          rev=False):
+    #TODO: move this function somewhere else
+    if qrs == 0:
+        return ['']
+
+    if (qrs == 1):
+        return ['0', '1']
+
+    all_names = bit_strings(qrs, rev)
+    not_used = []
+
+    for j in list(range(qrs)):
+        if j not in qs:
+            not_used.append(j)
+
+    bad_names = []
+    for name in all_names:
+        for k in (not_used):
+            rev_name = name[::-1]
+            if (rev_name[k] == '1'):
+                bad_names.append(name)
+
+    relevant_names = []
+    for name in all_names:
+        if name not in bad_names:
+            relevant_names.append(name)
+
+    return relevant_names
+
+
 
 
 def calculate_total_variation_distance(p: np.array, q: np.array) -> float:
@@ -763,7 +808,7 @@ def get_correction_error_bound_from_parameters(norm_of_correction_matrix: float,
     return norm_of_correction_matrix * (coherent_error_bound + statistical_error_bound) + alpha
 
 
-def counts_dict_to_frequencies_vector(count_dict: dict) -> list:
+def counts_dict_to_frequencies_vector(count_dict: dict, reverse_order=False) -> list:
     """
     Description:
         Generates and returns vector of frequencies basing on given counts dict. Mostly used with qiskit data.
@@ -788,7 +833,12 @@ def counts_dict_to_frequencies_vector(count_dict: dict) -> list:
     for i in range(len(frequencies)):
         frequencies[i] = frequencies[i] / counts_sum
 
-    return frequencies
+
+
+    if reverse_order:
+        return reorder_probabilities(frequencies, range(qubits_number)[::-1])
+    else:
+        return frequencies
 
 
 def get_possible_n_qubit_outcomes(n: int) -> list:
@@ -806,3 +856,41 @@ def get_possible_n_qubit_outcomes(n: int) -> list:
         possible_outcomes.append(bin(i)[2:].zfill(n))
 
     return possible_outcomes
+
+
+def get_noise_matrix_from_povm(povm):
+    number_of_povm_outcomes = len(povm)
+    dimension = povm[0].shape[0]
+
+    transition_matrix = np.zeros((number_of_povm_outcomes, number_of_povm_outcomes), dtype=float)
+
+    for k in range(number_of_povm_outcomes):
+        current_povm_effect = povm[k]
+
+        # Get diagonal part of the effect. Here we remove eventual 0 imaginary part to avoid format conflicts
+        # (diagonal elements of Hermitian matrices are real).
+        vec_p = np.array([np.real(current_povm_effect[i, i]) for i in range(dimension)])
+
+        # Add vector to transition matrix.
+        transition_matrix[k, :] = vec_p[:]
+
+    return transition_matrix
+
+
+def get_correction_matrix_from_povm(povm):
+    number_of_povm_outcomes = len(povm)
+    dimension = povm[0].shape[0]
+
+    transition_matrix = np.zeros((number_of_povm_outcomes, number_of_povm_outcomes), dtype=float)
+
+    for k in range(number_of_povm_outcomes):
+        current_povm_effect = povm[k]
+
+        # Get diagonal part of the effect. Here we remove eventual 0 imaginary part to avoid format conflicts
+        # (diagonal elements of Hermitian matrices are real).
+        vec_p = np.array([np.real(current_povm_effect[i, i]) for i in range(dimension)])
+
+        # Add vector to transition matrix.
+        transition_matrix[k, :] = vec_p[:]
+
+    return np.linalg.inv(transition_matrix)

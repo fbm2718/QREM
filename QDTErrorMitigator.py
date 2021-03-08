@@ -31,7 +31,7 @@ class QDTErrorMitigator:
         This class is used to mitigate errors in qiskit jobs using data from QDT.
     """
 
-    def __init__(self, povm=None):
+    def __init__(self):
         """
         Description:
             Constructor of the class. If povm is None, then it should be prepared before use (using prepare_mitigator)!
@@ -42,8 +42,8 @@ class QDTErrorMitigator:
         self.distances_from_closest_probability_vector = []
         self.qiskit_register_convention = False
 
-        if povm is not None:
-            self.prepare_mitigator(povm)
+        # if povm is not None:
+        #     self.prepare_mitigator(povm)
 
     def prepare_mitigator(self, povm: List[np.ndarray]) -> None:
         """

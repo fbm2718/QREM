@@ -121,9 +121,7 @@ def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
 def detector_tomography_circuits(qubit_indices,
                                  probe_kets,
                                  number_of_repetitions=1,
-                                 qrs = None,
-                                 crs=None,
-                                 add_measurements = True):
+                                 qrs = None):
     """From list of probe kets and qubit data return quantum circuits which will be implemented to perform
     Quantum Detector Tomography (QDT).
 
@@ -146,21 +144,18 @@ def detector_tomography_circuits(qubit_indices,
     if qrs is None:
        qrs = max(qubit_indices) + 1
 
-    if crs is None:
-        len(qubit_indices)
     # outer loop is for copies of QDT experiment
     for number in range(number_of_repetitions):
+
         # inner loop goes through all circuits in QDT experiments and prepares them
         for index_for_set in range(len(indices_for_circuits)):
-            # print(number,index_for_set)
 
             # index of set of qubits+unitaries for current step
             current_set = indices_for_circuits[index_for_set]
 
             # create quantum register
             qreg = QuantumRegister(qrs)
-
-            creg = ClassicalRegister(crs)
+            creg = ClassicalRegister(len(qubit_indices))
 
             # create quantum circuit with nice names
             set_string = ''.join(['u' + str(st) for st in current_set[0]])
@@ -200,9 +195,8 @@ def detector_tomography_circuits(qubit_indices,
                                current_angles[2], qreg[q_now_index])
 
             # Add measurements
-            if add_measurements:
-                for i in range(len(qubit_indices)):
-                    circuit.measure(qreg[qubit_indices[i]], creg[i])
+            for i in range(len(qubit_indices)):
+                circuit.measure(qreg[qubit_indices[i]], creg[i])
 
             tomography_circuits.append(circuit)
     return tomography_circuits
@@ -210,7 +204,9 @@ def detector_tomography_circuits(qubit_indices,
 
 def detector_tomography_circuits_rigetti(qubit_indices,
                                  probe_kets,
-                                 shots = 10**5):
+                                 number_of_repetitions=1,
+                                 shots = 8192,
+                                 qrs = None):
     """From list of probe kets and qubit data return quantum circuits which will be implemented to perform
     Quantum Detector Tomography (QDT).
 
@@ -223,15 +219,18 @@ def detector_tomography_circuits_rigetti(qubit_indices,
     :return: (list of QuantumCircuit objects) of length len(probe_states)**(number_of_qubits)
     """
     import pyquil as pyq
-    #TODO: this is stupid fastly written code for 1q
+
     qubit_indices = sorted(qubit_indices)  # Sort to ensure, that results can easily be interpreted.
-    tomography_circuits = []
-    # unitaries = [povmtools.get_unitary_change_ket_qubit(ket) for ket in probe_kets]
+
+    unitaries = [povmtools.get_unitary_change_ket_qubit(ket) for ket in probe_kets]
 
     # create nice list with proper ordering of circuits. In first step, last qubit in list qubit_indices is iterated
     # while all the other are fixed. See function description for details.
-    indices_for_circuits = get_list_of_lists_indices_qdt(qubit_indices, len(probe_kets))
+    indices_for_circuits = get_list_of_lists_indices_qdt(qubit_indices, len(unitaries))
+    if qrs is None:
+       qrs = max(qubit_indices) + 1
 
+    tomography_circuits = []
     # inner loop goes through all circuits in QDT experiments and prepares them
     for index_for_set in range(len(indices_for_circuits)):
 
@@ -249,11 +248,8 @@ def detector_tomography_circuits_rigetti(qubit_indices,
         #
         # circuit = QuantumCircuit(qreg, creg,
         #                          name="QDT-" + qubits_string + "-id-" + set_string + '-no-' + str(number))
-
         program = pyq.Program()
-
-        ro = program.declare('ro', memory_type='BIT', memory_size=len(qubit_indices))
-        program+=pyq.gates.RESET()
+        ro = program.declare('ro', memory_type='BIT', memory_size=qrs)
 
         # get barrier to prevent compiler from making changes
         # circuit.barrier()
