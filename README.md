@@ -7,6 +7,15 @@ measurement error mitigation on quantum devices.
 This package is under development and new functionalities and notebooks are expected to be added in the future.
 Currently, the methods for quantum detector tomography and measurement error mitigation based on that tomography are
 working properly. 
+
+### UPDATE January 2021
+In the near future the repository will get a massive update implementing the ideas from work:
+
+Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of realistic readout noise with applications to the Quantum Approximate Optimization Algorithm", 
+[arXiv:2101.02331](https://arxiv.org/abs/2101.02331)
+
+This will allow to a) perform efficient characterization of multiqubit noise correlations b) use characterization data to construct a noise model which can be used to mitigate errors on the level of marginal probablitiy distributions (for problems such as QAOA).
+
   
 ## Dependencies
 For QREM to work properly,  the following libraries should be installed:
@@ -60,6 +69,7 @@ we will use prefix _m__, to mark all matrices.
 
 - [Filip Maciejewski](https://github.com/fbm2718) (contact: filip.b.maciejewski@gmail.com)
 - [Tomasz Rybotycki](https://github.com/Tomev)
+- [Oskar Słowik](https://github.com/Feigenbaum4669)
 
 
  ## References
@@ -85,5 +95,18 @@ Hewlett-Packard Labs (2003).
 
 [5] John A. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", [Phys. Rev. Lett. 108, 070502
 (2012)](https://arxiv.org/abs/1106.5458).
+
+
+## Citation
+The following bibtex entry can be used to cite this repository:
+```
+@misc{qrem,
+   url={https://github.com/fbm2718/QREM},
+   title = {Quantum Readout Errors Mitigation (QREM) -- open source GitHub repository},
+   author={Maciejewski, F. B. and Rybotycki, T. and Oszmaniec, M.},
+   year={2020},
+}
+```
+
 
 
