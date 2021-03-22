@@ -651,37 +651,39 @@ def operational_distance_POVMs(M, P, method='direct'):
         return biggest_norm
 
 
-def get_statistical_error_bound(counts: np.ndarray, statistical_error_mistake_probability: float) -> float:
+def get_statistical_error_bound(number_of_measurement_outcomes: int,
+                                number_of_samples: int,
+                                statistical_error_mistake_probability: float,
+                                number_of_marginals=1) -> float:
     """
     Description:
         Get upper bound for tv-distance of estimated probability distribution from ideal one. See Ref. [3] for
         details.
 
     Parameters:
-        :param counts: Counts for experiment for which statistical error bound is being calculated.
+        :param number_of_measurement_outcomes: Number of outcomes in probabiility distribution (2^(number_of_qubits) for standard measurement)
+        :param number_of_samples: Number of samples for experiment for which statistical error bound is being calculated.
         :param statistical_error_mistake_probability: Parameter describing infidelity of returned error bound.
 
     Return:
         Statistical error upper bound in total variance distance.
     """
 
-    number_of_measurement_outcomes = len(counts)
-    number_of_samples = 0
+    if number_of_marginals==0:
+        number_of_marginals = 1
 
-    for count in counts:
-        number_of_samples += count
 
     if number_of_measurement_outcomes < 16:
         # for small number of outcomes "-2" factor is not negligible
         return np.sqrt(
             (np.log(2 ** number_of_measurement_outcomes - 2)
-             - np.log(statistical_error_mistake_probability)) / 2 / number_of_samples
+             - np.log(statistical_error_mistake_probability)+np.log(number_of_marginals)) / 2 / number_of_samples
         )
         # for high number of outcomes "-2" factor is negligible
     else:
         return np.sqrt(
             (number_of_measurement_outcomes * np.log(2) - np.log(
-                statistical_error_mistake_probability)) / 2 / number_of_samples
+                statistical_error_mistake_probability)+np.log(number_of_marginals)) / 2 / number_of_samples
         )
 
 

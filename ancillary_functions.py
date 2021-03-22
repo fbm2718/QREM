@@ -7,6 +7,7 @@ Created on Fri Feb 23 00:06:42 2018
 import numpy as np
 import cmath as c
 import copy
+import re
 
 epsilon = 10 ** (-7)
 pauli_sigmas = {
@@ -15,6 +16,35 @@ pauli_sigmas = {
     'Y': np.array([[0., -1j], [1j, 0]]),
     'Z': np.array([[1., 0j], [0, -1]])
 }
+
+
+
+def get_qubit_indices_from_string(qubits_string,
+                                  with_q=False):
+
+    """Return list of qubit indices from the string of the form "q0q1q22q31"
+    :param qubits_string (string): string which has the form of "q" followed by qubit index
+    :param (optional) with_q (Boolean): specify whether returned indices should be in form of string with letter
+
+    :return: list of qubit indices:
+
+    depending on value of parameter "with_q" the mapping will be one of the following:
+
+    if with_q:
+        'q1q5q13' -> ['q1','q5','q13']
+    else:
+        'q1q5q13' -> [1,5,13]
+
+    """
+
+    numbers = re.findall(r'\d+', qubits_string)
+
+    if with_q:
+        qubits = ['q'+s for s in numbers]
+    else:
+        qubits = [int(s) for s in numbers]
+
+    return qubits
 
 
 def round_matrix(m_a, decimal):
@@ -125,3 +155,48 @@ def thresh(m_a, decimal=7):
             x[...] = np.round(x, decimal)
 
     return m_b
+
+
+
+
+
+def lists_intersection(lst1, lst2):
+    return list(set(lst1) & set(lst2))
+
+
+def lists_difference(lst1, lst2):
+    return list(set(lst1) - set(lst2))
+
+
+def lists_sum(lst1, lst2):
+    return list(set(lst1).union(set(lst2)))
+
+
+def lists_intersection_multi(lists):
+    l0 = lists[0]
+    l1 = lists[1]
+
+    int_list = lists_intersection(l0,l1)
+    for l in lists[2:]:
+        int_list = lists_intersection(int_list,l)
+    return int_list
+
+def check_if_there_are_common_elements(lists):
+
+    for i in range(len(lists)):
+        for j in range(i+1, len(lists)):
+            if len(lists_intersection(lists[i],lists[j]))!=0:
+                return True
+
+    return False
+
+
+
+
+
+
+
+
+
+
+

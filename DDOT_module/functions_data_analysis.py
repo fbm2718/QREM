@@ -6,39 +6,10 @@ Created on 01.03.2021
 """
 
 import numpy as np
-import re
 import copy
 import QREM
 
-
-def get_qubit_indices_from_string(qubits_string,
-                                  with_q=False):
-
-    """Return list of qubit indices from the string of the form "q0q1q22q31"
-    :param qubits_string (string): string which has the form of "q" followed by qubit index
-    :param (optional) with_q (Boolean): specify whether returned indices should be in form of string with letter
-
-    :return: list of qubit indices:
-
-    depending on value of parameter "with_q" the mapping will be one of the following:
-
-    if with_q:
-        'q1q5q13' -> ['q1','q5','q13']
-    else:
-        'q1q5q13' -> [1,5,13]
-
-    """
-
-    numbers = re.findall(r'\d+', qubits_string)
-
-    if with_q:
-        qubits = ['q'+s for s in numbers]
-    else:
-        qubits = [int(s) for s in numbers]
-
-    return qubits
-
-
+from QREM import ancillary_functions as anf
 
 
 def get_state_from_circuit_name(circuit_name):
@@ -57,6 +28,19 @@ def get_mini_dict(number_of_qubits):
     return {key:np.zeros((int(2**number_of_qubits),1)) for key in register}
 
 
+def get_noise_matrix_from_counts_dict(results_dictionary):
+    """Return noise matrix from counts dictionary.
+    Assuming that the results are given only for qubits of interest.
+    :param results_dictionary (dictionary): results dictionary for which KEY is the bitstring denoting INPUT CLASSICAL STATE, while VALUE is the probability vector of results
+
+    :return: noise_matrix (array): the array representing noise on qubits on which the experiments were performed
+    """
+
+    number_of_qubits = len(list(results_dictionary.keys())[0])
+    noise_matrix = np.zeros((2 ** number_of_qubits, 2 ** number_of_qubits))
+    for input_state, probability_vector in results_dictionary.items():
+        noise_matrix[:, int(input_state, 2)] = probability_vector[:, 0]
+    return noise_matrix
 
 
 def get_marginals_from_counts_dict(counts,
@@ -78,7 +62,7 @@ def get_marginals_from_counts_dict(counts,
     """
 
     for qubits_string in marginals_dictionary.keys():
-        qubits_indices = get_qubit_indices_from_string(qubits_string)
+        qubits_indices = anf.get_qubit_indices_from_string(qubits_string)
         if qubits_mapping is not None:
             bits_of_interest = [qubits_mapping(qubits_indices[i]) for i in range(qubits_indices)]
         else:
@@ -137,23 +121,18 @@ def get_subsets_marginals_from_counts(results_dictionary,
 
 
 
-def get_noise_matrix_from_counts_dict(counts_dict,
-                                      number_of_qubits=None):
-    if number_of_qubits is None:
-        number_of_qubits = len(list(counts_dict.keys())[0])
-    lam = np.zeros((2**number_of_qubits,2**number_of_qubits))
-    for key, val in counts_dict.items():
-        lam[:,int(key,2)] = val[:,0]
-    return lam
-
-
-
-
-
 def get_subset_noise_matrices_from_marginals(marginal_dictionaries,
                                             subsets,
                                             max_subset_length=7):
+    """Return dictionary of marginal probability distributions from results_dictionary
+    :param marginal_dictionaries (dictionary): dictionary (as returned by function "get_subsets_marginals_from_counts") for which KEY is the bitstring denoting INPUT CLASSICAL STATE, while VALUE is the dictionary with MARGINALS (as returned by function "get_marginals_from_counts_dict")
+    :param subsets (list of lists of ints): list of lists. Each list contains labels of subset of qubits for which marginal distributions are to be calculated.
 
+    :param (optional) max_subset_length (int): the length of the biggest subset, default is 7
+
+
+    :return: noise_matrices (dictionary): dictionary where each KEY is the string denoting qubits subset, and VALUE is the noise matrix on acting on that subset.
+    """
 
     marginals_dictionaries_template = {'q'.join(sub):np.zeros((2**(int(len(sub),1)))) for sub in subsets}
 
@@ -162,7 +141,7 @@ def get_subset_noise_matrices_from_marginals(marginal_dictionaries,
 
     marginal_dictionaries_subsets = {}
     for key_marginal in marginals_dictionaries_template.keys():
-        qubits_now = get_qubit_indices_from_string(key_marginal)
+        qubits_now = anf.get_qubit_indices_from_string(key_marginal)
         mini_dict_now = copy.deepcopy(mini_dicts_template[len(qubits_now)])
 
 
