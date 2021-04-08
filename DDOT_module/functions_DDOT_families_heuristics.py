@@ -626,6 +626,7 @@ def partition_algorithm_v1_cummulative(correlations_table, alpha, C_maxsize, N_a
 
 
 #TESTING
+"""
 printing=False
 drawing=False
 
@@ -670,7 +671,7 @@ print(partition)
 print("final value: "+str(score))
 if(drawing):
     functions_data_visualization.print_partition(partition)
-
+"""
 
 
 
