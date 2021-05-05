@@ -4,12 +4,6 @@ Created on 28.04.2021
 @author: Filip Maciejewski
 @contact: filip.b.maciejewski@gmail.com
 """
-
-"""
-    This class should be used as a base class for all standard BS permanent calculators. By standard I mean that the
-    matrix and in(out)put states are stored in a variables. It takes care of a lot of boilerplate code.
-"""
-
 from typing import Optional
 from DDOT_module.parent_classes.marginals_analyzer_interface import MarginalsAnalyzerInterface
 import numpy as np
