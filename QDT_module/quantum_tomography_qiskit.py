@@ -79,7 +79,8 @@ def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
     qubits_and_unitaries = list(itertools.product(qubits_indices, unitaries_indices))
 
     # take lists corresponding to particular qubits
-    single_qubit_unitaries = [qubits_and_unitaries[i * unitaries_amount:(i + 1) * unitaries_amount] for i in
+    single_qubit_unitaries = [qubits_and_unitaries[i * unitaries_amount:(i + 1) * unitaries_amount] for
+                              i in
                               range(qubits_number)]
 
     # get all possible combinations of qubit+gate pairs
@@ -107,7 +108,8 @@ def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
 
     # take sublists of length 2*qubits_number (one index for qubit and one index for unitary)
     almost_final_list = [
-        list_of_gates[i * single_circuit_description_length:(i + 1) * single_circuit_description_length] for i in
+        list_of_gates[
+        i * single_circuit_description_length:(i + 1) * single_circuit_description_length] for i in
         range(int(len(list_of_gates) / single_circuit_description_length))]
 
     final_list = []
@@ -121,9 +123,9 @@ def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
 def detector_tomography_circuits(qubit_indices,
                                  probe_kets,
                                  number_of_repetitions=1,
-                                 qrs = None,
+                                 qrs=None,
                                  crs=None,
-                                 add_measurements = True):
+                                 add_measurements=True):
     """From list of probe kets and qubit data return quantum circuits which will be implemented to perform
     Quantum Detector Tomography (QDT).
 
@@ -144,7 +146,7 @@ def detector_tomography_circuits(qubit_indices,
     # while all the other are fixed. See function description for details.
     indices_for_circuits = get_list_of_lists_indices_qdt(qubit_indices, len(unitaries))
     if qrs is None:
-       qrs = max(qubit_indices) + 1
+        qrs = max(qubit_indices) + 1
 
     if crs is None:
         len(qubit_indices)
@@ -167,7 +169,8 @@ def detector_tomography_circuits(qubit_indices,
             qubits_string = ''.join(['q' + str(st) for st in qubit_indices])
 
             circuit = QuantumCircuit(qreg, creg,
-                                     name="QDT-" + qubits_string + "-id-" + set_string + '-no-' + str(number))
+                                     name="QDT-" + qubits_string + "-id-" + set_string + '-no-' + str(
+                                         number))
 
             # get barrier to prevent compiler from making changes
             circuit.barrier()
@@ -209,8 +212,8 @@ def detector_tomography_circuits(qubit_indices,
 
 
 def detector_tomography_circuits_rigetti(qubit_indices,
-                                 probe_kets,
-                                 shots = 10**5):
+                                         probe_kets,
+                                         shots=10 ** 5):
     """From list of probe kets and qubit data return quantum circuits which will be implemented to perform
     Quantum Detector Tomography (QDT).
 
@@ -223,7 +226,7 @@ def detector_tomography_circuits_rigetti(qubit_indices,
     :return: (list of QuantumCircuit objects) of length len(probe_states)**(number_of_qubits)
     """
     import pyquil as pyq
-    #TODO: this is stupid fastly written code for 1q
+    # TODO: this is stupid fastly written code for 1q
     qubit_indices = sorted(qubit_indices)  # Sort to ensure, that results can easily be interpreted.
     tomography_circuits = []
     # unitaries = [povmtools.get_unitary_change_ket_qubit(ket) for ket in probe_kets]
@@ -253,7 +256,7 @@ def detector_tomography_circuits_rigetti(qubit_indices,
         program = pyq.Program()
 
         ro = program.declare('ro', memory_type='BIT', memory_size=len(qubit_indices))
-        program+=pyq.gates.RESET()
+        program += pyq.gates.RESET()
 
         # get barrier to prevent compiler from making changes
         # circuit.barrier()
@@ -266,25 +269,25 @@ def detector_tomography_circuits_rigetti(qubit_indices,
             q_now_index, u_now_index = pair_now[0], pair_now[1]
 
             if u_now_index == 0:
-                program+=pyq.gates.I(q_now_index)
+                program += pyq.gates.I(q_now_index)
             elif u_now_index == 1:
-                program+=pyq.gates.X(q_now_index)
+                program += pyq.gates.X(q_now_index)
             elif u_now_index == 2:
-                program+=pyq.gates.H(q_now_index)
+                program += pyq.gates.H(q_now_index)
             elif u_now_index == 3:
-                program+=pyq.gates.X(q_now_index)
-                program+=pyq.gates.H(q_now_index)
+                program += pyq.gates.X(q_now_index)
+                program += pyq.gates.H(q_now_index)
             elif u_now_index == 4:
-                program+=pyq.gates.H(q_now_index)
+                program += pyq.gates.H(q_now_index)
                 program += pyq.gates.S(q_now_index)
             elif u_now_index == 5:
-                program+=pyq.gates.X(q_now_index)
-                program+=pyq.gates.H(q_now_index)
+                program += pyq.gates.X(q_now_index)
+                program += pyq.gates.H(q_now_index)
                 program += pyq.gates.S(q_now_index)
 
         # Add measurements
         for i in range(len(qubit_indices)):
-            program+=pyq.gates.MEASURE(qubit_indices[i], ro[i])
+            program += pyq.gates.MEASURE(qubit_indices[i], ro[i])
 
         program.wrap_in_numshots_loop(shots)
         tomography_circuits.append(program)
@@ -313,7 +316,8 @@ def detector_tomography_circuits_pymali(qubit_indices, probe_kets):
     # while all the other are fixed. See function description for details.
     gtc = GeneralTensorCalculator.GeneralTensorCalculator(gtc_tensor_calculating_function)
     unitaries_lists_for_tensor_calculator = [unitaries.copy() for i in range(len(qubit_indices))]
-    list_of_unitaries_sets = gtc.calculate_tensor_to_increasing_list(unitaries_lists_for_tensor_calculator)
+    list_of_unitaries_sets = gtc.calculate_tensor_to_increasing_list(
+        unitaries_lists_for_tensor_calculator)
     qrs = max(qubit_indices) + 1
 
     # inner loop goes through all circuits in QDT experiments and prepares them
@@ -329,7 +333,8 @@ def detector_tomography_circuits_pymali(qubit_indices, probe_kets):
 
             current_angles = povmtools.get_su2_parametrizing_angles(unitaries_set[j])
 
-            # TODO TR: I believe there may be more "special" cases. If so, then this should be placed in other method
+            # TODO TR: I believe there may be more "special" cases.
+            #  If so, then this should be placed in other method
             #  or in get_su2_ ... method.
             if current_angles[0] == 'id':
                 circuit.i(qreg[qubit_indices[j]])

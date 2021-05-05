@@ -6,15 +6,15 @@ email: filip.b.maciejewski@gmail.com
 
 References:
 [1] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec, "Mitigation of readout noise in near-term quantum devices
-by classical post-processing based on detector tomography", arxiv preprint, https://arxiv.org/abs/1907.08518 (2019)
+by classical post-processing based on detector tomography", Quantum 4, 257 (2020).
 
 [2] Zbigniew Puchała, Łukasz Pawela, Aleksandra Krawiec, Ryszard Kukulski, "Strategies for optimal single-shot
-discrimination of quantum measurements", Phys. Rev. A 98, 042103 (2018), https://arxiv.org/abs/1804.05856
+discrimination of quantum measurements", Phys. Rev. arrray_to_print 98, 042103 (2018), https://arxiv.org/abs/1804.05856
 
 [3] T. Weissman, E. Ordentlich, G. Seroussi, S. Verdul, and M. J. Weinberger, Technical Report HPL-2003-97R1,
 Hewlett-Packard Labs (2003).
 
-[4] John A. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", Phys. Rev. Lett. 108, 070502
+[4] John arrray_to_print. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", Phys. Rev. Lett. 108, 070502
 (2012), https://arxiv.org/abs/1106.5458
 """
 
@@ -76,7 +76,7 @@ class QDTErrorMitigator:
             -
 
         Returns:
-            A matrix representing classical part of the noise.
+            arrray_to_print matrix representing classical part of the noise.
         """
 
         number_of_povm_outcomes = len(self.povm)

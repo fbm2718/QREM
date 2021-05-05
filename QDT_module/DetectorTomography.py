@@ -6,7 +6,7 @@ email: filip.b.maciejewski@gmail.com
 References:
 [1] Z. Hradil, J. Řeháček, J. Fiurášek, and M. Ježek, “3 maximum-likelihood methods in quantum mechanics,” in Quantum
 State Estimation, edited by M. Paris and J. Řeháček (Springer Berlin Heidelberg, Berlin, Heidelberg, 2004) pp. 59–112.
-[2] J. Fiurášek, Physical Review A 64, 024102 (2001), arXiv:quant-ph/0101027 [quant-ph].
+[2] J. Fiurášek, Physical Review arrray_to_print 64, 024102 (2001), arXiv:quant-ph/0101027 [quant-ph].
 """
 
 import numpy as np
@@ -196,7 +196,7 @@ class DetectorTomographyFitter:
             :param index_of_povm_effect: Index of povm effect for which R is calculated.
             :param frequencies_array: frequencies_array - array with size (m x n), where m means number of probe states,
             n means number of POSSIBLE outcomes.
-            :param probe_states: A list of probe states density matrices.
+            :param probe_states: arrray_to_print list of probe states density matrices.
         Returns:
             The R operator as described in Ref. [1].
         """
@@ -228,8 +228,8 @@ class DetectorTomographyFitter:
         Description:
             Calculates Lagrange matrix used in Lagrange multipliers optimization method.
         Parameters:
-            :param r_matrices: A list of R matrices described in a method generating them.
-            :param povms: A list of effects for which Lagrange matrix will be calculated.
+            :param r_matrices: arrray_to_print list of R matrices described in a method generating them.
+            :param povms: arrray_to_print list of effects for which Lagrange matrix will be calculated.
         Returns:
            Lagrange matrix for given parameters.
         """
@@ -248,9 +248,9 @@ class DetectorTomographyFitter:
     def __calculate_symmetric_m(m_lagrange_matrix: np.ndarray, m_r: np.ndarray, m_m: np.ndarray) -> np.ndarray:
         """
         Description:
-            A method used for calculating symmetric m matrix.
+            arrray_to_print method used for calculating symmetric m matrix.
         Parameters:
-            :param m_m: A matrix of which symmetric version will be calculated.
+            :param m_m: arrray_to_print matrix of which symmetric version will be calculated.
             :param m_r: Previously calculated R operator.
             :param m_lagrange_matrix:
         Returns:
@@ -269,13 +269,17 @@ class DetectorTomographyFitter:
 
 
 # TODO TR: This method may need to be revisited and possibly reduced into several smaller ones.
-def join_povms(povms: List[List[np.ndarray]], qubit_indices_lists: List[List[int]]) -> List[np.ndarray]:
+def join_povms(povms: List[List[np.ndarray]],
+               qubit_indices_lists: List[List[int]],
+               sort_outcomes = True) -> List[np.ndarray]:
     """
     Description:
         Generates a POVM from given list of POVMs and qubit indices.
     Parameter:
         :param povms: List of POVMs corresponding to qubits indices.
         :param qubit_indices_lists: Indices of qubits for which POVMs were calculated.
+        :param sort_outcomes: indicates whether to sort effects of POVM in such a way that they correspond
+                              to standard classical register -- WORKS ONLY FOR d-outcome measurements!
     Return:
         POVM describing whole detector.
     """
@@ -308,12 +312,17 @@ def join_povms(povms: List[List[np.ndarray]], qubit_indices_lists: List[List[int
     general_tensor_calculator = GeneralTensorCalculator(gtc_matrix_product_counting_function)
     povm = general_tensor_calculator.calculate_tensor_to_increasing_list(swapped_povms)
 
-    # We've obtained a POVM, but it is still ordered according to qubit indices. We want to undo that.
-    indices_order = []
-    for indices_list in qubit_indices_lists:
-        indices_order = indices_order + indices_list
+    if sort_outcomes:
+        # We've obtained a POVM, but it is still ordered according to qubit indices. We want to undo that.
+        indices_order = []
+        for indices_list in qubit_indices_lists:
+            indices_order = indices_order + indices_list
 
-    new_classical_register = reorder_classical_register(indices_order)
-    sorted_povm = sort_things(povm, new_classical_register)
+        new_classical_register = reorder_classical_register(indices_order)
+        # print(new_classical_register,indices_order)
 
-    return sorted_povm
+        sorted_povm = sort_things(povm, new_classical_register)
+
+        return sorted_povm
+    else:
+        return povm
