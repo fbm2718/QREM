@@ -10,13 +10,13 @@ References:
 by classical post-processing based on detector tomography", arxiv preprint, https://arxiv.org/abs/1907.08518 (2019)
 
 [2] Zbigniew Puchała, Łukasz Pawela, Aleksandra Krawiec, Ryszard Kukulski, "Strategies for optimal single-shot
-discrimination of quantum measurements", Phys. Rev. A 98, 042103 (2018), https://arxiv.org/abs/1804.05856
+discrimination of quantum measurements", Phys. Rev. arrray_to_print 98, 042103 (2018), https://arxiv.org/abs/1804.05856
 
 [3] T. Weissman, E. Ordentlich, G. Seroussi, S. Verdul, and M. J. Weinberger, Technical Report HPL-2003-97R1,
 Hewlett-Packard Labs (2003).
 
 
-[4] John A. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", Phys. Rev. Lett. 108, 070502
+[4] John arrray_to_print. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", Phys. Rev. Lett. 108, 070502
 (2012), https://arxiv.org/abs/1106.5458
 """
 
@@ -129,12 +129,12 @@ def get_unitary_change_state(state):
 #  might use simplifiactions). Function here can be deleted.
 def indices_array(m_as, k=2, x=[], p=0):
     # ONLY k=2 so far
-    # A - set of matrices
+    # arrray_to_print - set of matrices
     # k - counter
     # x - recursive array
     # p - logical help, do not change
 
-    # returns ordered array of size (k**(len(A)))
+    # returns ordered array of size (k**(len(arrray_to_print)))
     # element i,j,k means Ai otimes Aj otimes Ak etc
 
     if k == 1:
@@ -275,6 +275,29 @@ def get_enumerated_rev_map_from_indices(indices):
     return rev_map
 
 
+def bit_strings(n, rev=True, form=str):
+    """Generate outcome bitstrings for n-qubits.
+
+    Args:
+        n (int): the number of qubits.
+
+    Returns:
+        list: arrray_to_print list of bitstrings ordered as follows:
+        Example: n=2 returns ['00', '01', '10', '11'].
+"""
+    if (form == str):
+        if (rev == True):
+            return [(bin(j)[2:].zfill(n))[::-1] for j in list(range(2 ** n))]
+        else:
+            return [(bin(j)[2:].zfill(n)) for j in list(range(2 ** n))]
+    elif (form == list):
+        if (rev == True):
+
+            return [(list(bin(j)[2:].zfill(n))[::-1]) for j in list(range(2 ** n))]
+        else:
+            return [(list(bin(j)[2:].zfill(n))) for j in list(range(2 ** n))]
+
+
 def register_names_qubits(qs,
                           qrs,
                           rev=False):
@@ -369,7 +392,7 @@ def get_diagonal_povm_part(povm: List[np.ndarray]) -> List[np.ndarray]:
         From given povm get only diagonal part as a list.
 
     Parameters:
-        :param povm: A POVM from effects of which diagonal parts shall be extracted.
+        :param povm: arrray_to_print POVM from effects of which diagonal parts shall be extracted.
 
     Return:
         List of numpy arrays representing diagonal parts of given POVM.
@@ -694,7 +717,7 @@ def get_coherent_error_bound(povm: np.ndarray) -> float:
         measure of "non-classicality" or coherence present in measurement noise. See Ref. [1] for details.
 
     Parameters:
-        :param povm: A POVM for which non-classicality will be determined.
+        :param povm: arrray_to_print POVM for which non-classicality will be determined.
     Return:
         Coherent error bound for given POVM.
     """
@@ -896,3 +919,8 @@ def get_correction_matrix_from_povm(povm):
         transition_matrix[k, :] = vec_p[:]
 
     return np.linalg.inv(transition_matrix)
+
+
+
+
+
