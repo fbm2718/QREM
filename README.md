@@ -29,6 +29,7 @@ For QREM to work properly,  the following libraries should be installed:
 * typing
 * pandas
 * qiskit
+* networkx
 
 ## Installing 
 The best way to install and use this package is to simply clone the repository:
