@@ -10,12 +10,18 @@ import abc
     This file holds an interface for Marginals Analyzers. BS. 
 """
 
+
 class MarginalsAnalyzerInterface(abc.ABC):
+    """
+    This is interface for classes that will analyze marginal probability distributions.
+    It requires those child classes to have basic functionalities that should be included.
+    for analyzing marginals.
+    """
+
     @property
     @abc.abstractmethod
     def results_dictionary(self) -> dict:
-        '''Results dictionary for which KEY is the bitstring denoting LABEL OF EXPERIMENT,
-         while VALUE is the counts dictionary with results of the experiments'''
+        # dictionary of experimental results
 
         raise NotImplementedError
 
@@ -27,8 +33,7 @@ class MarginalsAnalyzerInterface(abc.ABC):
     @property
     @abc.abstractmethod
     def marginals_dictionary(self) -> dict:
-        '''Marginals dictionary for which each KEY is label of the subset, and each VALUE is
-           dictionary of those marginals'''
+        # Dictionary storing marginal probability distributions
         raise NotImplementedError
 
     @results_dictionary.setter
@@ -43,9 +48,12 @@ class MarginalsAnalyzerInterface(abc.ABC):
 
     @abc.abstractmethod
     def results_dictionary_update(self, results_dictionary_new: dict) -> None:
+        #Updating dictionary with results
         raise NotImplementedError
+
     @abc.abstractmethod
     def marginals_dictionary_update(self, marginals_dictionary_new: dict) -> None:
+        #Updating dictionary with new marginals
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -54,9 +62,3 @@ class MarginalsAnalyzerInterface(abc.ABC):
                           subsets: list) -> dict:
         """Computes marginals for input subsets"""
         raise NotImplementedError
-
-
-
-
-
-
