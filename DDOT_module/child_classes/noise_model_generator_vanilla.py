@@ -4,12 +4,14 @@ Created on 29.04.2021
 @author: Filip Maciejewski
 @contact: filip.b.maciejewski@gmail.com
 """
-from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
-from typing import Optional
+
+
 import numpy as np
-from QREM.povmtools import get_enumerated_rev_map_from_indices
 import copy
 import QREM.ancillary_functions as anf
+from typing import Optional, List, Dict, Union
+from QREM.povmtools import get_enumerated_rev_map_from_indices
+from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
 from DDOT_module.functions.functions_noise_model_heuristic import partition_algorithm_v1_cummulative
 
 
@@ -19,11 +21,12 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
     """
 
     def __init__(self,
-                 results_dictionary_ddot: dict,
+                 results_dictionary_ddot: Dict[str, Dict[str, int]],
                  bitstrings_right_to_left: bool,
                  number_of_qubits: int,
-                 marginals_dictionary: Optional[dict] = None,
-                 noise_matrices_dictionary: Optional[dict] = None
+                 marginals_dictionary: Optional[Dict[str, Dict[str, np.ndarray]]] = None,
+                 noise_matrices_dictionary: Optional[
+                     Dict[str, Union[np.ndarray, Dict[str, Dict[str, np.ndarray]]]]] = None
                  ) -> None:
 
         super().__init__(results_dictionary_ddot,
@@ -78,7 +81,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
     @neighborhoods.setter
     def neighborhoods(self, neighborhoods: dict) -> None:
         self._neighborhoods = neighborhoods
-        self.clusters_list = [anf.get_qubit_indices_from_string(cluster_string) for cluster_string in
+        self.clusters_list = [self.get_qubit_indices_from_string(cluster_string) for cluster_string in
                               neighborhoods.keys()]
 
         for cluster_string in neighborhoods.keys():

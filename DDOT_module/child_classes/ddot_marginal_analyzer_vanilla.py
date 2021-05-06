@@ -57,6 +57,14 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
 
         if noise_matrices_dictionary is None:
             noise_matrices_dictionary = {}
+            #TODO FBM: Make sure whether this helps in anything
+            #TODO FBM: (because we anyway perform checks in the functions later)
+            if marginals_dictionary is not None:
+                for experiment_key, dictionary_of_marginals in marginals_dictionary.items():
+                    for marginal_key in dictionary_of_marginals.keys():
+                        if marginal_key not in noise_matrices_dictionary.keys():
+                            noise_matrices_dictionary[marginal_key] = {}
+
 
         self._noise_matrices_dictionary = noise_matrices_dictionary
 

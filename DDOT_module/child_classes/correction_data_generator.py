@@ -7,10 +7,9 @@ Created on 29.04.2021
 
 import copy
 import numpy as np
-from typing import Optional, Dict
-from tqdm import tqdm
+from typing import Optional, Dict, Union, List
 from QREM import ancillary_functions as anf
-from ..child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
+from DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
 from DDOT_module.child_classes.global_noise_matrix_creator import GlobalNoiseMatrixCreator
 
 
@@ -20,13 +19,14 @@ class CorrectionDataGenerator(DDTMarginalsAnalyzer):
     """
 
     def __init__(self,
-                 results_dictionary_ddot: dict,
+                 results_dictionary_ddot: Dict[str, Dict[str, int]],
                  bitstrings_right_to_left: bool,
                  number_of_qubits: int,
-                 marginals_dictionary: dict,
-                 clusters_list: list,
-                 neighborhoods: dict,
-                 noise_matrices_dictionary: Optional[dict] = None
+                 marginals_dictionary: Dict[str, Dict[str, np.ndarray]],
+                 clusters_list: List[List[int]],
+                 neighborhoods: Dict[str, List[int]],
+                 noise_matrices_dictionary: Optional[
+                     Dict[str, Union[np.ndarray, Dict[str, Dict[str, np.ndarray]]]]] = None
                  ) -> None:
 
         super().__init__(results_dictionary_ddot,
@@ -55,7 +55,9 @@ class CorrectionDataGenerator(DDTMarginalsAnalyzer):
         self._correction_indices = {}
 
     def compute_pairs_correction_matrices(self,
-                                          pairs_list: list) -> None:
+                                          pairs_list: List[List[int]]) -> None:
+
+        #TODO FBM: split this into several smaller functions
 
         # TODO FBM: add mitigation errors
         calculate_mitigation_errors = False
@@ -366,7 +368,7 @@ class CorrectionDataGenerator(DDTMarginalsAnalyzer):
                         {'qubits': string_marginal, 'error': mitigation_errors_ij / 2})
 
     def get_pairs_correction_data(self,
-                                  pairs_list: list,
+                                  pairs_list: List[List[int]],
                                   show_progress_bar: Optional[bool] = False):
 
         # TODO FBM: possibly change resetting
