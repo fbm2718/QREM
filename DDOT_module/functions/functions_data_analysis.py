@@ -13,18 +13,38 @@ from QREM import ancillary_functions as anf
 from collections import defaultdict
 
 
-class key_dependent_dict_for_marginals(defaultdict):
+class KeyDependentDictForMarginals(defaultdict):
+    """
+    This is class used to store marginal probability distributions in dictionary.
+    It is "key dependent" in the sense that if user tries to refer to non-existing value for some
+    KEY, then this value is created as a marginal distribution which size depends on the KEY
+    NOTE: We assume that provided KEY is a string denoting  qubits subset
+    (see self.value_creating_function)
+
+
+    COPYRIGHT NOTE
+    The main idea of this code was taken from Reddit thread:
+    https://www.reddit.com/r/Python/comments/27crqg/making_defaultdict_create_defaults_that_are_a/
+
+    """
+
     def __init__(self):
-        super().__init__(None)  # base class doesn't get a factory
-        self.f_of_x = lambda key: np.zeros((int(2 ** len(anf.get_qubit_indices_from_string(key))), 1),
-                                 dtype=float)  # save f(x)
+        super().__init__(None)  # initialize as standard defaultdict
 
-    def __missing__(self, key):  # called when a default needed
-        ret = self.f_of_x(key)  # calculate default value
-        self[key] = ret  # and install it in the dict
+        # This is the function which takes the string "key" that is assumed to label qubits subset
+        # in the form 'q2q3q11...' etc. It takes this key, calculates number of qubits N, and creates
+        # empty vector of the size d=2^N.
+        self.value_creating_function = lambda key: np.zeros(
+            (int(2 ** len(anf.get_qubit_indices_from_string(key))), 1),
+            dtype=float)
+
+    # called when key is missing
+    def __missing__(self, key):
+        # calculate the key-dependent value
+        ret = self.value_creating_function(key)
+        # put the value inside the dictionary
+        self[key] = ret
         return ret
-
-
 
 
 def get_state_from_circuit_name(circuit_name):
@@ -41,8 +61,6 @@ def get_state_from_circuit_name(circuit_name):
 def get_mini_dict(number_of_qubits):
     register = QREM.povmtools.register_names_qubits(range(number_of_qubits), number_of_qubits)
     return {key: np.zeros((int(2 ** number_of_qubits), 1)) for key in register}
-
-
 
 
 def estimate_energy_from_marginals(weights_dictionary, marginals):
@@ -65,4 +83,3 @@ def estimate_energy_from_marginals(weights_dictionary, marginals):
         return energy[0]
     else:
         return energy
-

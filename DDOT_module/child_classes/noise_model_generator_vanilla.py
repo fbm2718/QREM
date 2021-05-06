@@ -4,7 +4,7 @@ Created on 29.04.2021
 @author: Filip Maciejewski
 @contact: filip.b.maciejewski@gmail.com
 """
-from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDOTMarginalsAnalyzer
+from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
 from typing import Optional
 import numpy as np
 from QREM.povmtools import get_enumerated_rev_map_from_indices
@@ -13,21 +13,21 @@ import QREM.ancillary_functions as anf
 from DDOT_module.functions.functions_noise_model_heuristic import partition_algorithm_v1_cummulative
 
 
-class NoiseModelGenerator(DDOTMarginalsAnalyzer):
+class NoiseModelGenerator(DDTMarginalsAnalyzer):
     """
         1
     """
 
     def __init__(self,
                  results_dictionary_ddot: dict,
-                 reverse_counts: bool,
+                 bitstrings_right_to_left: bool,
                  number_of_qubits: int,
                  marginals_dictionary: Optional[dict] = None,
                  noise_matrices_dictionary: Optional[dict] = None
                  ) -> None:
 
         super().__init__(results_dictionary_ddot,
-                         reverse_counts,
+                         bitstrings_right_to_left,
                          marginals_dictionary,
                          noise_matrices_dictionary
                          )
@@ -136,8 +136,8 @@ class NoiseModelGenerator(DDOTMarginalsAnalyzer):
             for qj in qubit_indices:
                 ha, he = mapping[qi], mapping[qj]
                 if qj > qi:
-                    lam_i_j = self._get_noise_matrix_dependent([qi], [qj])
-                    lam_j_i = self._get_noise_matrix_dependent([qj], [qi])
+                    lam_i_j = self.get_noise_matrix_dependent([qi], [qj])
+                    lam_j_i = self.get_noise_matrix_dependent([qj], [qi])
 
                     diff_i_j = lam_i_j['0'] - lam_i_j['1']
                     diff_j_i = lam_j_i['1'] - lam_j_i['0']
@@ -388,8 +388,8 @@ class NoiseModelGenerator(DDOTMarginalsAnalyzer):
         potential_neighbours = []
         for qi in self._qubit_indices:
             if qi not in cluster:
-                lam_ci_j = self._get_noise_matrix_dependent(cluster,
-                                                            [qi])
+                lam_ci_j = self.get_noise_matrix_dependent(cluster,
+                                                           [qi])
                 diff_ci_j = lam_ci_j['0'] - lam_ci_j['1']
                 correlation_ci_j = 1 / 2 * np.linalg.norm(diff_ci_j, ord=1)
                 potential_neighbours.append([qi, correlation_ci_j])

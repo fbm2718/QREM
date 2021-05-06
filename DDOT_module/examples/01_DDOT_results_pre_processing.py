@@ -7,7 +7,7 @@ Created on 03.05.2021
 
 import os, pickle
 from QREM import ancillary_functions as anf
-from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDOTMarginalsAnalyzer
+from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
 
 
 
@@ -46,8 +46,8 @@ list_of_qubits = range(number_of_qubits)
 dictionary_results = dictionary_data['converted_dict']
 
 # get instance of marginals analyzer for ddot experiments
-marginals_analyzer_ddot = DDOTMarginalsAnalyzer(dictionary_results,
-                                                reverse_counts)
+marginals_analyzer_ddot = DDTMarginalsAnalyzer(dictionary_results,
+                                               reverse_counts)
 
 # get indices of all qubit pairs (in ascending order)
 all_pairs = [[i, j] for i in list_of_qubits for j in list_of_qubits if j > i]
@@ -59,7 +59,7 @@ marginals_analyzer_ddot.compute_all_marginals(all_pairs, show_progress_bar=True)
 # compute average noise matrices on all qubits pairs;
 # this will be used for initial noise analysis
 # showing progress bar requires 'tqdm' package
-marginals_analyzer_ddot.compute_subset_noise_matrices(all_pairs, show_progress_bar=True)
+marginals_analyzer_ddot.compute_subset_noise_matrices_averaged(all_pairs, show_progress_bar=True)
 
 
 

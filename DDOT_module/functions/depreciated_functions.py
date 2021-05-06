@@ -39,7 +39,7 @@ def get_marginals_from_counts_dict(counts,
     :param counts (dictionary): results dictionary for which KEY is the bitstring denoting result of measurement in computational basis, while VALUE is the number of occurances of that result
     :param marginals_dictionary (dictionary):  the dictionary which will be filled with the counts from "counts" dictionary.
     Each KEY is the string of the form "q1q5q13" specyfing what qubits we are interested in, each VALUE is a vector of the size 2**(number of qubits in marginal) which might be either filled with 0s or filled with previous values
-    :param (optional) reverse_counts (Boolean): Specify whether measurement result bitsstring should be reversed before adding to marginal (this is the case for qiskit where bits are counted from right)
+    :param (optional) bitstrings_right_to_left (Boolean): Specify whether measurement result bitsstring should be reversed before adding to marginal (this is the case for qiskit where bits are counted from right)
     :param (optional) normalize (Boolean): specify whether marginal distributions should be normalized to 1
     :param (optional) qubits_mapping (dict): optional dictionary with qubits labels mapping
 
@@ -76,7 +76,7 @@ def get_subsets_marginals_from_counts(results_dictionary,
     :param results_dictionary (dictionary): results dictionary for which KEY is the bitstring denoting INPUT CLASSICAL STATE, while VALUE is the counts dictionary with results of the experiments
     :param subsets (list of lists of ints): list of lists. Each list contains labels of subset of qubits for which marginal distributions are to be calculated.
    es
-    :param reverse_counts (Boolean): Specify whether measurement result bitsstring should be reversed before adding to marginal (this is the case for qiskit where bits are counted from right)
+    :param bitstrings_right_to_left (Boolean): Specify whether measurement result bitsstring should be reversed before adding to marginal (this is the case for qiskit where bits are counted from right)
     :param (optional) qubits_mapping (dict): optional dictionary with qubits labels mapping
 
 
@@ -156,8 +156,8 @@ def get_small_noise_matrices_depending_on_neighbours_states(big_noise_matrix,
     d_small_neighbours = int(2 ** number_of_neighbours)
     d_small_qubit = int(2 ** number_of_qubits)
 
-    enumerating_qubits = anf.get_enumerated_rev_map_from_indices(qubits_of_interest)
-    enumerating_neighbours = anf.get_enumerated_rev_map_from_indices(neighbours_of_interest)
+    enumerating_qubits = anf.get_reversed_enumerated_from_indices(qubits_of_interest)
+    enumerating_neighbours = anf.get_reversed_enumerated_from_indices(neighbours_of_interest)
 
     dictionary_neighbours = {
         anf.binary_integer_format(i, number_of_neighbours): np.zeros((d_small_qubit, d_small_qubit),
@@ -806,8 +806,8 @@ def get_pairs_correction_matrices(counts_dict,
 
 
                     if calculate_mitigation_errors:
-                        # qubits_clusters_ij = anf.get_enumerated_rev_map_from_indices(anf.lists_sum_multi([cluster_i,cluster_j]))
-                        qubits_ij = anf.get_enumerated_rev_map_from_indices(anf.lists_sum_multi([cluster_i,cluster_j,dependencies_cluster_i,dependencies_cluster_j]))
+                        # qubits_clusters_ij = anf.get_reversed_enumerated_from_indices(anf.lists_sum_multi([cluster_i,cluster_j]))
+                        qubits_ij = anf.get_reversed_enumerated_from_indices(anf.lists_sum_multi([cluster_i, cluster_j, dependencies_cluster_i, dependencies_cluster_j]))
 
                         clu_i, clu_j = [qubits_ij[qc] for qc in cluster_i],  [qubits_ij[qc] for qc in cluster_j],
                         deps_i, deps_j = [qubits_ij[qc] for qc in dependencies_cluster_i],  [qubits_ij[qc] for qc in dependencies_cluster_j]
@@ -839,7 +839,7 @@ def get_pairs_correction_matrices(counts_dict,
 
 
 
-                        map_cluster = anf.get_enumerated_rev_map_from_indices(sorted(clu_i+clu_j))
+                        map_cluster = anf.get_reversed_enumerated_from_indices(sorted(clu_i + clu_j))
 
                         matrices_cluster_i_proper, matrices_cluster_j_proper = copy.deepcopy(matrices_cluster_i), copy.deepcopy(matrices_cluster_j)
                         if len(deps_i)==0:
@@ -895,7 +895,7 @@ def get_pairs_correction_matrices(counts_dict,
                 qubits_in_here = cluster_i+cluster_j
                 sorted_qubits_in_here = dict(enumerate(sorted(qubits_in_here)))
                 print(cluster_i, cluster_j)
-                rev_map = anf.get_enumerated_rev_map_from_indices(cluster_i+cluster_j)
+                rev_map = anf.get_reversed_enumerated_from_indices(cluster_i + cluster_j)
                 # print(qubits_in_here,sorted_qubits_in_here)
 
                 qubits_in_here_dict = dict(enumerate(qubits_in_here))

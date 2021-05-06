@@ -26,12 +26,12 @@ from QREM import povmtools as pt
 class MarginalsCorrector(MarginalsAnalyzerBase):
     def __init__(self,
                  experimental_results_dictionary: Dict[str, Dict[str, int]],
-                 reverse_counts: bool,
+                 bitstrings_right_to_left: bool,
                  correction_data_dictionary: dict,
                  marginals_dictionary: Optional[dict] = None
                  ) -> None:
         super().__init__(experimental_results_dictionary,
-                         reverse_counts,
+                         bitstrings_right_to_left,
                          marginals_dictionary
                          )
 
@@ -78,7 +78,7 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
             if key in keys_of_interest:
                 marginals_of_interest[key] = distribution_now
 
-            qubits_here = anf.get_qubit_indices_from_string(key)
+            qubits_here = self.get_qubit_indices_from_string(key)
             enumerated_qubits = dict(enumerate(qubits_here))
             rev_map = {}
             for kkk, vvv in enumerated_qubits.items():

@@ -59,7 +59,7 @@ clusters_list_naive, neighborhoods_naive = dictionary_data['clusters_list_naive'
     'neighborhoods_naive']
 
 correction_data_generator_naive = CorrectionDataGenerator(results_dictionary_ddot=dictionary_results,
-                                                          reverse_counts=reverse_counts,
+                                                          bitstrings_right_to_left=reverse_counts,
                                                           number_of_qubits=number_of_qubits,
                                                           marginals_dictionary=marginal_dictionaries_pairs,
                                                           clusters_list=clusters_list_naive,
@@ -79,7 +79,7 @@ no_clusters, neighborhoods_no_clusters = dictionary_data['no_clusters'], \
 
 correction_data_generator_no_clusters = CorrectionDataGenerator(
     results_dictionary_ddot=dictionary_results,
-    reverse_counts=reverse_counts,
+    bitstrings_right_to_left=reverse_counts,
     number_of_qubits=number_of_qubits,
     marginals_dictionary=marginal_dictionaries_pairs,
     clusters_list=no_clusters,

@@ -7,7 +7,7 @@ Created on 28.04.2021
 
 from povms_qi import povmtools
 import numpy as np
-from DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDOTMarginalsAnalyzer
+from DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
 import povms_qi.ancillary_functions as anf
 
 A0 = povmtools.random_stochastic_matrix(2)
@@ -45,8 +45,8 @@ for i in range(int(2**big_N)):
 
 
 
-DDOT_analyzer_test = DDOTMarginalsAnalyzer(results_dictionary,
-                                             False)
+DDOT_analyzer_test = DDTMarginalsAnalyzer(results_dictionary,
+                                          False)
 
 subsets = [[i,j] for i in range(big_N) for j in range(i+1,big_N)]
 

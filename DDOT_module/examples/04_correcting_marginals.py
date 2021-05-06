@@ -71,17 +71,17 @@ results_dictionary_ground_states = dictionary_data_ground_states['dictionary_res
 hamiltonians_data_dictionary = dictionary_data_ground_states['hamiltonians_data_dictionary']
 
 marginals_analyzer_noisy = MarginalsAnalyzerBase(results_dictionary=results_dictionary_ground_states,
-                                                 reverse_counts=reverse_counts)
+                                                 bitstrings_right_to_left=reverse_counts)
 
 marginals_corrector_naive = MarginalsCorrector(
     experimental_results_dictionary=results_dictionary_ground_states,
-    reverse_counts=reverse_counts,
+    bitstrings_right_to_left=reverse_counts,
     correction_data_dictionary=correction_data_naive
 )
 
 marginals_corrector_no_clusters = MarginalsCorrector(
     experimental_results_dictionary=results_dictionary_ground_states,
-    reverse_counts=reverse_counts,
+    bitstrings_right_to_left=reverse_counts,
     correction_data_dictionary=correction_data_generator_no_clusters
 )
 

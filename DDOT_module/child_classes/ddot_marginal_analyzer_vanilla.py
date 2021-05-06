@@ -322,12 +322,12 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
         if cluster_string not in self._noise_matrices_dictionary.keys():
             # If there is no entry for our cluster in the dictionary, we create it and add
             # averaged noise matrix
-            avereaged_noise_matrix = np.zeros(
+            averaged_noise_matrix = np.zeros(
                 (2 ** number_of_qubits_of_interest, 2 ** number_of_qubits_of_interest))
             for neighbors_state_bitstring in conditional_noise_matrices.keys():
-                avereaged_noise_matrix += conditional_noise_matrices[neighbors_state_bitstring]
-            avereaged_noise_matrix *= 1 / 2 ** number_of_qubits_of_interest
-            self._noise_matrices_dictionary[cluster_string] = {'averaged': avereaged_noise_matrix}
+                averaged_noise_matrix += conditional_noise_matrices[neighbors_state_bitstring]
+            averaged_noise_matrix *= 1 / 2 ** number_of_qubits_of_interest
+            self._noise_matrices_dictionary[cluster_string] = {'averaged': averaged_noise_matrix}
 
         self._noise_matrices_dictionary[cluster_string][neighbours_string] = conditional_noise_matrices
 

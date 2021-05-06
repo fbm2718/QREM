@@ -7,7 +7,7 @@ Created on 03.05.2021
 
 import os, pickle
 from QREM import ancillary_functions as anf
-from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDOTMarginalsAnalyzer
+from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
 from QREM.DDOT_module.child_classes.noise_model_generator_vanilla import NoiseModelGenerator
 
 module_directory = anf.get_module_directory()
@@ -58,11 +58,11 @@ dictionary_results = dictionary_data['results_dictionary_preprocessed']
 
 
 # marginals_analyzer_ddot = DDOTMarginalsAnalyzer(dictionary_results,
-#                                                 reverse_counts)
+#                                                 bitstrings_right_to_left)
 #
-marginals_analyzer_ddot = DDOTMarginalsAnalyzer(dictionary_results,
-                                                reverse_counts,
-                                                marginals_dictionary=dictionary_data[
+marginals_analyzer_ddot = DDTMarginalsAnalyzer(dictionary_results,
+                                               reverse_counts,
+                                               marginals_dictionary=dictionary_data[
                                                     'marginals_dictionary_pairs'])
 
 # dict = marginals_analyzer_ddot.marginals_dictionary
@@ -80,8 +80,8 @@ all_pairs = [[i, j] for i in list_of_qubits for j in list_of_qubits if j > i]
 # compute average noise matrices on all qubits pairs;
 # this will be used for initial noise analysis
 # showing progress bar requires 'tqdm' package
-marginals_analyzer_ddot.compute_subset_noise_matrices(all_pairs,
-                                                      show_progress_bar=True)
+marginals_analyzer_ddot.compute_subset_noise_matrices_averaged(all_pairs,
+                                                               show_progress_bar=True)
 
 print(marginals_analyzer_ddot.noise_matrices_dictionary['q0q1'])
 
@@ -124,7 +124,7 @@ noise_matrices_dictionary_pairs = dictionary_data['noise_matrices_dictionary_pai
 # raise KeyError
 # initialize noise model generator
 noise_model_analyzer = NoiseModelGenerator(results_dictionary_ddot=dictionary_results,
-                                           reverse_counts=reverse_counts,
+                                           bitstrings_right_to_left=reverse_counts,
                                            number_of_qubits=number_of_qubits,
                                            marginals_dictionary=marginal_dictionaries_pairs,
                                            noise_matrices_dictionary=noise_matrices_dictionary_pairs)

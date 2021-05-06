@@ -15,7 +15,7 @@ module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/data_for_tests/'
 
 
-example = fda.key_dependent_dict_for_marginals()
+example = fda.KeyDependentDictForMarginals()
 
 dictionary_save = {'rick':example}
 

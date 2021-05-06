@@ -115,7 +115,7 @@ for bitstring_input in classical_states:
     results_dictionary[bitstring_input] = counts_dictionary
 
 noise_model_analyzer = NoiseModelGenerator(results_dictionary_ddot=results_dictionary,
-                                           reverse_counts=False,
+                                           bitstrings_right_to_left=False,
                                            number_of_qubits=number_of_qubits)
 
 # # print(clusters_list_true)
@@ -125,7 +125,7 @@ noise_model_analyzer = NoiseModelGenerator(results_dictionary_ddot=results_dicti
 # print(noise_model_analyzer.marginals_dictionary)
 #
 # raise KeyError
-noise_model_analyzer.compute_subset_noise_matrices(clusters_list_true)
+noise_model_analyzer.compute_subset_noise_matrices_averaged(clusters_list_true)
 # clusters_list_
 # noise_model_analyzer.clusters_list = [[qi] for qi in range(number_of_qubits)]
 # noise_model_analyzer.compute_correlations_table_pairs()

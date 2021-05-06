@@ -10,18 +10,18 @@ import numpy as np
 from typing import Optional, Dict
 from tqdm import tqdm
 from QREM import ancillary_functions as anf
-from ..child_classes.ddot_marginal_analyzer_vanilla import DDOTMarginalsAnalyzer
+from ..child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
 from DDOT_module.child_classes.global_noise_matrix_creator import GlobalNoiseMatrixCreator
 
 
-class CorrectionDataGenerator(DDOTMarginalsAnalyzer):
+class CorrectionDataGenerator(DDTMarginalsAnalyzer):
     """
         1
     """
 
     def __init__(self,
                  results_dictionary_ddot: dict,
-                 reverse_counts: bool,
+                 bitstrings_right_to_left: bool,
                  number_of_qubits: int,
                  marginals_dictionary: dict,
                  clusters_list: list,
@@ -30,7 +30,7 @@ class CorrectionDataGenerator(DDOTMarginalsAnalyzer):
                  ) -> None:
 
         super().__init__(results_dictionary_ddot,
-                         reverse_counts,
+                         bitstrings_right_to_left,
                          marginals_dictionary,
                          noise_matrices_dictionary
                          )
@@ -84,7 +84,7 @@ class CorrectionDataGenerator(DDOTMarginalsAnalyzer):
                 dependencies_clusters_i_j = sorted(
                     anf.lists_sum(neighborhoods_cluster_i, neighborhoods_cluster_j))
 
-                matrices_clusters = self._get_noise_matrix_dependent(
+                matrices_clusters = self.get_noise_matrix_dependent(
                     anf.lists_sum(cluster_i, cluster_j),
                     dependencies_clusters_i_j)
 
@@ -108,11 +108,11 @@ class CorrectionDataGenerator(DDOTMarginalsAnalyzer):
                 dependencies_cluster_i = sorted(self._neighborhoods[string_cluster_i])
                 dependencies_cluster_j = sorted(self._neighborhoods[string_cluster_j])
 
-                matrices_cluster_i = self._get_noise_matrix_dependent(cluster_i,
-                                                                      neighborhoods_cluster_i)
+                matrices_cluster_i = self.get_noise_matrix_dependent(cluster_i,
+                                                                     neighborhoods_cluster_i)
                 # print('\n', cluster_j, neighborhoods_cluster_j)
-                matrices_cluster_j = self._get_noise_matrix_dependent(cluster_j,
-                                                                      neighborhoods_cluster_j)
+                matrices_cluster_j = self.get_noise_matrix_dependent(cluster_j,
+                                                                     neighborhoods_cluster_j)
 
                 intersection_i, intersection_j = anf.lists_intersection(dependencies_cluster_i,
                                                                         cluster_j), \
@@ -192,7 +192,7 @@ class CorrectionDataGenerator(DDOTMarginalsAnalyzer):
                         averaged_matrices_cluster_j = matrices_cluster_j
 
                     # Sort indices
-                    rev_map_enumerated = anf.get_enumerated_rev_map_from_indices(
+                    rev_map_enumerated = anf.get_reversed_enumerated_from_indices(
                         cluster_i + cluster_j)
 
                     qubit_indices_for_construction = []
@@ -233,8 +233,8 @@ class CorrectionDataGenerator(DDOTMarginalsAnalyzer):
 
                     if calculate_mitigation_errors:
                         # TODO: FIX THIS PART
-                        # qubits_clusters_ij = anf.get_enumerated_rev_map_from_indices(anf.lists_sum_multi([cluster_i,cluster_j]))
-                        qubits_ij = anf.get_enumerated_rev_map_from_indices(anf.lists_sum_multi(
+                        # qubits_clusters_ij = anf.get_reversed_enumerated_from_indices(anf.lists_sum_multi([cluster_i,cluster_j]))
+                        qubits_ij = anf.get_reversed_enumerated_from_indices(anf.lists_sum_multi(
                             [cluster_i, cluster_j, dependencies_cluster_i,
                              dependencies_cluster_j]))
 
@@ -265,7 +265,7 @@ class CorrectionDataGenerator(DDOTMarginalsAnalyzer):
                             new_state = ''.join([x for x in new_state])
                             possible_states_ij.append(new_state)
 
-                        map_cluster = anf.get_enumerated_rev_map_from_indices(
+                        map_cluster = anf.get_reversed_enumerated_from_indices(
                             sorted(clu_i + clu_j))
 
                         matrices_cluster_i_proper, matrices_cluster_j_proper = copy.deepcopy(
@@ -318,7 +318,7 @@ class CorrectionDataGenerator(DDOTMarginalsAnalyzer):
                 qubits_in_here = cluster_i + cluster_j
                 sorted_qubits_in_here = dict(enumerate(sorted(qubits_in_here)))
 
-                rev_map = anf.get_enumerated_rev_map_from_indices(cluster_i + cluster_j)
+                rev_map = anf.get_reversed_enumerated_from_indices(cluster_i + cluster_j)
 
                 qubits_in_here_dict = dict(enumerate(qubits_in_here))
 

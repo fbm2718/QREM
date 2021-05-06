@@ -55,7 +55,7 @@ noise_matrices_dictionary_pairs = dictionary_data['noise_matrices_dictionary_pai
 
 # initialize noise model generator
 noise_model_analyzer = NoiseModelGenerator(results_dictionary_ddot=dictionary_results,
-                                           reverse_counts=reverse_counts,
+                                           bitstrings_right_to_left=reverse_counts,
                                            number_of_qubits=number_of_qubits,
                                            marginals_dictionary=marginal_dictionaries_pairs,
                                            noise_matrices_dictionary=noise_matrices_dictionary_pairs)
