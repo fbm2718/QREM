@@ -6,6 +6,7 @@ Created on 01.03.2021
 """
 
 import numpy as np
+import math
 import re
 import copy
 import QREM
@@ -324,5 +325,13 @@ def cut_subset_sizes(clusters_neighbourhoods_dict,
 
 
     return cutted_dict
+
+#repalces entries of correlations_table below statistical fluctuations with 0. shots - number of shots for single-qubit marginals.    
+def chop_statistical_fluctuations(correlations_table, shots, biggest_clust_size):
+    eps=math.sqrt((math.log(2)+log(1.0/0.001)+math.log(math.pow(N,biggest_clust_size-1)))/(2*shots))
+    for i in correlations_table:
+        for j in correlations_table:
+            if correlations_table[i,j]<2*eps:
+               correlations_table[i,j]==0
 
 
