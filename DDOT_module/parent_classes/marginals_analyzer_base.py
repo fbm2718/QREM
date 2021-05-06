@@ -68,6 +68,7 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         experimental_results = self._results_dictionary[experiment_key]
 
         for subset in subsets_list:
+            # print(subset)
             marginal_vector_now = np.zeros((int(2 ** len(subset)), 1),
                                            dtype=float)
 
@@ -92,10 +93,10 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         :param subsets_list: list of subsets of qubits for which marginals should be calculated
         :param show_progress_bar: if True, shows progress bar. Requires "tqdm" package
         """
-
         if show_progress_bar:
             from tqdm import tqdm
             keys_list = list(self._results_dictionary.keys())
+            # print(keys_list)
             for key_index in tqdm(range(len(keys_list))):
                 self.compute_marginals(keys_list[key_index], subsets_list)
 
@@ -182,3 +183,6 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         marginal_distribution = np.array(marginal_distribution).reshape(2 ** len(bits_of_interest), 1)
 
         return marginal_distribution
+
+
+

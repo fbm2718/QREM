@@ -31,7 +31,7 @@ number_of_neighbours_range = [0, int(np.min([number_of_qubits - 1, 3]))]
 # number_of_neighbours_range = [0,0]
 
 clusters_list_true = [[qi] for qi in list_of_qubits]
-noise_matrices_dictionary, neighbors_of_clusters = {}, []
+true_noise_matrices, true_neighbors_list = {'q%s'%qi:{} for qi in range(number_of_qubits)}, []
 
 for qubit_index in range(number_of_qubits):
     number_of_neighbours_now = int(
@@ -73,26 +73,29 @@ for qubit_index in range(number_of_qubits):
             noise_matrices_dictionary_now[neighbors_state_now] = state_dependent_noise_matrices[
                 neighbors_state_index]
 
-        noise_matrices_dictionary['q%s' % qubit_index] = noise_matrices_dictionary_now
-        neighbors_of_clusters.append(neighbours_now)
+        neighbors_key = 'q'+'q'.join([str(qneigh) for qneigh in neighbours_now])
+        true_noise_matrices['q%s' % qubit_index][neighbors_key] = noise_matrices_dictionary_now
+        true_neighbors_list.append(neighbours_now)
 
     else:
         single_qubit_noise_matrix = hpf.get_random_stochastic_matrix_1q(p10_range, p01_range)
-        noise_matrices_dictionary['q%s' % qubit_index] = {'averaged': single_qubit_noise_matrix}
-        neighbors_of_clusters.append(None)
+        true_noise_matrices['q%s' % qubit_index] = {'averaged': single_qubit_noise_matrix}
+        true_neighbors_list.append(None)
 
-global_noise_creator = GlobalNoiseMatrixCreator(noise_matrices_dictionary,
+true_neighbors_dictionary = {'q%s' % qi: true_neighbors_list[qi] for qi in range(number_of_qubits)}
+
+global_noise_creator = GlobalNoiseMatrixCreator(true_noise_matrices,
                                                 )
 
-global_noise_matrix = global_noise_creator.compute_global_noise_matrix(clusters_list_true,
-                                                                       neighbors_of_clusters)
+global_noise_matrix_true = global_noise_creator.compute_global_noise_matrix(clusters_list_true,
+                                                                            true_neighbors_list)
 # 
 # print(noise_matrices_dictionary)
 
 
-anf.print_array_nicely(global_noise_matrix, 3)
-anf.print_array_nicely(np.diag(global_noise_matrix))
-print(neighbors_of_clusters)
+anf.print_array_nicely(global_noise_matrix_true, 3)
+anf.print_array_nicely(np.diag(global_noise_matrix_true))
+print(true_neighbors_list)
 
 number_of_shots = 8192
 
@@ -104,16 +107,96 @@ for bitstring_input in classical_states:
 
     counts_dictionary = {}
 
-    probability_distribution_now = global_noise_matrix[:, int(bitstring_input, 2)]
+    probability_distribution_now = global_noise_matrix_true[:, int(bitstring_input, 2)]
     for bitstring_output in classical_states:
         counts_dictionary[bitstring_output] = probability_distribution_now[
                                                   int(bitstring_output, 2)] * number_of_shots
 
-
-
+    results_dictionary[bitstring_input] = counts_dictionary
 
 noise_model_analyzer = NoiseModelGenerator(results_dictionary_ddot=results_dictionary,
                                            reverse_counts=False,
                                            number_of_qubits=number_of_qubits)
 
+# # print(clusters_list_true)
+# noise_model_analyzer.compute_all_marginals(clusters_list_true,
+#                                            show_progress_bar=True)
+#
+# print(noise_model_analyzer.marginals_dictionary)
+#
+# raise KeyError
+noise_model_analyzer.compute_subset_noise_matrices(clusters_list_true)
+# clusters_list_
+# noise_model_analyzer.clusters_list = [[qi] for qi in range(number_of_qubits)]
+# noise_model_analyzer.compute_correlations_table_pairs()
+
+noise_model_analyzer.compute_clusters_naive(0.04,
+                                            max_size=5)
+#
+noise_model_analyzer.find_all_neighborhoods(maximal_size=5,
+                                            chopping_threshold=0.01)
+
+# noi
+
+
+estimated_clusters = noise_model_analyzer.clusters_list
+estimated_neighbors = noise_model_analyzer.neighborhoods
+
+
+
+
 # noise_model_analyzer
+
+print(estimated_clusters)
+print(true_neighbors_list)
+print(estimated_neighbors)
+#
+estimated_neighbors_list = []
+
+for qi in range(number_of_qubits):
+    if len(estimated_neighbors['q%s' % qi]) > 0:
+        estimated_neighbors_list.append(estimated_neighbors['q%s' % qi])
+    else:
+        estimated_neighbors_list.append(None)
+
+noise_matrices_dictionary = noise_model_analyzer.noise_matrices_dictionary
+import colorama
+
+for qi in range(number_of_qubits):
+    cluster_string_now = 'q%s' % qi
+
+    estimated_noise_matrices = noise_matrices_dictionary[cluster_string_now]
+
+    true_matrices = true_noise_matrices[cluster_string_now]
+
+    print()
+    anf.cool_print('estimated matrices for cluster: ', [qi])
+    print(estimated_noise_matrices)
+    anf.cool_print('true matrices for cluster: ', [qi], colorama.Fore.BLUE)
+    print(true_matrices)
+
+
+noise_model_analyzer.clusters_list = estimated_clusters
+noise_model_analyzer.neighborhoods = estimated_neighbors
+
+
+
+global_noise_creator_estimate = GlobalNoiseMatrixCreator(
+    noise_model_analyzer.noise_matrices_dictionary,
+    )
+
+global_noise_matrix_estimated = global_noise_creator_estimate.compute_global_noise_matrix(
+    estimated_clusters,
+    estimated_neighbors_list)
+
+anf.print_array_nicely(noise_model_analyzer.correlations_table_pairs)
+
+print('''
+
+
+''')
+
+anf.print_array_nicely(global_noise_matrix_true)
+anf.print_array_nicely(global_noise_matrix_estimated)
+
+anf.print_array_nicely(global_noise_matrix_estimated - global_noise_matrix_true,6)
