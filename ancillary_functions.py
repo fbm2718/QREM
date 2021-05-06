@@ -41,14 +41,14 @@ def binary_integer_format(integer, number_of_bits):
     return "{0:b}".format(integer).zfill(number_of_bits)
 
 
-def get_enumerated_rev_map_from_indices(indices):
+def get_reversed_enumerated_from_indices(indices):
     enumerated_dict = dict(enumerate(indices))
     rev_map = {}
     for k, v in enumerated_dict.items():
         rev_map[v]=k
     return rev_map
 
-def get_enumerated_rev_map_from_dict(enumerated_dict):
+def get_reversed_enumerated_from_dict(enumerated_dict):
     rev_map = {}
     for k, v in enumerated_dict.items():
         rev_map[v]=k
@@ -70,7 +70,6 @@ def get_qubit_indices_from_string(qubits_string,
         'q1q5q13' -> ['q1','q5','q13']
     else:
         'q1q5q13' -> [1,5,13]
-
     """
 
     numbers = re.findall(r'\d+', qubits_string)
