@@ -8,7 +8,7 @@ This package is under development and new functionalities and notebooks are expe
 Currently, the methods for quantum detector tomography and measurement error mitigation based on that tomography are
 working properly. 
 
-### UPDATE January 2021
+### UPDATE May 2021
 In the near future the repository will get a massive update implementing the ideas from work:
 
 Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of realistic readout noise with applications to the Quantum Approximate Optimization Algorithm", 
