@@ -10,13 +10,13 @@ References:
 by classical post-processing based on detector tomography", arxiv preprint, https://arxiv.org/abs/1907.08518 (2019)
 
 [2] Zbigniew Puchała, Łukasz Pawela, Aleksandra Krawiec, Ryszard Kukulski, "Strategies for optimal single-shot
-discrimination of quantum measurements", Phys. Rev. A 98, 042103 (2018), https://arxiv.org/abs/1804.05856
+discrimination of quantum measurements", Phys. Rev. arrray_to_print 98, 042103 (2018), https://arxiv.org/abs/1804.05856
 
 [3] T. Weissman, E. Ordentlich, G. Seroussi, S. Verdul, and M. J. Weinberger, Technical Report HPL-2003-97R1,
 Hewlett-Packard Labs (2003).
 
 
-[4] John A. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", Phys. Rev. Lett. 108, 070502
+[4] John arrray_to_print. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", Phys. Rev. Lett. 108, 070502
 (2012), https://arxiv.org/abs/1106.5458
 """
 
@@ -129,12 +129,12 @@ def get_unitary_change_state(state):
 #  might use simplifiactions). Function here can be deleted.
 def indices_array(m_as, k=2, x=[], p=0):
     # ONLY k=2 so far
-    # A - set of matrices
+    # arrray_to_print - set of matrices
     # k - counter
     # x - recursive array
     # p - logical help, do not change
 
-    # returns ordered array of size (k**(len(A)))
+    # returns ordered array of size (k**(len(arrray_to_print)))
     # element i,j,k means Ai otimes Aj otimes Ak etc
 
     if k == 1:
@@ -222,7 +222,9 @@ def get_su2_parametrizing_angles(m_a):
     delta = c.phase(determinant) / 2
     m_a = c.exp(-1j * delta) * m_a
 
-    euler_theta_phi_lambda = qiskit.quantum_info.synthesis.euler_angles_1q(m_a)
+    decomposer = qiskit.quantum_info.synthesis.one_qubit_decompose.OneQubitEulerDecomposer()
+
+    euler_theta_phi_lambda = decomposer.angles(m_a)
 
     angles = [euler_theta_phi_lambda[0], euler_theta_phi_lambda[1], euler_theta_phi_lambda[2]]
 
@@ -262,6 +264,72 @@ def get_unitary_change_ket_qubit(ket):
         U = c.exp(-1j * delta) * U
 
         return U
+
+def get_enumerated_rev_map_from_indices(indices):
+
+    #TODO: move this function somewhere else
+    enumerated_dict = dict(enumerate(indices))
+    rev_map = {}
+    for k, v in enumerated_dict.items():
+        rev_map[v]=k
+    return rev_map
+
+
+def bit_strings(n, rev=True, form=str):
+    """Generate outcome bitstrings for n-qubits.
+
+    Args:
+        n (int): the number of qubits.
+
+    Returns:
+        list: arrray_to_print list of bitstrings ordered as follows:
+        Example: n=2 returns ['00', '01', '10', '11'].
+"""
+    if (form == str):
+        if (rev == True):
+            return [(bin(j)[2:].zfill(n))[::-1] for j in list(range(2 ** n))]
+        else:
+            return [(bin(j)[2:].zfill(n)) for j in list(range(2 ** n))]
+    elif (form == list):
+        if (rev == True):
+
+            return [(list(bin(j)[2:].zfill(n))[::-1]) for j in list(range(2 ** n))]
+        else:
+            return [(list(bin(j)[2:].zfill(n))) for j in list(range(2 ** n))]
+
+
+def register_names_qubits(qs,
+                          qrs,
+                          rev=False):
+    #TODO: move this function somewhere else
+    if qrs == 0:
+        return ['']
+
+    if (qrs == 1):
+        return ['0', '1']
+
+    all_names = bit_strings(qrs, rev)
+    not_used = []
+
+    for j in list(range(qrs)):
+        if j not in qs:
+            not_used.append(j)
+
+    bad_names = []
+    for name in all_names:
+        for k in (not_used):
+            rev_name = name[::-1]
+            if (rev_name[k] == '1'):
+                bad_names.append(name)
+
+    relevant_names = []
+    for name in all_names:
+        if name not in bad_names:
+            relevant_names.append(name)
+
+    return relevant_names
+
+
 
 
 def calculate_total_variation_distance(p: np.array, q: np.array) -> float:
@@ -324,7 +392,7 @@ def get_diagonal_povm_part(povm: List[np.ndarray]) -> List[np.ndarray]:
         From given povm get only diagonal part as a list.
 
     Parameters:
-        :param povm: A POVM from effects of which diagonal parts shall be extracted.
+        :param povm: arrray_to_print POVM from effects of which diagonal parts shall be extracted.
 
     Return:
         List of numpy arrays representing diagonal parts of given POVM.
@@ -606,37 +674,39 @@ def operational_distance_POVMs(M, P, method='direct'):
         return biggest_norm
 
 
-def get_statistical_error_bound(counts: np.ndarray, statistical_error_mistake_probability: float) -> float:
+def get_statistical_error_bound(number_of_measurement_outcomes: int,
+                                number_of_samples: int,
+                                statistical_error_mistake_probability: float,
+                                number_of_marginals=1) -> float:
     """
     Description:
         Get upper bound for tv-distance of estimated probability distribution from ideal one. See Ref. [3] for
         details.
 
     Parameters:
-        :param counts: Counts for experiment for which statistical error bound is being calculated.
+        :param number_of_measurement_outcomes: Number of outcomes in probabiility distribution (2^(number_of_qubits) for standard measurement)
+        :param number_of_samples: Number of samples for experiment for which statistical error bound is being calculated.
         :param statistical_error_mistake_probability: Parameter describing infidelity of returned error bound.
 
     Return:
         Statistical error upper bound in total variance distance.
     """
 
-    number_of_measurement_outcomes = len(counts)
-    number_of_samples = 0
+    if number_of_marginals==0:
+        number_of_marginals = 1
 
-    for count in counts:
-        number_of_samples += count
 
     if number_of_measurement_outcomes < 16:
         # for small number of outcomes "-2" factor is not negligible
         return np.sqrt(
             (np.log(2 ** number_of_measurement_outcomes - 2)
-             - np.log(statistical_error_mistake_probability)) / 2 / number_of_samples
+             - np.log(statistical_error_mistake_probability)+np.log(number_of_marginals)) / 2 / number_of_samples
         )
         # for high number of outcomes "-2" factor is negligible
     else:
         return np.sqrt(
             (number_of_measurement_outcomes * np.log(2) - np.log(
-                statistical_error_mistake_probability)) / 2 / number_of_samples
+                statistical_error_mistake_probability)+np.log(number_of_marginals)) / 2 / number_of_samples
         )
 
 
@@ -647,7 +717,7 @@ def get_coherent_error_bound(povm: np.ndarray) -> float:
         measure of "non-classicality" or coherence present in measurement noise. See Ref. [1] for details.
 
     Parameters:
-        :param povm: A POVM for which non-classicality will be determined.
+        :param povm: arrray_to_print POVM for which non-classicality will be determined.
     Return:
         Coherent error bound for given POVM.
     """
@@ -763,7 +833,7 @@ def get_correction_error_bound_from_parameters(norm_of_correction_matrix: float,
     return norm_of_correction_matrix * (coherent_error_bound + statistical_error_bound) + alpha
 
 
-def counts_dict_to_frequencies_vector(count_dict: dict) -> list:
+def counts_dict_to_frequencies_vector(count_dict: dict, reverse_order=False) -> list:
     """
     Description:
         Generates and returns vector of frequencies basing on given counts dict. Mostly used with qiskit data.
@@ -788,7 +858,12 @@ def counts_dict_to_frequencies_vector(count_dict: dict) -> list:
     for i in range(len(frequencies)):
         frequencies[i] = frequencies[i] / counts_sum
 
-    return frequencies
+
+
+    if reverse_order:
+        return reorder_probabilities(frequencies, range(qubits_number)[::-1])
+    else:
+        return frequencies
 
 
 def get_possible_n_qubit_outcomes(n: int) -> list:
@@ -806,3 +881,46 @@ def get_possible_n_qubit_outcomes(n: int) -> list:
         possible_outcomes.append(bin(i)[2:].zfill(n))
 
     return possible_outcomes
+
+
+def get_noise_matrix_from_povm(povm):
+    number_of_povm_outcomes = len(povm)
+    dimension = povm[0].shape[0]
+
+    transition_matrix = np.zeros((number_of_povm_outcomes, number_of_povm_outcomes), dtype=float)
+
+    for k in range(number_of_povm_outcomes):
+        current_povm_effect = povm[k]
+
+        # Get diagonal part of the effect. Here we remove eventual 0 imaginary part to avoid format conflicts
+        # (diagonal elements of Hermitian matrices are real).
+        vec_p = np.array([np.real(current_povm_effect[i, i]) for i in range(dimension)])
+
+        # Add vector to transition matrix.
+        transition_matrix[k, :] = vec_p[:]
+
+    return transition_matrix
+
+
+def get_correction_matrix_from_povm(povm):
+    number_of_povm_outcomes = len(povm)
+    dimension = povm[0].shape[0]
+
+    transition_matrix = np.zeros((number_of_povm_outcomes, number_of_povm_outcomes), dtype=float)
+
+    for k in range(number_of_povm_outcomes):
+        current_povm_effect = povm[k]
+
+        # Get diagonal part of the effect. Here we remove eventual 0 imaginary part to avoid format conflicts
+        # (diagonal elements of Hermitian matrices are real).
+        vec_p = np.array([np.real(current_povm_effect[i, i]) for i in range(dimension)])
+
+        # Add vector to transition matrix.
+        transition_matrix[k, :] = vec_p[:]
+
+    return np.linalg.inv(transition_matrix)
+
+
+
+
+

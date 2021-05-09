@@ -29,6 +29,7 @@ For QREM to work properly,  the following libraries should be installed:
 * typing
 * pandas
 * qiskit
+* networkx
 
 ## Installing 
 The best way to install and use this package is to simply clone the repository:
@@ -69,14 +70,18 @@ we will use prefix _m__, to mark all matrices.
 
 - [Filip Maciejewski](https://github.com/fbm2718) (contact: filip.b.maciejewski@gmail.com)
 - [Tomasz Rybotycki](https://github.com/Tomev)
+- [Oskar Słowik](https://github.com/Feigenbaum4669)
 
 
  ## References
-**The workflow of this package is mainly based on the work**:
+**The workflow of this package is mainly based on the works**:
   
 [0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec, "Mitigation of readout noise in near-term quantum devices
 by classical post-processing based on detector tomography", 
 [Quantum 4, 257 (2020)](https://quantum-journal.org/papers/q-2020-04-24-257/)
+
+[0.5] Filip B. Maciejewski, Flavio Baccari Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of realistic readout noise with applications to the Quantum Approximate Optimization Algorithm", 
+[arxiv:	arXiv:2101.02331 (2021)](https://arxiv.org/abs/2101.02331)
   
 **Important quantum information ideas appearing in the code are, to a higher or lower degree, described in following 
 references:**
@@ -94,6 +99,21 @@ Hewlett-Packard Labs (2003).
 
 [5] John A. Smolin, Jay M. Gambetta, Graeme Smith, "Maximum Likelihood, Minimum Effort", [Phys. Rev. Lett. 108, 070502
 (2012)](https://arxiv.org/abs/1106.5458).
+
+[6] J. Cotler, F. Wilczek, "Quantum Overlapping Tomography", [Phys. Rev. Lett. 124, 100401 (2020)](https://arxiv.org/abs/1908.02754).
+
+
+## Citation
+The following bibtex entry can be used to cite this repository:
+```
+@misc{qrem,
+   url={https://github.com/fbm2718/QREM},
+   title = {Quantum Readout Errors Mitigation (QREM) -- open source GitHub repository},
+   author={Maciejewski, F. B. and Rybotycki, T. and Oszmaniec, M.},
+   year={2020},
+}
+```
+
 
 
 ## Citation

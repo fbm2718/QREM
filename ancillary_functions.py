@@ -7,6 +7,9 @@ Created on Fri Feb 23 00:06:42 2018
 import numpy as np
 import cmath as c
 import copy
+import re
+from colorama import Fore, Style
+from collections import defaultdict
 
 epsilon = 10 ** (-7)
 pauli_sigmas = {
@@ -15,6 +18,69 @@ pauli_sigmas = {
     'Y': np.array([[0., -1j], [1j, 0]]),
     'Z': np.array([[1., 0j], [0, -1]])
 }
+
+
+class key_dependent_dict(defaultdict):
+    def __init__(self, f_of_x=None):
+        super().__init__(None)  # base class doesn't get a factory
+        self.f_of_x = f_of_x  # save f(x)
+
+    def __missing__(self, key):  # called when a default needed
+        ret = self.f_of_x(key)  # calculate default value
+        self[key] = ret  # and install it in the dict
+        return ret
+
+
+
+
+
+
+
+
+def binary_integer_format(integer, number_of_bits):
+    return "{0:b}".format(integer).zfill(number_of_bits)
+
+
+def get_enumerated_rev_map_from_indices(indices):
+    enumerated_dict = dict(enumerate(indices))
+    rev_map = {}
+    for k, v in enumerated_dict.items():
+        rev_map[v]=k
+    return rev_map
+
+def get_enumerated_rev_map_from_dict(enumerated_dict):
+    rev_map = {}
+    for k, v in enumerated_dict.items():
+        rev_map[v]=k
+    return rev_map
+
+
+def get_qubit_indices_from_string(qubits_string,
+                                  with_q=False):
+
+    """Return list of qubit indices from the string of the form "q0q1q22q31"
+    :param qubits_string (string): string which has the form of "q" followed by qubit index
+    :param (optional) with_q (Boolean): specify whether returned indices should be in form of string with letter
+
+    :return: list of qubit indices:
+
+    depending on value of parameter "with_q" the mapping will be one of the following:
+
+    if with_q:
+        'q1q5q13' -> ['q1','q5','q13']
+    else:
+        'q1q5q13' -> [1,5,13]
+
+    """
+
+    numbers = re.findall(r'\d+', qubits_string)
+
+    if with_q:
+        qubits = ['q'+s for s in numbers]
+    else:
+        qubits = [int(s) for s in numbers]
+
+    return qubits
 
 
 def round_matrix(m_a, decimal):
@@ -125,3 +191,173 @@ def thresh(m_a, decimal=7):
             x[...] = np.round(x, decimal)
 
     return m_b
+
+
+
+
+
+def lists_intersection(lst1, lst2):
+    return list(set(lst1) & set(lst2))
+
+
+def lists_difference(lst1, lst2):
+    return list(set(lst1) - set(lst2))
+
+
+def lists_sum(lst1, lst2):
+    return list(set(lst1).union(set(lst2)))
+
+def lists_sum_multi(lists):
+    return set().union(*lists)
+
+def lists_intersection_multi(lists):
+    l0 = lists[0]
+    l1 = lists[1]
+
+    int_list = lists_intersection(l0,l1)
+    for l in lists[2:]:
+        int_list = lists_intersection(int_list,l)
+    return int_list
+
+def check_if_there_are_common_elements(lists):
+
+    for i in range(len(lists)):
+        for j in range(i+1, len(lists)):
+            if len(lists_intersection(lists[i],lists[j]))!=0:
+                return True
+
+    return False
+
+
+def find_significant_digit(x):
+    counter = 0
+    passed = 0
+
+    y = str(x)
+
+    # print(x)
+    if (y[0] == '-'):
+        y.replace('-', '')
+
+    for k in range(len(y)):
+        if (y[k] == '.'):
+            passed = 1
+            dec = k
+
+        if (passed == 1 and y[k] != '.'):
+            if (y[k] == '0'):
+                counter += 1
+            else:
+                counter += 1
+                break
+
+    if (len(y) - 2 == dec and y[len(y) - 1] == '0'):
+        counter = 0
+
+    return counter
+
+def cool_print(a,b='',color=Fore.CYAN):
+    #a is printed with color
+    #b is printed without color
+    if b=='':
+        print(color+Style.BRIGHT+str(a)+Style.RESET_ALL)
+    else:
+        print(color+Style.BRIGHT+str(a)+Style.RESET_ALL,repr(b))
+
+
+def bit_strings(n, rev=False):
+    """Generate outcome bitstrings for n-qubits.
+
+    Args:
+        n (int): the number of qubits.
+
+    Returns:
+        list: arrray_to_print list of bitstrings ordered as follows:
+        Example: n=2 returns ['00', '01', '10', '11'].
+"""
+    if (rev == True):
+        return [(bin(j)[2:].zfill(n))[::-1] for j in list(range(2 ** n))]
+    else:
+        return [(bin(j)[2:].zfill(n)) for j in list(range(2 ** n))]
+
+
+
+def register_names_qubits(qs, qrs, rev=False):
+    if qrs == 0:
+        return ['']
+
+    if (qrs == 1):
+        return ['0', '1']
+
+    all_names = bit_strings(qrs, rev)
+    not_used = []
+
+    for j in list(range(qrs)):
+        if j not in qs:
+            not_used.append(j)
+
+    bad_names = []
+    for name in all_names:
+        for k in (not_used):
+            rev_name = name[::-1]
+            if (rev_name[k] == '1'):
+                bad_names.append(name)
+
+    relevant_names = []
+    for name in all_names:
+        if name not in bad_names:
+            relevant_names.append(name)
+
+    return relevant_names
+
+
+
+def get_module_directory():
+
+    from QREM import name_holder
+    name_holder = name_holder.__file__
+
+    return name_holder[0:-15]
+from povms_qi import ancillary_functions
+
+
+def zeros_to_dots(A, decimal):
+    m = A.shape[0]
+    n = A.shape[1]
+
+    B = np.zeros((m, n), dtype=dict)
+
+    for i in range(m):
+        for j in range(n):
+            el = A[i, j]
+            if (abs(np.round(el, decimal)) >= 0):
+                B[i, j] = el
+            else:
+                B[i, j] = '.'
+
+    return B
+
+
+def print_array_nicely(arrray_to_print,
+                       rounding_decimal=3):
+    import pandas as pd
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', 110)
+    try:
+        if (arrray_to_print.shape[0] == 1 or arrray_to_print.shape[1] == 1):
+            B = copy.deepcopy(arrray_to_print)
+            if (arrray_to_print.shape[0] == 1 and arrray_to_print.shape[1] == 1):
+                print(np.round(arrray_to_print[0, 0], rounding_decimal))
+            elif (arrray_to_print.shape[0] == 1):
+                print([np.round(x[1], rounding_decimal) for x in arrray_to_print])
+            elif (arrray_to_print.shape[1] == 1):
+                print([np.round(x[0], rounding_decimal) for x in arrray_to_print])
+        else:
+
+            B = copy.deepcopy(arrray_to_print)
+            C = round_matrix(B, rounding_decimal)
+            D = zeros_to_dots(C, rounding_decimal)
+            print(pd.DataFrame(D))
+    except(IndexError):
+        print(pd.DataFrame(np.array(np.round(arrray_to_print, rounding_decimal))))
+
