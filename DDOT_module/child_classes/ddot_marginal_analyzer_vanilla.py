@@ -20,6 +20,23 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
         This includes averaged noise matrices, i.e., averaged over states off all other qubits,
         as well as state-dependent, i.e., conditioned on the particular
         input classical state of some other qubits.
+
+        In this class, and all its children, we use the following convention
+        for storing marginal noise matrices:
+
+        :param noise_matrices_dictionary: nested dictionary with following structure:
+
+        noise_matrices_dictionary[qubits_subset_string]['averaged']
+        = average noise matrix on qubits subset
+        and
+        noise_matrices_dictionary[qubits_subset_string][other_qubits_subset_string][input_state_bitstring]
+        = noise matrix on qubits subset depending on input state of other qubits.
+
+        where:
+        - qubits_subset_string - is string labeling qubits subset (e.g., 'q1q2q15...')
+        - other_qubits_subset_string - string labeling other subset
+        - input_state_bitstring - bitstring labeling input state of qubits in other_qubits_subset_string
+
     """
 
     def __init__(self,
@@ -36,18 +53,7 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
         :param bitstrings_right_to_left: specify whether bitstrings
                                  should be read from right to left (when interpreting qubit labels)
         :param marginals_dictionary: see description of MarginalsAnalyzerBase.
-        :noise_matrices_dictionary nested dictionary with following structure:
-
-        noise_matrices_dictionary[qubits_subset_string]['averaged']
-        = average noise matrix on qubits subset
-        and
-        noise_matrices_dictionary[qubits_subset_string][other_qubits_subset_string][input_state_bitstring]
-        = noise matrix on qubits subset depending on input state of other qubits.
-
-        where:
-        - qubits_subset_string - is string labeling qubits subset (e.g., 'q1q2q15...')
-        - other_qubits_subset_string - string labeling other subset
-        - input_state_bitstring - bitstring labeling input state of qubits in other_qubits_subset_string
+        :param noise_matrices_dictionary: nested dictionary with following structure:
         """
 
         super().__init__(results_dictionary_ddot,
@@ -57,14 +63,13 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
 
         if noise_matrices_dictionary is None:
             noise_matrices_dictionary = {}
-            #TODO FBM: Make sure whether this helps in anything
-            #TODO FBM: (because we anyway perform checks in the functions later)
+            # TODO FBM: Make sure whether this helps in anything
+            # TODO FBM: (because we anyway perform checks in the functions later)
             if marginals_dictionary is not None:
                 for experiment_key, dictionary_of_marginals in marginals_dictionary.items():
                     for marginal_key in dictionary_of_marginals.keys():
                         if marginal_key not in noise_matrices_dictionary.keys():
                             noise_matrices_dictionary[marginal_key] = {}
-
 
         self._noise_matrices_dictionary = noise_matrices_dictionary
 
@@ -136,10 +141,10 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
         for neighbors_state, conditional_noise_matrix in matrices_cluster.items():
             list_string_neighbors = list(copy.deepcopy(neighbors_state))
 
-            list_string_neighbors = list(np.delete(list_string_neighbors,
-                                                   qubits_to_be_averaged_over_mapped))
+            list_string_neighbors_to_be_left = list(np.delete(list_string_neighbors,
+                                                              qubits_to_be_averaged_over_mapped))
 
-            string_neighbors = ''.join(list_string_neighbors)
+            string_neighbors = ''.join(list_string_neighbors_to_be_left)
 
             # TODO FBM: make sure this commented check is not needed anymore
             # if string_neighbors == '' or string_neighbors:
@@ -175,12 +180,16 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
         # TODO FBM: refactor defaultdict usage here
         marginal_dict_now = defaultdict(float)
 
+        # anf.cool_print('I survived here')
+
         for input_state_bitstring, dictionary_marginals_now in marginals_dictionary_ddot.items():
             input_marginal = ''.join([input_state_bitstring[x] for x in subset])
 
+            # anf.cool_print('I survived here 2')
             if subset_key not in dictionary_marginals_now.keys():
-                self.compute_marginals(input_state_bitstring, [subset])
-
+                self.compute_marginals([input_state_bitstring], [subset])
+            # anf.cool_print('I survived here 3')
+            # anf.cool_print('Bitstring now:',input_state_bitstring)
             marginal_dict_now[input_marginal] += dictionary_marginals_now[subset_key]
 
             # TODO FBM: this perhaps is incosistend method, make sure.
@@ -193,7 +202,11 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
             for key_small in marginal_dict_now.keys():
                 marginal_dict_now[key_small] *= 1 / np.sum(marginal_dict_now[key_small])
 
+        #
         noise_matrix_averaged = self.get_noise_matrix_from_counts_dict(marginal_dict_now)
+
+        if not anf.is_stochastic(noise_matrix_averaged):
+            raise ValueError('Noise matrix not stochastic for subset:', subset)
 
         if subset_key in self._noise_matrices_dictionary.keys():
             self._noise_matrices_dictionary[subset_key]['averaged'] = noise_matrix_averaged
@@ -358,10 +371,23 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
 
         cluster_key = self.get_qubits_key(qubits_of_interest)
 
+        if cluster_key not in self._noise_matrices_dictionary.keys():
+            self.compute_subset_noise_matrices_averaged([qubits_of_interest])
+
         if len(neighbors_of_interest) == 0 or neighbors_of_interest is None:
             neighbors_key = 'averaged'
 
             if neighbors_key in self._noise_matrices_dictionary[cluster_key]:
+                if not anf.is_stochastic(self._noise_matrices_dictionary[cluster_key]['averaged']):
+                    anf.cool_print('Bug is here')
+                    print(cluster_key, neighbors_key)
+                    # TODO FBM: SOMETHING IS BROKEN
+                    self._noise_matrices_dictionary[cluster_key][
+                        'averaged'] = self._compute_noise_matrix_averaged(qubits_of_interest)
+                    if not anf.is_stochastic(self._noise_matrices_dictionary[cluster_key]['averaged']):
+                        anf.cool_print('And I cant fix it')
+
+                    # anf.print_array_nicely(self._noise_matrices_dictionary[cluster_key]['averaged'])
                 return {'averaged': self._noise_matrices_dictionary[cluster_key]['averaged']}
             else:
                 return self._compute_noise_matrix_dependent(qubits_of_interest,
@@ -386,7 +412,7 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
         :param show_progress_bar: whether to show animated progress bar. requires tqdm package
 
         """
-
+        # self.normalize_marginals()
         subsets_range = range(len(subsets_list))
         if show_progress_bar:
             from tqdm import tqdm

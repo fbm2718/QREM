@@ -7,24 +7,39 @@ Created on 04.05.2021
 
 import os, pickle
 from QREM import ancillary_functions as anf
-# from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDOTMarginalsAnalyzer
 from QREM.DDOT_module.child_classes.noise_model_generator_vanilla import NoiseModelGenerator
+from povms_qi.ancillary_functions import cool_print
 
 module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/data_for_tests/'
 
 # data used for testing
-backend_name = 'ASPEN-8'
-number_of_qubits = 23
-date = '2020_05_04'
+backend_name = 'ibmq_16_melbourne'
+date = '2020_05_07'
 
 # specify whether count names are read from right to left (convention used by IBM)
-reverse_counts = False
+if backend_name == 'ibmq_16_melbourne':
+    number_of_qubits = 15
+    reverse_counts = True
 
-directory = tests_directory + 'DDOT/' + backend_name + '/N%s' % number_of_qubits + '/' + date + '/'
+    threshold_clusters = 0.04
+    threshold_neighbors = 0.01
+
+
+elif backend_name == 'ASPEN-8':
+    number_of_qubits = 23
+    reverse_counts = False
+
+    threshold_clusters = 0.06
+    threshold_neighbors = 0.02
+
+else:
+    raise ValueError('Wrong backend')
+
+directory = tests_directory + 'mitigation_on_marginals/' + backend_name + '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
 
 files = os.listdir(directory)
-with open(directory + files[-1], 'rb') as filein:
+with open(directory + '02_test_results_noise_matrices_pairs.pkl', 'rb') as filein:
     dictionary_data = pickle.load(filein)
 
 # in this exemplary file, the "true qubits" are labels of physical qubits
@@ -72,89 +87,47 @@ qubits except "j"), provided that input state of qubit "j" was "Y_j". Hence, c_{
 measures how much noise on qubit "i" depends on the input state of qubit "j".
 """
 
-correlations_table_pairs = noise_model_analyzer.correlations_table_pairs
-anf.print_array_nicely(correlations_table_pairs[0:10, 0:10], 3)
-
-# #
-threshold_clusters = 0.06
-threshold_neighbors = 0.02
+# set maximal size of cluster+neighborhood set
 maximal_size = 5
-#
-# #compute clusters using naive method based on correlations treshold
-noise_model_analyzer.compute_clusters_naive(max_size=maximal_size,
-                                            threshold=threshold_clusters
-                                            )
 
-clusters_naive = noise_model_analyzer.clusters_list
+# Choose clustering method and its kwargs
+clustering_method = 'pairwise'
+clustering_function_arguments = {'cluster_threshold': threshold_clusters}
 
-neighborhoods_naive = noise_model_analyzer.find_all_neighborhoods_naive(maximal_size=maximal_size,
-                                                                        threshold=threshold_neighbors)
-neighborhoods_naive_smarter = noise_model_analyzer.find_all_neighborhoods(maximal_size=maximal_size,
-                                                                          chopping_threshold=0.02,
-                                                                          show_progress_bar=True)
+# compute clusters based on correlations treshold
+noise_model_analyzer.compute_clusters(maximal_size=maximal_size,
+                                      method=clustering_method,
+                                      method_kwargs=clustering_function_arguments
+                                      )
 
-print(neighborhoods_naive_smarter)
+clusters = noise_model_analyzer.clusters_list
 
-noise_model_analyzer.compute_clusters_heuristic(max_size=3,
-                                                version='v1')
+# Choose method for finding neighborhoods and its kwargs
+neighborhoods_method = 'pairwise'
+neighborhoods_function_arguments = {'chopping_threshold': threshold_neighbors,
+                                    'show_progress_bar': True}
+# compute neighborhoods based on correlations treshold
+neighborhoods = noise_model_analyzer.find_all_neighborhoods(maximal_size=maximal_size,
+                                                            method=neighborhoods_method,
+                                                            method_kwargs=
+                                                            neighborhoods_function_arguments)
 
-clusters_list_heuristic = noise_model_analyzer.clusters_list
-
-noise_model_analyzer.find_all_neighborhoods(maximal_size=maximal_size,
-                                            chopping_threshold=0.02,
-                                            show_progress_bar=True)
-
-neighborhoods_heuristic = noise_model_analyzer.neighborhoods
-
-no_clusters = [[qi] for qi in list_of_qubits]
-
-noise_model_analyzer.clusters_list = no_clusters
-
-noise_model_analyzer.find_all_neighborhoods_naive(maximal_size=maximal_size,
-                                                  threshold=threshold_neighbors)
-
-neighborhoods_no_clusters_naive = noise_model_analyzer.neighborhoods
-
-noise_model_analyzer.find_all_neighborhoods(maximal_size=maximal_size,
-                                            chopping_threshold=0.02,
-                                            show_progress_bar=True)
-
-neighborhoods_no_clusters_smarter = noise_model_analyzer.neighborhoods
-
-from povms_qi.ancillary_functions import cool_print
-
-cool_print('Clusters naive:', clusters_naive)
-cool_print('Clusters heuristic:', clusters_list_heuristic)
-print()
-cool_print('Neighborhoods naive:', neighborhoods_naive)
-cool_print('Neighborhoods naive smarter:', neighborhoods_naive_smarter)
-cool_print('Neighborhoods heuristic:', neighborhoods_heuristic)
-cool_print('Neighborhoods naive no clusters:', neighborhoods_no_clusters_naive)
-cool_print('Neighborhoods smarter no clusters:', neighborhoods_no_clusters_smarter)
+cool_print('Clusters:', clusters)
+cool_print('Neighborhoods:', neighborhoods)
 print()
 
-# dictionary_to_save = {}
 dictionary_to_save = {'true_qubits': true_qubits,
                       'list_of_qubits': list_of_qubits,
                       'results_dictionary_preprocessed': dictionary_results,
-                      'marginals_dictionary_pairs': noise_model_analyzer.marginals_dictionary,
-                      'noise_matrices_dictionary_pairs': noise_model_analyzer.noise_matrices_dictionary,
-                      'clusters_list_naive': clusters_naive,
-                      'neighborhoods_naive': neighborhoods_naive,
-                      'neighborhoods_naive_smarter': neighborhoods_naive_smarter,
-                      'clusters_list_heuristic': clusters_list_heuristic,
-                      'neighborhoods_heuristic': neighborhoods_heuristic,
-                      'no_clusters': no_clusters,
-                      'neighborhoods_no_clusters_naive': neighborhoods_no_clusters_naive,
-                      'neighborhoods_no_clusters_smarter': neighborhoods_no_clusters_smarter
+                      'marginals_dictionary': noise_model_analyzer.marginals_dictionary,
+                      'noise_matrices_dictionary': noise_model_analyzer.noise_matrices_dictionary,
+                      'clusters_list': clusters,
+                      'neighborhoods': neighborhoods
                       }
-# diction
-#
-date_save = '2020_05_04'
-directory = tests_directory + 'DDOT/' + backend_name + '/N%s' % number_of_qubits + '/' + date_save + '/'
 
-from povms_qi import povm_data_tools as pdt
+date_save = '2020_05_07'
+directory = tests_directory + 'mitigation_on_marginals/' + backend_name + '/N%s' % number_of_qubits + '/' + date_save + '/DDOT'
 
-pdt.Save_Results_simple(dictionary_to_save,
+anf.save_results_pickle(dictionary_to_save,
                         directory,
-                        'test_results')
+                        '03_test_results_noise_models')

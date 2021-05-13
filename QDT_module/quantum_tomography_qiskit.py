@@ -305,7 +305,7 @@ def gtc_tensor_calculating_function(arguments: list):
 
 def detector_tomography_circuits_pymali(qubit_indices, probe_kets):
     """
-    Analogical version of the circuits preparing method utilizing pymali general tensor calculator.
+    Analogical method of the circuits preparing method utilizing pymali general tensor calculator.
     """
 
     qubit_indices = sorted(qubit_indices)  # Sort to ensure, that results can easily be interpreted.

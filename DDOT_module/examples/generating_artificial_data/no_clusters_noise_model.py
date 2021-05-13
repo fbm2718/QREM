@@ -119,19 +119,19 @@ noise_model_analyzer = NoiseModelGenerator(results_dictionary_ddot=results_dicti
                                            number_of_qubits=number_of_qubits)
 
 # # print(clusters_list_true)
-# noise_model_analyzer.compute_all_marginals(clusters_list_true,
+# noise_model_analyzer_naive.compute_all_marginals(clusters_list_true,
 #                                            show_progress_bar=True)
 #
-# print(noise_model_analyzer.marginals_dictionary)
+# print(noise_model_analyzer_naive.marginals_dictionary)
 #
 # raise KeyError
 noise_model_analyzer.compute_subset_noise_matrices_averaged(clusters_list_true)
 # clusters_list_
-# noise_model_analyzer.clusters_list = [[qi] for qi in range(number_of_qubits)]
-# noise_model_analyzer.compute_correlations_table_pairs()
+# noise_model_analyzer_naive.clusters_list = [[qi] for qi in range(number_of_qubits)]
+# noise_model_analyzer_naive.compute_correlations_table_pairs()
 
-noise_model_analyzer.compute_clusters_naive(0.04,
-                                            max_size=5)
+noise_model_analyzer._compute_clusters_naive(0.04,
+                                             max_size=5)
 #
 noise_model_analyzer.find_all_neighborhoods(maximal_size=5,
                                             chopping_threshold=0.01)
@@ -145,7 +145,7 @@ estimated_neighbors = noise_model_analyzer.neighborhoods
 
 
 
-# noise_model_analyzer
+# noise_model_analyzer_naive
 
 print(estimated_clusters)
 print(true_neighbors_list)

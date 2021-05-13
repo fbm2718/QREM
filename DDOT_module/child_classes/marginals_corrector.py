@@ -17,9 +17,8 @@ arxiv:2102.02331 (2021), https://arxiv.org/abs/2101.02331.
 """
 
 import numpy as np
-from typing import Optional, Dict
+from typing import Optional, Dict, Union, List
 from QREM.DDOT_module.parent_classes.marginals_analyzer_base import MarginalsAnalyzerBase
-from QREM import ancillary_functions as anf
 from QREM import povmtools as pt
 
 
@@ -28,7 +27,7 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
                  experimental_results_dictionary: Dict[str, Dict[str, int]],
                  bitstrings_right_to_left: bool,
                  correction_data_dictionary: dict,
-                 marginals_dictionary: Optional[dict] = None
+                 marginals_dictionary: Optional[Dict[str, Dict[str,np.ndarray]]] = None
                  ) -> None:
         super().__init__(experimental_results_dictionary,
                          bitstrings_right_to_left,
@@ -36,35 +35,40 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
                          )
 
         self._noise_matrices = correction_data_dictionary['noise_matrices']
-        self._correction_matrices = correction_data_dictionary['correction_matrices']
 
-        # self._mitigation_errors = correction_data_dictionary['mitigation_errors']
+        if 'correction_matrices' in correction_data_dictionary.keys():
+            self._correction_matrices = correction_data_dictionary['correction_matrices']
+        else:
+            print('no correction matrices provided')
         self._correction_indices = correction_data_dictionary['correction_indices']
 
         self._corrected_marginals = {}
 
     @property
-    def correction_indices(self) -> dict:
+    def correction_indices(self) -> Dict[str, str]:
         return self._correction_indices
 
     @correction_indices.setter
-    def correction_indices(self, correction_indices) -> dict:
+    def correction_indices(self, correction_indices) -> None:
         self._correction_indices = correction_indices
 
     @property
-    def corrected_marginals(self) -> dict:
+    def corrected_marginals(self) -> Dict[str, Dict[str, np.ndarray]]:
         return self._corrected_marginals
 
+
+
     def get_specific_marginals_from_marginals_dictionary(self,
-                                                         keys_of_interest: list,
-                                                         corrected=False) -> dict:
-        """From dictionary of marginals take only those which are in "keys_of_interest".
+                                                         keys_of_interest: List[str],
+                                                         corrected=False) -> \
+            Dict[str, Dict[str, np.ndarray]]:
+        """From dictionary of marginals take only those which are in "marginals_labels_hamiltonian".
         Furthermore, for all keys, calculate also two-qubit and single-qubit marginals for qubits
         inside those marginals.
 
         :param keys_of_interest: list of strings representing qubit indices, e.g., 'q1q3q15'
 
-        :return: marginals_of_interest : dictionary with marginal distributions for keys_of_interest
+        :return: marginals_of_interest : dictionary with marginal distributions for marginals_labels_hamiltonian
         """
         if corrected:
             marginals_dictionary = self._corrected_marginals
@@ -215,14 +219,14 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
         - [Optional] if parameter "unphysicality_threshold" is provided,
            then it projects the result of "T_matrix" correction onto probability simplex
            and if Total Variation Distance between this projected vector
-           and original unphysical one is belowthis threshold, then it returns the projection.
+           and original unphysical one is belowthis cluster_threshold, then it returns the projection.
            Otherwise, it performs IBU.
 
         :param estimated_distribution: noisy distribution (to be corrected)
         :param noise_matrix: noise matrix
         :param correction_matrix: correction matrix (inverse of noise matrix)
                                  if not provided, it is calculated from noise_matrix
-        :param unphysicality_threshold: threshold to decide whether unphysical "T_matrix"
+        :param unphysicality_threshold: cluster_threshold to decide whether unphysical "T_matrix"
                                         correction is acceptable. See description of the function
         :param iterations_number: number of iterations in IBU
         :param prior: ansatz for ideal distribution in IBU, default is uniform
@@ -268,7 +272,7 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
     def correct_marginals(self,
                           marginals_dictionary: Optional[Dict[str, np.ndarray]] = None,
                           method='T_matrix',
-                          method_kwargs=None) -> dict:
+                          method_kwargs=None) -> Dict[str,Dict[str,np.ndarray]]:
 
         """Return dictionary of corrected marignal distributions
         :param marginals_dictionary: dictionary of (noisy) marginal distributions
@@ -286,6 +290,7 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
         :return: corrected_marginals : dictionary of corrected marginal distributions
         """
 
+        #TODO FBM: make it consistent with conventions used in parent class
         if marginals_dictionary is None:
             marginals_dictionary = self._marginals_dictionary
 

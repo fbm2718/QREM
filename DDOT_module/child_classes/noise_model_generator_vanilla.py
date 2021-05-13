@@ -5,7 +5,6 @@ Created on 29.04.2021
 @contact: filip.b.maciejewski@gmail.com
 """
 
-
 import numpy as np
 import copy
 import QREM.ancillary_functions as anf
@@ -13,6 +12,8 @@ from typing import Optional, List, Dict, Union
 from QREM.povmtools import get_enumerated_rev_map_from_indices
 from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
 from DDOT_module.functions.functions_noise_model_heuristic import partition_algorithm_v1_cummulative
+
+from povms_qi import povmtools
 
 
 class NoiseModelGenerator(DDTMarginalsAnalyzer):
@@ -26,7 +27,9 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
                  number_of_qubits: int,
                  marginals_dictionary: Optional[Dict[str, Dict[str, np.ndarray]]] = None,
                  noise_matrices_dictionary: Optional[
-                     Dict[str, Union[np.ndarray, Dict[str, Dict[str, np.ndarray]]]]] = None
+                     Dict[str, Union[np.ndarray, Dict[str, Dict[str, np.ndarray]]]]] = None,
+                 clusters_list: Optional[List[List[int]]] = None,
+                 neighborhoods: Dict[str, List[int]] = None
                  ) -> None:
 
         super().__init__(results_dictionary_ddot,
@@ -37,26 +40,32 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
         self._number_of_qubits = number_of_qubits
         self._qubit_indices = list(range(number_of_qubits))
 
-        self._correlations_table_pairs = np.zeros((number_of_qubits, number_of_qubits), dtype=float)
+        self._correlations_table_pairs = None
 
-        self._clusters_list = []
-        self._neighborhoods = {}
+        if clusters_list is None:
+            clusters_list = []
+
+        if neighborhoods is None:
+            neighborhoods = {}
+
+        self._clusters_list = clusters_list
+
+        self._neighborhoods = neighborhoods
 
     @property
     def correlations_table_pairs(self) -> np.ndarray:
         return self._correlations_table_pairs
 
     @correlations_table_pairs.setter
-    def correlations_table_pairs(self, correlations_table_pairs: dict) -> None:
+    def correlations_table_pairs(self, correlations_table_pairs: np.ndarray) -> None:
         self._correlations_table_pairs = correlations_table_pairs
 
     @property
-    def clusters_list(self) -> list:
+    def clusters_list(self) -> List[List[int]]:
         return self._clusters_list
 
     @clusters_list.setter
-    def clusters_list(self, clusters_list: list) -> None:
-
+    def clusters_list(self, clusters_list: List[List[int]]) -> None:
         for cluster in clusters_list:
             cluster_string = self.get_qubits_key(cluster)
             if cluster_string not in self._noise_matrices_dictionary.keys():
@@ -75,11 +84,11 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
         self._clusters_list = clusters_list
 
     @property
-    def neighborhoods(self) -> dict:
+    def neighborhoods(self) -> Dict[str, List[int]]:
         return self._neighborhoods
 
     @neighborhoods.setter
-    def neighborhoods(self, neighborhoods: dict) -> None:
+    def neighborhoods(self, neighborhoods: Dict[str, List[int]]) -> None:
         self._neighborhoods = neighborhoods
         self.clusters_list = [self.get_qubit_indices_from_string(cluster_string) for cluster_string in
                               neighborhoods.keys()]
@@ -87,7 +96,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
         for cluster_string in neighborhoods.keys():
             dictionary_now = self._noise_matrices_dictionary[cluster_string]
             neighborhood_now = neighborhoods[cluster_string]
-            print(dictionary_now.keys())
+            # print(dictionary_now.keys())
             neighbors_key = self.get_qubits_key(neighborhood_now)
             if neighbors_key not in dictionary_now.keys():
                 cluster = anf.get_qubit_indices_from_string(cluster_string)
@@ -99,7 +108,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
                                                                    **dependent_noise_matrices}
 
     def compute_correlations_table_pairs(self,
-                                         qubit_indices: Optional[list] = None,
+                                         qubit_indices: Optional[List[int]] = None,
                                          chopping_threshold: Optional[float] = 0.) -> np.ndarray:
         """From marginal noise matrices, get correlations between pairs of qubits.
            Correlations are defined as:
@@ -115,7 +124,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
 
            :param chopping_threshold: numerical value, for which correlations lower than
                   chopping_threshold are set to 0. If not provided, does not chop. In general, it is a
-                  advisable to set such threshold that cuts off values below expected statistical
+                  advisable to set such cluster_threshold that cuts off values below expected statistical
                   fluctuations.
 
            :return: correlations_table (ARRAY):
@@ -159,17 +168,18 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
 
         return correlations_table
 
-    def compute_clusters_naive(self,
-                               threshold: float,
-                               max_size: int) -> list:
+    def _compute_clusters_naive(self,
+                                cluster_threshold: float,
+                                max_size: int) -> list:
         """
             Get partition of qubits in a device into disjoint "clusters". This function uses "naive"
             method by assigning qubits to the same cluster if correlations between them are higher
-            than some "threshold". It restricts size of the cluster to "max_size" by disregarding
+            than some "threshold". It restricts size of the cluster to "maximal_size" by disregarding
             the lowest correlations (that are above threshold).
             It uses table of correlations from class property self._correlations_table_pairs
 
-          :param threshold: correlations magnitude above which qubits are assigned to the same cluster
+          :param cluster_threshold: correlations magnitude above which qubits are assigned
+                 to the same cluster
           :param max_size: maximal allowed size of the cluster
 
           :return: clusters_list: list of lists, each representing a single cluster
@@ -182,29 +192,22 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
         clusters = {'q%s' % qi: [[qi, 0., 0.]] for qi in qubit_indices}
         for qi in qubit_indices:
             for qj in qubit_indices:
-                ha, he = qi, qj
                 if qj > qi:
-                    corr_j_i, corr_i_j = self._correlations_table_pairs[he, ha], \
-                                         self._correlations_table_pairs[ha, he]
+                    corr_j_i, corr_i_j = self._correlations_table_pairs[qj, qi], \
+                                         self._correlations_table_pairs[qi, qj]
+
                     # if any of the qubit affects the other strongly enough,
                     # we assign them to the same cluster
-
-                    if corr_j_i >= threshold or corr_i_j >= threshold:
-                        # print(qi,qj,corr_j_i, corr_i_j)
+                    if corr_j_i >= cluster_threshold or corr_i_j >= cluster_threshold:
                         clusters['q%s' % qi].append([qj, corr_i_j, corr_j_i])
                         clusters['q%s' % qj].append([qi, corr_i_j, corr_j_i])
 
+        # Merge clusters containing the same qubits
         new_lists = []
-        # print(clusters)
         for key, value in clusters.items():
             clusters[key] = sorted(value, key=lambda x: x[0])
-            # print(clusters[key])
-            # print(clusters[key])
             new_lists.append([vi[0] for vi in clusters[key]])
-            # print([vi[0] for vi in value])
 
-        # print('new',new_lists)
-        #
         while anf.check_if_there_are_common_elements(new_lists):
             for i in range(len(new_lists)):
                 cl0 = new_lists[i]
@@ -213,22 +216,12 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
                     if len(anf.lists_intersection(cl0, cl1)) != 0:
                         new_lists[i] = anf.lists_sum(cl0, cl1)
 
-            # print(np.unique(new_lists))
-
-            # unique_lists = [list(small_list) for small_list in
-            #                 set(tuple(small_list) for small_list in new_lists)]
-            #
             unique_stuff = [sorted(l) for l in np.unique(new_lists)]
-
-            # unique_stuff = [sorted(small_list) for small_list in unique_lists]
             new_lists = copy.deepcopy(unique_stuff)
 
         clusters_list = new_lists
 
-        # print(clusters_list)
-        #
-        # raise KeyError
-
+        # Chop clusters if they exceed max size
         chopped_clusters = []
         for cluster in clusters_list:
             if len(cluster) > max_size:
@@ -238,78 +231,31 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
                     # given qubit and other guys in its cluster.
                     x = 0.0
                     for list_now in clusters['q%s' % qi]:
-                        # print(list_now)
-                        # choose the correlation between "qi" and other qubit in cluster which is higher
-                        # print(np.max())
-
                         x += np.max([list_now[1], list_now[2]])
 
                     correlations_sorting.append([qi, x])
-                # sort qubits in a cluster according to their total correlations value
-                # print(correlations_sorting)
+
                 correlations_sorted = sorted(correlations_sorting, key=lambda arg: arg[1],
                                              reverse=True)
-                # choose only "max_size" qubits to belong to given cluster
+
+                # choose only "maximal_size" qubits to belong to given cluster
                 qubits_sorted = [correlations_sorted[index][0] for index in range(max_size)]
             else:
                 qubits_sorted = cluster
             chopped_clusters.append(qubits_sorted)
 
-        # print(chopped_clusters)
         chopped_clusters_sorted = sorted(chopped_clusters, key=lambda y: y[0])
 
         self._clusters_list = chopped_clusters_sorted
 
         return chopped_clusters_sorted
 
-    def compute_clusters_heuristic(self,
-                                   max_size: float,
-                                   version: Optional[str] = 'v1',
-                                   kwargs: Optional[dict] = None) -> list:
-        """
-        Get partition of qubits in a device into disjoint "clusters".
-        This function uses various heuristic methods, specified via string "version".
-        It uses table of correlations from class property self._correlations_table_pairs
 
-        :param max_size: maximal allowed size of the cluster
-        :param version: string specifying type of heuristic
-        Possible values:
-            'v1' - heuristic that uses function partition_algorithm_v1_cummulative
-
-        :param kwargs: potential arguments that will be passed to clustering function.
-                           For possible parameters see descriptions of particular functions.
-
-        :return: clusters_list: list of lists, each representing a single cluster
-        """
-        self._clusters_list = []
-
-        if version == 'v1':
-            if kwargs is None:
-                alpha = 1
-                algorithm_runs = 1000
-                default_kwargs = {'alpha': alpha,
-                                  'N_alg': algorithm_runs,
-                                  'printing': False,
-                                  'drawing': False}
-
-                kwargs = default_kwargs
-
-            kwargs['C_maxsize'] = max_size
-            clusters_list, score = partition_algorithm_v1_cummulative(self._correlations_table_pairs,
-                                                                      **kwargs)
-
-            anf.cool_print('Current partitioning got score:', score)
-            self._clusters_list = clusters_list
-        else:
-            raise ValueError('No heuristic with that name: ' + version)
-
-        return clusters_list
-
-    def find_neighbors_of_cluster_naive(self,
-                                        cluster: list,
-                                        maximal_size: int,
-                                        threshold: float
-                                        ) -> list:
+    def _find_neighbors_of_cluster_naive(self,
+                                         cluster: List[int],
+                                         maximal_size: int,
+                                         threshold: float
+                                         ) -> List[int]:
 
         qubit_indices = self._qubit_indices
 
@@ -322,13 +268,19 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
                     corr_j_i = self._correlations_table_pairs[qi, qj]
                     # if any of the qubit affects the other strongly enough,
                     # we assign them to the same cluster
+                    # if cluster == [4, 5]:
+                    #     print(qj, corr_j_i)
 
                     affections_qj.append(corr_j_i)
             if qj not in cluster:
                 # print(affections_qj)
                 corr_j_i = np.max(affections_qj)
+
                 if corr_j_i >= threshold:
                     potential_neighbors.append([qj, corr_j_i])
+        #
+        # if cluster == [4, 5]:
+        #     raise KeyError
 
         sorted_neighbors = sorted(potential_neighbors, key=lambda x: x[1], reverse=True)
 
@@ -348,22 +300,10 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
         #
         #     return cutted_neighbors
 
-    def find_all_neighborhoods_naive(self,
-                                     maximal_size: int,
-                                     threshold: float
-                                     ):
-        self._neighborhoods = {}
-
-        for cluster in self._clusters_list:
-            self._neighborhoods[self.get_qubits_key(cluster)] = self.find_neighbors_of_cluster_naive(
-                cluster, maximal_size=maximal_size, threshold=threshold)
-
-        return self._neighborhoods
-
-    def find_neighbors_of_cluster(self,
-                                  cluster: list,
-                                  maximal_size: int,
-                                  chopping_threshold: Optional[float] = 0.) -> list:
+    def _find_neighbors_of_cluster_hollistic(self,
+                                             cluster: List[int],
+                                             maximal_size: int,
+                                             chopping_threshold: Optional[float] = 0.) -> List[int]:
         """
         For a given cluster of qubits, find qubits which are their all_neighbors, i.e., they affect the
         noise matrix of cluster significantly. Figure of merit for correlations here is:
@@ -372,7 +312,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
 
         where \Lambda_{cluster}^{Y_j} is the noise matrix describing noise on qubits in "cluster"
         provided that input state of qubit "j" was "Y_j".
-        See also description of self.compute_clusters_naive.
+        See also description of self._compute_clusters_naive.
 
 
         :param cluster: list of labels of qubits in a cluster
@@ -399,7 +339,6 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
 
         sorted_neighbours = sorted(potential_neighbours, key=lambda x: x[1], reverse=True)
 
-        # print(sorted_neighbours)
         neighbors_list = sorted(
             [sorted_neighbours[i][0] for i in range(int(np.min([size_cut, len(sorted_neighbours)]))) if
              chopping_threshold < sorted_neighbours[i][1]])
@@ -410,10 +349,11 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
 
         return neighbors_list
 
-    def find_all_neighborhoods(self,
-                               maximal_size,
-                               chopping_threshold: float,
-                               show_progress_bar: Optional[bool] = False):
+    def _find_all_neighborhoods_holistic(self,
+                                         maximal_size,
+                                         chopping_threshold: float,
+                                         show_progress_bar: Optional[bool] = False) \
+            -> Dict[str, List[int]]:
         self._neighborhoods = {}
         if show_progress_bar:
             from tqdm import tqdm
@@ -421,15 +361,124 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
 
             for index_cluster in tqdm(range(len(clusters_list))):
                 cluster = clusters_list[index_cluster]
-                self._neighborhoods[self.get_qubits_key(cluster)] = self.find_neighbors_of_cluster(
+                self._neighborhoods[
+                    self.get_qubits_key(cluster)] = self._find_neighbors_of_cluster_hollistic(
                     cluster,
                     maximal_size,
                     chopping_threshold)
 
         else:
             for cluster in self._clusters_list:
-                self._neighborhoods[self.get_qubits_key(cluster)] = self.find_neighbors_of_cluster(
+                self._neighborhoods[
+                    self.get_qubits_key(cluster)] = self._find_neighbors_of_cluster_hollistic(
                     cluster,
                     maximal_size,
                     chopping_threshold)
         return self._neighborhoods
+
+    def _find_all_neighborhoods_pairwise(self,
+                                         maximal_size: int,
+                                         threshold: float
+                                         ):
+        self._neighborhoods = {}
+
+        if self._correlations_table_pairs is None:
+            self.compute_correlations_table_pairs()
+
+        for cluster in self._clusters_list:
+            self._neighborhoods[self.get_qubits_key(cluster)] = self._find_neighbors_of_cluster_naive(
+                cluster, maximal_size=maximal_size, threshold=threshold)
+
+        return self._neighborhoods
+
+
+    def compute_clusters(self,
+                         maximal_size: float,
+                         method: Optional[str] = 'holistic_v1',
+                         method_kwargs: Optional[dict] = None) -> list:
+        """
+        Get partition of qubits in a device into disjoint "clusters".
+        This function uses various heuristic methods, specified via string "version".
+        It uses table of correlations from class property self._correlations_table_pairs
+
+        :param maximal_size: maximal allowed size of the cluster
+        :param method: string specifying type of heuristic
+        Possible values:
+            'pairwise' - heuristic that uses Algorithm 3 from Ref.[]
+            'holistic_v1' - heuristic that uses function partition_algorithm_v1_cummulative
+
+        :param method_kwargs: potential arguments that will be passed to clustering function.
+                           For possible parameters see descriptions of particular functions.
+
+        :return: clusters_list: list of lists, each representing a single cluster
+        """
+        self._clusters_list = []
+
+        if method == 'pairwise':
+            if method_kwargs is None:
+                default_kwargs = {'cluster_threshold': 0.02,
+                                  'maximal_size': maximal_size}
+
+                method_kwargs = default_kwargs
+
+            clusters_list = self._compute_clusters_naive(**method_kwargs)
+
+
+        elif method == 'holistic_v1':
+            if method_kwargs is None:
+                alpha = 1
+                algorithm_runs = 1000
+                default_kwargs = {'alpha': alpha,
+                                  'N_alg': algorithm_runs,
+                                  'printing': False,
+                                  'drawing': False}
+
+                method_kwargs = default_kwargs
+
+            method_kwargs['C_maxsize'] = maximal_size
+            clusters_list, score = partition_algorithm_v1_cummulative(self._correlations_table_pairs,
+                                                                      **method_kwargs)
+
+            anf.cool_print('Current partitioning got score:', score)
+        else:
+            raise ValueError('No heuristic with that name: ' + method)
+
+        self._clusters_list = clusters_list
+
+        return clusters_list
+
+    def find_all_neighborhoods(self,
+                               maximal_size: int,
+                               method: Optional[str] = 'holistic',
+                               method_kwargs: Optional[dict] = None):
+
+        if method == 'pairwise':
+            if method_kwargs is None:
+                default_kwargs = {'threshold': 0.01}
+                method_kwargs = default_kwargs
+
+            method_kwargs['maximal_size'] = maximal_size
+            neighborhoods = self._find_all_neighborhoods_pairwise(**method_kwargs)
+
+        elif method == 'holistic':
+            if method_kwargs is None:
+                default_kwargs = {'chopping_threshold': 0.0,
+                                  'show_progress_bar': True}
+                method_kwargs = default_kwargs
+            method_kwargs['maximal_size'] = maximal_size
+            neighborhoods = self._find_all_neighborhoods_holistic(**method_kwargs)
+
+        else:
+            raise ValueError('Wrong method name')
+
+        return neighborhoods
+
+    def print_properties(self):
+        # TODO FBM, OS: add this
+
+        return None
+
+    def draw_noise_model(self):
+        # TODO FBM, OS: add this
+
+        return None

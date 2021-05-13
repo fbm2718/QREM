@@ -15,6 +15,7 @@ import QREM
 functions for data analysis
 """
 
+
 def get_noise_matrix_from_counts_dict(results_dictionary):
     """Return noise matrix from counts dictionary.
     Assuming that the results are given only for qubits of interest.
@@ -186,7 +187,7 @@ def get_small_noise_matrices_depending_on_neighbours_states(big_noise_matrix,
                     # print(state_of_qubits_output,big_state_output)
                     dictionary_neighbours[state_of_neighbours_input][
                         int(state_of_qubits_output, 2), int(state_of_qubits_input, 2)] += \
-                    big_noise_matrix[int(big_state_output, 2), int(big_state_input, 2)]
+                        big_noise_matrix[int(big_state_output, 2), int(big_state_input, 2)]
 
     # raise KeyError
     for key in dictionary_neighbours.keys():
@@ -202,12 +203,9 @@ def get_small_noise_matrices_depending_on_neighbours_states(big_noise_matrix,
     return dictionary_neighbours
 
 
-
-
 """
 functions for noise model analysis
 """
-
 
 
 def get_averaged_noise_matrix_from_big_noise_matrix(big_lambda,
@@ -285,7 +283,8 @@ def get_small_noise_matrices_from_big_noise_matrix(big_lambda,
     # If there are no all_neighbors, then this corresponds to averaging over all qubits except "qubits_of_interest"
     if len(neighbors_of_interest) == 0 or neighbors_of_interest is None:
         small_lambdas = {'neighbours': None,
-                         'lambdas': get_averaged_noise_matrix_from_big_noise_matrix(big_lambda, qubits_of_interest)}
+                         'lambdas': get_averaged_noise_matrix_from_big_noise_matrix(big_lambda,
+                                                                                    qubits_of_interest)}
         return small_lambdas
 
     # check if there is no collision between qubits of interest and all_neighbors of interest (if there is, then the model won't be consistent)
@@ -309,7 +308,8 @@ def get_small_noise_matrices_from_big_noise_matrix(big_lambda,
     classical_register_big = ["{0:b}".format(i).zfill(big_N) for i in range(2 ** big_N)]
 
     # classical register on neighbours
-    classical_register_neighbours = ["{0:b}".format(i).zfill(neighbours_N) for i in range(2 ** neighbours_N)]
+    classical_register_neighbours = ["{0:b}".format(i).zfill(neighbours_N) for i in
+                                     range(2 ** neighbours_N)]
 
     # create dictionary of the marginal states of qubits of interest and all_neighbors for the whole register
     # (this function is storing data which could also be calculated in situ in the loops later)
@@ -385,9 +385,11 @@ def calculate_correlations_pairs(marginal_noise_matrices,
         for qj in qubit_indices:
             ha, he = mapping[qi], mapping[qj]
             if qj > qi:
-                big_lambda = marginal_noise_matrices['q%sq%s' % (qi, qj)]
-                lam_i_j = get_small_noise_matrices_from_big_noise_matrix(big_lambda, [0], [1])['lambdas']
-                lam_j_i = get_small_noise_matrices_from_big_noise_matrix(big_lambda, [1], [0])['lambdas']
+                big_lambda = marginal_noise_matrices['q%sq%s' % (qi, qj)]['averaged']
+                lam_i_j = get_small_noise_matrices_from_big_noise_matrix(big_lambda, [0], [1])[
+                    'lambdas']
+                lam_j_i = get_small_noise_matrices_from_big_noise_matrix(big_lambda, [1], [0])[
+                    'lambdas']
 
                 diff_i_j = lam_i_j['0'] - lam_i_j['1']
                 diff_j_i = lam_j_i['1'] - lam_j_i['0']
@@ -398,6 +400,90 @@ def calculate_correlations_pairs(marginal_noise_matrices,
                 correlations_table[he, ha] = correlation_j_i
 
     return correlations_table
+
+
+def get_different_lambdas(big_lambda,
+                          bits_of_interest,
+                          neighbours_of_interest,
+                          mapping=None):
+    if len(neighbours_of_interest) == 0 or neighbours_of_interest is None:
+        # print('no neighbours given, returning averaged matrix')
+        small_lambdas = {'neighbours': None,
+                         'lambdas': get_averaged_noise_matrix_from_big_noise_matrix(big_lambda,
+                                                                                    bits_of_interest)}
+        return small_lambdas
+
+    if len(np.setdiff1d(bits_of_interest, neighbours_of_interest)) != len(bits_of_interest):
+        print(bits_of_interest, neighbours_of_interest)
+        raise ValueError('Wrong indices')
+
+    big_N = int(np.log2(big_lambda.shape[0]))
+    small_N = len(bits_of_interest)
+    neighbours_N = len(neighbours_of_interest)
+
+    normalization = 2 ** (big_N - neighbours_N - small_N)
+
+    classical_register_big = ["{0:b}".format(i).zfill(big_N) for i in range(2 ** big_N)]
+    # classical_register_small = ["{0:b}".format(i).zfill(small_N) for i in range(2 ** small_N)]
+    classical_register_neighbours = ["{0:b}".format(i).zfill(neighbours_N) for i in
+                                     range(2 ** neighbours_N)]
+    indices_small = {}
+
+    for s in classical_register_big:
+        small_string = ''.join([list(s)[b] for b in bits_of_interest])
+        neighbours_string = ''.join([list(s)[b] for b in neighbours_of_interest])
+        indices_small[s] = [small_string, neighbours_string]
+
+    # print(indice1s_1small)
+    small_lambdas = {s: np.zeros((2 ** small_N, 2 ** small_N)) for s in classical_register_neighbours}
+    # print(s)
+    for i in range(2 ** big_N):
+        for j in range(2 ** big_N):
+            lambda_element = big_lambda[i, j]
+            ideal_state = "{0:b}".format(j).zfill(big_N)
+            measured_state = "{0:b}".format(i).zfill(big_N)
+
+            ideal_state_small = indices_small[ideal_state][0]
+            measured_state_small = indices_small[measured_state][0]
+
+            ideal_state_neighbours = indices_small[ideal_state][1]
+
+            small_lambdas[ideal_state_neighbours][int(measured_state_small, 2), int(ideal_state_small,
+                                                                                    2)] += lambda_element / normalization
+
+    lambdas_dict = {'lambdas': small_lambdas,
+                    }
+    if mapping is None:
+        lambdas_dict['neighbours'] = list(neighbours_of_interest)
+    else:
+        lambdas_dict['neighbours'] = [mapping[ni] for ni in neighbours_of_interest]
+
+    return lambdas_dict
+
+
+def calculate_correlations_pairs_alternative(noise_matrices, qubit_indices):
+    correlations_pairs = {}
+
+    correlations_pairs = np.zeros((len(qubit_indices), len(qubit_indices)), dtype=float)
+    pairs = [[qi, qj] for qi in qubit_indices for qj in qubit_indices if qj > qi]
+
+    for pair_num in pairs:
+        # print(pair)
+        (qi, qj) = pair_num
+
+        lam = noise_matrices[anf.get_qubits_key(pair_num)]['averaged']
+        if len(pair_num) == 2:
+            lamsij = get_different_lambdas(lam, [0], [1])['lambdas']
+            corr_i_from_j = 1 / 2 * np.linalg.norm(lamsij['0'] - lamsij['1'], ord=1)
+
+            correlations_pairs[qi, qj] = corr_i_from_j
+
+            lamsji = get_different_lambdas(lam, [1], [0])['lambdas']
+            corr_j_from_i = 1 / 2 * np.linalg.norm(lamsji['0'] - lamsji['1'], ord=1)
+
+            correlations_pairs[qj, qi] = corr_j_from_i
+
+    return correlations_pairs
 
 
 def get_average_correlations(small_noise_matrices):
@@ -427,9 +513,6 @@ def get_average_correlations(small_noise_matrices):
     return correlation_i_j, correlation_j_i
 
 
-
-
-
 def get_initial_clusters(qubit_indices,
                          correlations_table,
                          treshold):
@@ -445,12 +528,11 @@ def get_initial_clusters(qubit_indices,
 
     number_of_qubits = len(qubit_indices)
 
-    #If indices of qubits are incompatible with size of the array, we assume they should be numbered in ascending order
+    # If indices of qubits are incompatible with size of the array, we assume they should be numbered in ascending order
     if np.max(qubit_indices) > number_of_qubits:
         mapping = QREM.povmtools.get_enumerated_rev_map_from_indices(qubit_indices)
     else:
         mapping = {qi: qi for qi in qubit_indices}
-
 
     clusters = {'q%s' % qi: [qi] for qi in qubit_indices}
     for qi in qubit_indices:
@@ -458,7 +540,7 @@ def get_initial_clusters(qubit_indices,
             ha, he = mapping[qi], mapping[qj]
             if qj > qi:
                 corr_j_i, corr_i_j = correlations_table[he, ha], correlations_table[ha, he]
-                #if any of the qubit affects the other strong enough, we assign them to the same cluster
+                # if any of the qubit affects the other strong enough, we assign them to the same cluster
                 if corr_j_i >= treshold or corr_i_j >= treshold:
                     # print(qi, qj, corr_j_i, corr_i_j)
                     clusters['q%s' % qi].append(qj)
@@ -485,14 +567,13 @@ def get_initial_clusters(qubit_indices,
     return clusters_list
 
 
-
 def get_neighbours_of_cluster(dictionary,
-                        cluster,
-                        number_of_qubits,
-                        maximal_size,
-                        chop_treshold = 0.02,
-                        reverse_counts=False,
-                        qubits_mapping=None):
+                              cluster,
+                              number_of_qubits,
+                              maximal_size,
+                              chop_treshold=0.02,
+                              reverse_counts=False,
+                              qubits_mapping=None):
     import time
     converted_dict = dictionary
     chosen_cluster = cluster
@@ -500,28 +581,30 @@ def get_neighbours_of_cluster(dictionary,
     size_cut = maximal_size - len(chosen_cluster)
 
     potential_neighbours = []
-    for qi in range(0,number_of_qubits):
+    for qi in range(0, number_of_qubits):
         if qi not in chosen_cluster:
             subset_marginals_to_process = get_subsets_marginals_from_counts(converted_dict,
-                                                                       [chosen_cluster+[qi]],
-                                                                       reverse_counts=reverse_counts,
-                                                                       qubits_mapping = qubits_mapping)
-            noise_matrices_to_process = get_subset_noise_matrices_from_marginals(subset_marginals_to_process,
-                                                                                            [chosen_cluster+[qi]])
+                                                                            [chosen_cluster + [qi]],
+                                                                            reverse_counts=reverse_counts,
+                                                                            qubits_mapping=qubits_mapping)
+            noise_matrices_to_process = get_subset_noise_matrices_from_marginals(
+                subset_marginals_to_process,
+                [chosen_cluster + [qi]])
 
+            big_matrix = noise_matrices_to_process[
+                'q' + 'q'.join([str(qsmall) for qsmall in chosen_cluster + [qi]])]
 
-            big_matrix = noise_matrices_to_process['q'+'q'.join([str(qsmall) for qsmall in chosen_cluster+[qi]])]
+            t0 = time.time()
+            lam_ci_j = \
+            get_small_noise_matrices_from_big_noise_matrix(big_matrix, range(len(chosen_cluster)),
+                                                           [len(chosen_cluster)])['lambdas']
 
-            t0= time.time()
-            lam_ci_j = get_small_noise_matrices_from_big_noise_matrix(big_matrix, range(len(chosen_cluster)), [len(chosen_cluster)])['lambdas']
+            t1 = time.time()
+            lam_ci_j_v2 = get_small_noise_matrices_depending_on_neighbours_states(big_matrix, range(
+                len(chosen_cluster)), [len(chosen_cluster)])
+            t2 = time.time()
 
-            t1=time.time()
-            lam_ci_j_v2 = get_small_noise_matrices_depending_on_neighbours_states(big_matrix,range(len(chosen_cluster)), [len(chosen_cluster)])
-            t2=time.time()
-
-            print('First method:',t1-t0,'Second method:',t2-t1)
-
-
+            print('First method:', t1 - t0, 'Second method:', t2 - t1)
 
             diff_ci_j = lam_ci_j['0'] - lam_ci_j['1']
             diff_ci_j_v2 = lam_ci_j_v2['0'] - lam_ci_j_v2['1']
@@ -529,31 +612,27 @@ def get_neighbours_of_cluster(dictionary,
             correlation_ci_j = 1 / 2 * np.linalg.norm(diff_ci_j, ord=1)
             correlation_ci_j_v2 = 1 / 2 * np.linalg.norm(diff_ci_j_v2, ord=1)
 
-            if abs(correlation_ci_j-correlation_ci_j_v2)>10**(-5):
+            if abs(correlation_ci_j - correlation_ci_j_v2) > 10 ** (-5):
                 raise ValueError("Disagreement between methods")
             # print(correlation_ci_j,correlation_ci_j_v2)
 
-            potential_neighbours.append([qi,correlation_ci_j])
+            potential_neighbours.append([qi, correlation_ci_j])
 
+    sorted_neighbours = sorted(potential_neighbours, key=lambda x: x[1], reverse=True)
+    best_neighbours = sorted(
+        [sorted_neighbours[i][0] for i in range(size_cut) if chop_treshold < sorted_neighbours[i][1]])
 
-    sorted_neighbours = sorted(potential_neighbours,key = lambda x: x[1],reverse=True)
-    best_neighbours = sorted([sorted_neighbours[i][0] for i in range(size_cut) if chop_treshold<sorted_neighbours[i][1] ])
-
-    anf.cool_print('\nCluster:',chosen_cluster)
-    anf.cool_print('Best all_neighbors:',best_neighbours)
+    anf.cool_print('\nCluster:', chosen_cluster)
+    anf.cool_print('Best all_neighbors:', best_neighbours)
 
     return best_neighbours
-
-
-
-
 
 
 def get_clusters_and_neighbors_from_pairs(qubit_indices,
                                           correlations_2q,
                                           neighborhood_treshold=0.01,
                                           cluster_treshold=0.04):
-    #DEPRECIATED
+    # DEPRECIATED
 
     clusters = {'q%s' % i: [] for i in qubit_indices}
 
@@ -604,7 +683,6 @@ def get_clusters_and_neighbors_from_pairs(qubit_indices,
     return clusters_dict, neighborhoods_clusters, proper_clusters, neighborhoods_qubits
 
 
-
 """
 functions for error mitigation
 """
@@ -615,8 +693,8 @@ def get_pairs_correction_matrices(counts_dict,
                                   clusters,
                                   neighborhoods_clusters,
                                   backend_name,
-                                  calculate_mitigation_errors = True,
-                                  mapping_not_reversed = None):
+                                  calculate_mitigation_errors=True,
+                                  mapping_not_reversed=None):
     """Get two-qubit noise matrices for all pairs of qubits in a device
         :param counts_dict (ditionary): dictionary of DDOT results, KEY is INPUT classical state, and VALUE is dictionary
                                         of counts (results of experiment)
@@ -628,8 +706,7 @@ def get_pairs_correction_matrices(counts_dict,
         :return: clusters_list: list of lists, each representing a single cluster
    """
 
-
-    #Get correction matrices for all pairs of qubits
+    # Get correction matrices for all pairs of qubits
     number_of_qubits = len(qubit_indices)
 
     correction_indices = {}
@@ -638,9 +715,8 @@ def get_pairs_correction_matrices(counts_dict,
 
     highly_correlated_qubits = []
 
-
-    for i in tqdm(range(0,number_of_qubits)):
-        for j in range(i+1, number_of_qubits):
+    for i in tqdm(range(0, number_of_qubits)):
+        for j in range(i + 1, number_of_qubits):
             string_pair = 'q%sq%s' % (i, j)
 
             cluster_i = sorted([i] + clusters['q%s' % i])
@@ -657,10 +733,11 @@ def get_pairs_correction_matrices(counts_dict,
             # print(string_cluster_i,string_cluster_j)
 
             if len(anf.lists_intersection(cluster_i, cluster_j)) != 0:
-                #Check if clusters overlap. If yes, we treat them as single, big cluster
-                #and construct cluster-neighborhood noise model
+                # Check if clusters overlap. If yes, we treat them as single, big cluster
+                # and construct cluster-neighborhood noise model
 
-                dependencies_clusters_i_j = sorted(anf.lists_sum(neighborhoods_cluster_i, neighborhoods_cluster_j))
+                dependencies_clusters_i_j = sorted(
+                    anf.lists_sum(neighborhoods_cluster_i, neighborhoods_cluster_j))
                 matrices_clusters = get_subset_matrices(counts_dict,
                                                         anf.lists_sum(cluster_i, cluster_j),
                                                         dependencies_clusters_i_j,
@@ -674,24 +751,26 @@ def get_pairs_correction_matrices(counts_dict,
                 # print(matrices_clusters_old)
                 # enumerated_qubits = dict(enumerate(sorted(anf.lists_sum_multi([cluster_i,cluster_j,dependencies_clusters_i_j]))))
 
-                averaged_matrix_clusters_i_j = sum([lam for lam in matrices_clusters.values()]) / 2 ** (
-                    len(dependencies_clusters_i_j))
+                averaged_matrix_clusters_i_j = sum(
+                    [lam for lam in matrices_clusters.values()]) / 2 ** (
+                                                   len(dependencies_clusters_i_j))
 
                 if calculate_mitigation_errors:
                     mitigation_errors_ij = 0
-                    correction_norm_ij = np.linalg.norm(np.linalg.inv(averaged_matrix_clusters_i_j),ord=1)
+                    correction_norm_ij = np.linalg.norm(np.linalg.inv(averaged_matrix_clusters_i_j),
+                                                        ord=1)
                     # anf.cool_print('calculating','')
                     for lam in matrices_clusters.values():
-                        err_now = np.linalg.norm(averaged_matrix_clusters_i_j-lam,ord=1)
+                        err_now = np.linalg.norm(averaged_matrix_clusters_i_j - lam, ord=1)
                         # print(err_now)
-                        if err_now>mitigation_errors_ij:
+                        if err_now > mitigation_errors_ij:
                             mitigation_errors_ij = err_now
                     # anf.cool_print('ok', '')
-                    mitigation_errors_ij*=correction_norm_ij
+                    mitigation_errors_ij *= correction_norm_ij
 
 
             else:
-                #Check if clusters overlap. If not, we treat them as separate clusters.
+                # Check if clusters overlap. If not, we treat them as separate clusters.
                 dependencies_cluster_i = sorted(neighborhoods_clusters[string_cluster_i])
                 dependencies_cluster_j = sorted(neighborhoods_clusters[string_cluster_j])
 
@@ -707,9 +786,10 @@ def get_pairs_correction_matrices(counts_dict,
                                                          backend_name,
                                                          mapping=mapping_not_reversed)
 
-                intersection_i, intersection_j = anf.lists_intersection(dependencies_cluster_i,cluster_j),\
-                                                 anf.lists_intersection(dependencies_cluster_j,cluster_i)
-
+                intersection_i, intersection_j = anf.lists_intersection(dependencies_cluster_i,
+                                                                        cluster_j), \
+                                                 anf.lists_intersection(dependencies_cluster_j,
+                                                                        cluster_i)
 
                 # matrices_cluster_j_old = get_subset_matrices_old(counts_dict,cluster_j,neighborhoods_cluster_j)
                 # #
@@ -718,29 +798,32 @@ def get_pairs_correction_matrices(counts_dict,
 
                 # raise KeyboardInterrupt
 
-                if len(intersection_i)==0 and len(intersection_j)==0:
+                if len(intersection_i) == 0 and len(intersection_j) == 0:
 
                     # print(cluster_i,neighborhoods_cluster_i)
                     # print(matrices_cluster_i)
 
-                    #Check if clusters contain each others all_neighbors. If not, the noise matrix is simply a tensor product of clusters.
-                    averaged_matrix_cluster_i = sum([lam_i for lam_i in matrices_cluster_i.values()]) / 2 ** (
-                        len(dependencies_cluster_i))
+                    # Check if clusters contain each others all_neighbors. If not, the noise matrix is simply a tensor product of clusters.
+                    averaged_matrix_cluster_i = sum(
+                        [lam_i for lam_i in matrices_cluster_i.values()]) / 2 ** (
+                                                    len(dependencies_cluster_i))
 
-                    averaged_matrix_cluster_j = sum([lam_j for lam_j in matrices_cluster_j.values()]) / 2 ** (
-                        len(dependencies_cluster_j))
+                    averaged_matrix_cluster_j = sum(
+                        [lam_j for lam_j in matrices_cluster_j.values()]) / 2 ** (
+                                                    len(dependencies_cluster_j))
 
-                    averaged_matrix_clusters_i_j = np.kron(averaged_matrix_cluster_i, averaged_matrix_cluster_j)
-
+                    averaged_matrix_clusters_i_j = np.kron(averaged_matrix_cluster_i,
+                                                           averaged_matrix_cluster_j)
 
                     if calculate_mitigation_errors:
 
                         # anf.cool_print('calculating', '')
                         mitigation_errors_i, mitigation_errors_j = 0., 0.
 
-                        correction_norm_i, correction_norm_j = np.linalg.norm(np.linalg.inv(averaged_matrix_cluster_i),ord=1), \
-                                                               np.linalg.norm(np.linalg.inv(averaged_matrix_cluster_j),ord=1)
-
+                        correction_norm_i, correction_norm_j = np.linalg.norm(
+                            np.linalg.inv(averaged_matrix_cluster_i), ord=1), \
+                                                               np.linalg.norm(np.linalg.inv(
+                                                                   averaged_matrix_cluster_j), ord=1)
 
                         for lam in matrices_cluster_i.values():
                             err_now = np.linalg.norm(averaged_matrix_cluster_i - lam, ord=1)
@@ -754,15 +837,14 @@ def get_pairs_correction_matrices(counts_dict,
                             if err_now > mitigation_errors_j:
                                 mitigation_errors_j = err_now
 
-                        if mitigation_errors_i>0 and mitigation_errors_j>0:
-                            mitigation_errors_ij = mitigation_errors_i*mitigation_errors_j*correction_norm_i*correction_norm_j
-                        elif mitigation_errors_i>0 and mitigation_errors_j==0:
-                            mitigation_errors_ij = mitigation_errors_i*correction_norm_i
-                        elif mitigation_errors_i==0 and mitigation_errors_j>0:
-                            mitigation_errors_ij = mitigation_errors_j*correction_norm_j
+                        if mitigation_errors_i > 0 and mitigation_errors_j > 0:
+                            mitigation_errors_ij = mitigation_errors_i * mitigation_errors_j * correction_norm_i * correction_norm_j
+                        elif mitigation_errors_i > 0 and mitigation_errors_j == 0:
+                            mitigation_errors_ij = mitigation_errors_i * correction_norm_i
+                        elif mitigation_errors_i == 0 and mitigation_errors_j > 0:
+                            mitigation_errors_ij = mitigation_errors_j * correction_norm_j
                         else:
                             mitigation_errors_ij = 0
-
 
                         # print(mitigation_errors_ij)
                         # print(mitigation_errors_i,mitigation_errors_j)
@@ -773,76 +855,76 @@ def get_pairs_correction_matrices(counts_dict,
 
 
                 else:
-                    #Check if clusters are each others all_neighbors. If yes, the noise matrix needs to be constructed using
-                    #cluster-neighborhoods noise model with treating some members of clusters as neighbours
+                    # Check if clusters are each others all_neighbors. If yes, the noise matrix needs to be constructed using
+                    # cluster-neighborhoods noise model with treating some members of clusters as neighbours
 
-                    #average over neighbours of first cluster which do no include the members of second cluster
+                    # average over neighbours of first cluster which do no include the members of second cluster
                     averaged_matrices_cluster_i = average_over_some_qubits(matrices_cluster_i,
                                                                            dependencies_cluster_i,
                                                                            intersection_i)
 
-
-                    #average over neighbours of second cluster which do no include the members of first cluster
+                    # average over neighbours of second cluster which do no include the members of first cluster
                     averaged_matrices_cluster_j = average_over_some_qubits(matrices_cluster_j,
                                                                            dependencies_cluster_j,
                                                                            intersection_j)
 
-
-                    qubits_indices_enumerated = dict(enumerate(cluster_i+cluster_j))
+                    qubits_indices_enumerated = dict(enumerate(cluster_i + cluster_j))
                     rev_map_enumerated = anf.get_enumerated_rev_map(qubits_indices_enumerated)
 
                     qubit_indices_for_construction = []
-                    for clust in [cluster_i,cluster_j]:
+                    for clust in [cluster_i, cluster_j]:
                         qubit_indices_for_construction.append([rev_map_enumerated[ci] for ci in clust])
 
-                    averaged_matrices_cluster_i['neighbours'] = [rev_map_enumerated[ci] for ci in intersection_i]
-                    averaged_matrices_cluster_j['neighbours'] = [rev_map_enumerated[cj] for cj in intersection_j]
+                    averaged_matrices_cluster_i['neighbours'] = [rev_map_enumerated[ci] for ci in
+                                                                 intersection_i]
+                    averaged_matrices_cluster_j['neighbours'] = [rev_map_enumerated[cj] for cj in
+                                                                 intersection_j]
 
-                    properly_formatted_lambdas = [averaged_matrices_cluster_i,averaged_matrices_cluster_j]
+                    properly_formatted_lambdas = [averaged_matrices_cluster_i,
+                                                  averaged_matrices_cluster_j]
 
-
-                    averaged_matrix_clusters_i_j = fa.create_big_lambda(properly_formatted_lambdas,qubit_indices_for_construction)
-
-
+                    averaged_matrix_clusters_i_j = fa.create_big_lambda(properly_formatted_lambdas,
+                                                                        qubit_indices_for_construction)
 
                     if calculate_mitigation_errors:
                         # qubits_clusters_ij = anf.get_reversed_enumerated_from_indices(anf.lists_sum_multi([cluster_i,cluster_j]))
-                        qubits_ij = anf.get_reversed_enumerated_from_indices(anf.lists_sum_multi([cluster_i, cluster_j, dependencies_cluster_i, dependencies_cluster_j]))
+                        qubits_ij = anf.get_reversed_enumerated_from_indices(anf.lists_sum_multi(
+                            [cluster_i, cluster_j, dependencies_cluster_i, dependencies_cluster_j]))
 
-                        clu_i, clu_j = [qubits_ij[qc] for qc in cluster_i],  [qubits_ij[qc] for qc in cluster_j],
-                        deps_i, deps_j = [qubits_ij[qc] for qc in dependencies_cluster_i],  [qubits_ij[qc] for qc in dependencies_cluster_j]
+                        clu_i, clu_j = [qubits_ij[qc] for qc in cluster_i], [qubits_ij[qc] for qc in
+                                                                             cluster_j],
+                        deps_i, deps_j = [qubits_ij[qc] for qc in dependencies_cluster_i], [
+                            qubits_ij[qc] for qc in dependencies_cluster_j]
 
-
-                        all_qubit_ij = anf.lists_sum_multi([deps_i,deps_j])
-                        all_qubits_outside_ij = list(set(all_qubit_ij).difference(set(clu_i+clu_j)))
+                        all_qubit_ij = anf.lists_sum_multi([deps_i, deps_j])
+                        all_qubits_outside_ij = list(set(all_qubit_ij).difference(set(clu_i + clu_j)))
 
                         # print(qubits_ij,dependencies_cluster_j)
                         # print(deps_j)
                         # print(all_qubits_outside_ij)
-                        possible_states_ij_outside =  pdt.register_names_qubits(range(len(all_qubits_outside_ij)),len(all_qubits_outside_ij))
+                        possible_states_ij_outside = pdt.register_names_qubits(
+                            range(len(all_qubits_outside_ij)), len(all_qubits_outside_ij))
 
                         possible_states_ij = []
                         for k in range(len(possible_states_ij_outside)):
                             state_here = possible_states_ij_outside[k]
-                            better_statesize= len(list(state_here))+len(clu_i)+len(clu_j)
-                            new_state = np.zeros((better_statesize),dtype=str)
+                            better_statesize = len(list(state_here)) + len(clu_i) + len(clu_j)
+                            new_state = np.zeros((better_statesize), dtype=str)
 
                             for ciiiii in clu_i:
-                                new_state[ciiiii]='0'
+                                new_state[ciiiii] = '0'
                             for cjjjjj in clu_j:
                                 new_state[cjjjjj] = '0'
                             for kurde in range(len(state_here)):
-                                new_state[all_qubits_outside_ij[kurde]]=state_here[kurde]
+                                new_state[all_qubits_outside_ij[kurde]] = state_here[kurde]
                             new_state = ''.join([x for x in new_state])
                             possible_states_ij.append(new_state)
 
-
-
-
                         map_cluster = anf.get_reversed_enumerated_from_indices(sorted(clu_i + clu_j))
 
-                        matrices_cluster_i_proper, matrices_cluster_j_proper = copy.deepcopy(matrices_cluster_i), copy.deepcopy(matrices_cluster_j)
-                        if len(deps_i)==0:
+                        matrices_cluster_i_proper, matrices_cluster_j_proper = copy.deepcopy(
+                            matrices_cluster_i), copy.deepcopy(matrices_cluster_j)
+                        if len(deps_i) == 0:
                             matrices_cluster_i_proper['neighbours'] = None
                         else:
                             matrices_cluster_i_proper['neighbours'] = deps_i
@@ -852,38 +934,33 @@ def get_pairs_correction_matrices(counts_dict,
                         else:
                             matrices_cluster_j_proper['neighbours'] = deps_j
 
-
-
                         mitigation_errors_ij = 0
                         for state_possible in possible_states_ij:
-                            big_matrix_now = fa.create_big_lambda_modified([matrices_cluster_i_proper,matrices_cluster_j_proper],
-                                                                       [clu_i,clu_j],
-                                                                       state_possible,
-                                                                       map_cluster
-                                                                       )
-                            err_now = np.linalg.norm(averaged_matrix_clusters_i_j - big_matrix_now, ord=1)
+                            big_matrix_now = fa.create_big_lambda_modified(
+                                [matrices_cluster_i_proper, matrices_cluster_j_proper],
+                                [clu_i, clu_j],
+                                state_possible,
+                                map_cluster
+                                )
+                            err_now = np.linalg.norm(averaged_matrix_clusters_i_j - big_matrix_now,
+                                                     ord=1)
                             # print(err_now)
                             if err_now > mitigation_errors_ij:
                                 mitigation_errors_ij = err_now
 
-
-                        #TODO: Does this work already?
-
-
+                        # TODO: Does this work already?
 
                         # anf.cool_print('Finish this code dude','')
                         # raise KeyboardInterrupt("finish this code dude")
 
-
             sorted_quest = True
-            if cluster_i==cluster_j:
+            if cluster_i == cluster_j:
                 pass
             else:
                 for ccc1 in cluster_j:
                     for ccc0 in cluster_i:
-                        if ccc0>ccc1:
+                        if ccc0 > ccc1:
                             sorted_quest = False
-
 
             whole_marginal = sorted(anf.lists_sum(cluster_i, cluster_j))
             if not sorted_quest:
@@ -892,7 +969,7 @@ def get_pairs_correction_matrices(counts_dict,
                 import QREM.povmtools as qrem_pt
                 # anf.ptr(averaged_matrix_clusters_i_j)
 
-                qubits_in_here = cluster_i+cluster_j
+                qubits_in_here = cluster_i + cluster_j
                 sorted_qubits_in_here = dict(enumerate(sorted(qubits_in_here)))
                 print(cluster_i, cluster_j)
                 rev_map = anf.get_reversed_enumerated_from_indices(cluster_i + cluster_j)
@@ -900,21 +977,23 @@ def get_pairs_correction_matrices(counts_dict,
 
                 qubits_in_here_dict = dict(enumerate(qubits_in_here))
 
-                while qubits_in_here_dict!=sorted_qubits_in_here:
-                    for index_qubit_hehe in range(len(qubits_in_here)-1):
-                        if qubits_in_here[index_qubit_hehe]<qubits_in_here[index_qubit_hehe+1]:
+                while qubits_in_here_dict != sorted_qubits_in_here:
+                    for index_qubit_hehe in range(len(qubits_in_here) - 1):
+                        if qubits_in_here[index_qubit_hehe] < qubits_in_here[index_qubit_hehe + 1]:
                             pass
-                        elif qubits_in_here[index_qubit_hehe+1]<qubits_in_here[index_qubit_hehe]:
-                            averaged_matrix = qrem_pt.permute_matrix(averaged_matrix, len(whole_marginal),
-                                                                     [index_qubit_hehe+1,index_qubit_hehe+2])
+                        elif qubits_in_here[index_qubit_hehe + 1] < qubits_in_here[index_qubit_hehe]:
+                            averaged_matrix = qrem_pt.permute_matrix(averaged_matrix,
+                                                                     len(whole_marginal),
+                                                                     [index_qubit_hehe + 1,
+                                                                      index_qubit_hehe + 2])
 
                             anf.cool_print('Swapping qubits:', )
-                            print(qubits_in_here[index_qubit_hehe],qubits_in_here[index_qubit_hehe+1],index_qubit_hehe,index_qubit_hehe+1)
+                            print(qubits_in_here[index_qubit_hehe],
+                                  qubits_in_here[index_qubit_hehe + 1], index_qubit_hehe,
+                                  index_qubit_hehe + 1)
 
-                            qubits_in_here[index_qubit_hehe], qubits_in_here[index_qubit_hehe + 1] = qubits_in_here[index_qubit_hehe + 1], qubits_in_here[index_qubit_hehe]
-
-
-
+                            qubits_in_here[index_qubit_hehe], qubits_in_here[index_qubit_hehe + 1] = \
+                            qubits_in_here[index_qubit_hehe + 1], qubits_in_here[index_qubit_hehe]
 
                     qubits_in_here_dict = dict(enumerate(qubits_in_here))
 
@@ -934,13 +1013,10 @@ def get_pairs_correction_matrices(counts_dict,
             correction_matrices[string_marginal] = correction_matrix
             if calculate_mitigation_errors:
                 # print(string_marginal, mitigation_errors_ij)
-                mitigation_errors[string_marginal]= mitigation_errors_ij
+                mitigation_errors[string_marginal] = mitigation_errors_ij
 
-                if mitigation_errors_ij/2>=0.04:
-                    highly_correlated_qubits.append({'qubits':string_marginal,'error':mitigation_errors_ij/2})
-
+                if mitigation_errors_ij / 2 >= 0.04:
+                    highly_correlated_qubits.append(
+                        {'qubits': string_marginal, 'error': mitigation_errors_ij / 2})
 
     return correction_indices, correction_matrices, noise_matrices, highly_correlated_qubits, mitigation_errors
-
-
-

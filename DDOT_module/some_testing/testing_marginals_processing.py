@@ -89,7 +89,7 @@ print(marginals_analyzer_ddot.noise_matrices_dictionary['q0q1'])
 #                    'list_of_qubits': list_of_qubits,
 #                    'results_dictionary_preprocessed': dictionary_results,
 #                    'marginals_dictionary_pairs': marginals_analyzer_ddot.marginals_dictionary,
-#                    'noise_matrices_dictionary_pairs': marginals_analyzer_ddot.noise_matrices_dictionary
+#                    'noise_matrices_dictionary_initial': marginals_analyzer_ddot.noise_matrices_dictionary
 #                    }
 # # diction
 # #
@@ -114,13 +114,13 @@ marginal_dictionaries_pairs = dictionary_data['marginals_dictionary_pairs']
 # dictionary for which each KEY is label for qubits subset
 # and VALUE is effective noise matrix on that subset
 # in this example, we precomputed noise matrices for all pairs of qubits
-noise_matrices_dictionary_pairs = dictionary_data['noise_matrices_dictionary_pairs']
+noise_matrices_dictionary_pairs = dictionary_data['noise_matrices_dictionary_initial']
 
-# print(marginal_dictionaries_pairs['q0q1'])
-# noise_matrices_dictionary_pairs = marginals_analyzer_ddot.noise_matrices_dictionary
-# print(noise_matrices_dictionary_pairs['q0q1'])
+# print(marginal_dictionaries_initial['q0q1'])
+# noise_matrices_dictionary_initial = marginals_analyzer_ddot.noise_matrices_dictionary
+# print(noise_matrices_dictionary_initial['q0q1'])
 
-# print(noise_matrices_dictionary_pairs['q0q1'])
+# print(noise_matrices_dictionary_initial['q0q1'])
 # raise KeyError
 # initialize noise model generator
 noise_model_analyzer = NoiseModelGenerator(results_dictionary_ddot=dictionary_results,
@@ -129,7 +129,7 @@ noise_model_analyzer = NoiseModelGenerator(results_dictionary_ddot=dictionary_re
                                            marginals_dictionary=marginal_dictionaries_pairs,
                                            noise_matrices_dictionary=noise_matrices_dictionary_pairs)
 
-# print(noise_model_analyzer.noise_matrices_dictionary['q0q1'])
+# print(noise_model_analyzer_naive.noise_matrices_dictionary['q0q1'])
 
 noise_model_analyzer.compute_correlations_table_pairs()
 
@@ -150,15 +150,15 @@ old_clusters = dpf.get_initial_clusters(list(list_of_qubits),
 
 print(old_clusters)
 
-noise_model_analyzer.compute_clusters_naive(max_size=maximal_size,
-                                            threshold=threshold
-                                            )
+noise_model_analyzer._compute_clusters_naive(max_size=maximal_size,
+                                             cluster_threshold=threshold
+                                             )
 
 
 clusters_naive = noise_model_analyzer.clusters_list
 
-neighborhoods_naive = noise_model_analyzer.find_all_neighborhoods_naive(maximal_size=maximal_size,
-                                                                        threshold=0.02)
+neighborhoods_naive = noise_model_analyzer._find_all_neighborhoods_pairwise(maximal_size=maximal_size,
+                                                                            threshold=0.02)
 print(clusters_naive)
 print(neighborhoods_naive)
 

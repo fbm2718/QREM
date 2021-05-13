@@ -250,7 +250,7 @@ class DetectorTomographyFitter:
         Description:
             arrray_to_print method used for calculating symmetric m matrix.
         Parameters:
-            :param m_m: arrray_to_print matrix of which symmetric version will be calculated.
+            :param m_m: arrray_to_print matrix of which symmetric method will be calculated.
             :param m_r: Previously calculated R operator.
             :param m_lagrange_matrix:
         Returns:

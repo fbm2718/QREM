@@ -6,10 +6,12 @@ Created on Fri Feb 23 00:06:42 2018
 
 import numpy as np
 import cmath as c
-import copy
-import re
+import copy, os, re
+import datetime as dt
+import pickle
 from colorama import Fore, Style
 from collections import defaultdict
+from typing import List, Dict, Union, Optional
 
 epsilon = 10 ** (-7)
 pauli_sigmas = {
@@ -31,10 +33,15 @@ class key_dependent_dict(defaultdict):
         return ret
 
 
+def is_stochastic(a):
+    shape = a.shape[0]
+    for i in range(shape):
+        one_now = sum(a[:, i])
 
-
-
-
+        if abs(1 - one_now) >= 10 ** (-6):
+            # print(one_now,i)
+            return False
+    return True
 
 
 def binary_integer_format(integer, number_of_bits):
@@ -45,19 +52,19 @@ def get_reversed_enumerated_from_indices(indices):
     enumerated_dict = dict(enumerate(indices))
     rev_map = {}
     for k, v in enumerated_dict.items():
-        rev_map[v]=k
+        rev_map[v] = k
     return rev_map
+
 
 def get_reversed_enumerated_from_dict(enumerated_dict):
     rev_map = {}
     for k, v in enumerated_dict.items():
-        rev_map[v]=k
+        rev_map[v] = k
     return rev_map
 
 
 def get_qubit_indices_from_string(qubits_string,
                                   with_q=False):
-
     """Return list of qubit indices from the string of the form "q0q1q22q31"
     :param qubits_string (string): string which has the form of "q" followed by qubit index
     :param (optional) with_q (Boolean): specify whether returned indices should be in form of string with letter
@@ -75,11 +82,24 @@ def get_qubit_indices_from_string(qubits_string,
     numbers = re.findall(r'\d+', qubits_string)
 
     if with_q:
-        qubits = ['q'+s for s in numbers]
+        qubits = ['q' + s for s in numbers]
     else:
         qubits = [int(s) for s in numbers]
 
     return qubits
+
+
+def get_qubits_key(list_of_qubits: List[int]) -> str:
+    """ from subset of qubit indices get the string that labels this subset
+        using convention 'q5q6q12...' etc.
+    :param list_of_qubits: labels of qubits
+
+    :return: string label for qubits
+
+     NOTE: this function is "dual" to get_qubit_indices_from_string.
+    """
+
+    return 'q' + 'q'.join([str(s) for s in list_of_qubits])
 
 
 def round_matrix(m_a, decimal):
@@ -156,7 +176,8 @@ def spectral_decomposition(m_a):
     eigen_values, eigen_vectors = np.linalg.eig(m_a)
 
     d = m_a.shape[0]
-    projectors = [calculate_outer_product(np.array(eigen_vectors[:, i]).reshape(d, 1)) for i in range(d)]
+    projectors = [calculate_outer_product(np.array(eigen_vectors[:, i]).reshape(d, 1)) for i in
+                  range(d)]
 
     return eigen_values, projectors
 
@@ -192,9 +213,6 @@ def thresh(m_a, decimal=7):
     return m_b
 
 
-
-
-
 def lists_intersection(lst1, lst2):
     return list(set(lst1) & set(lst2))
 
@@ -206,29 +224,34 @@ def lists_difference(lst1, lst2):
 def lists_sum(lst1, lst2):
     return list(set(lst1).union(set(lst2)))
 
+
 def lists_sum_multi(lists):
     return set().union(*lists)
+
 
 def lists_intersection_multi(lists):
     l0 = lists[0]
     l1 = lists[1]
 
-    int_list = lists_intersection(l0,l1)
+    int_list = lists_intersection(l0, l1)
     for l in lists[2:]:
-        int_list = lists_intersection(int_list,l)
+        int_list = lists_intersection(int_list, l)
     return int_list
 
-def check_if_there_are_common_elements(lists):
 
+def check_if_there_are_common_elements(lists):
     for i in range(len(lists)):
-        for j in range(i+1, len(lists)):
-            if len(lists_intersection(lists[i],lists[j]))!=0:
+        for j in range(i + 1, len(lists)):
+            if len(lists_intersection(lists[i], lists[j])) != 0:
                 return True
 
     return False
 
 
 def find_significant_digit(x):
+    if x == np.Inf or x == np.nan:
+        return 0
+
     counter = 0
     passed = 0
 
@@ -255,13 +278,23 @@ def find_significant_digit(x):
 
     return counter
 
-def cool_print(a,b='',color=Fore.CYAN):
-    #a is printed with color
-    #b is printed without color
-    if b=='':
-        print(color+Style.BRIGHT+str(a)+Style.RESET_ALL)
+
+def cool_print(a, b='', color=Fore.CYAN):
+    # a is printed with color
+    # b is printed without color
+
+    if isinstance(color, str):
+        if color in ['red', 'RED', 'Red']:
+            color = Fore.RED
+        elif color in ['green', 'GREEN', 'Green']:
+            color = Fore.BLUE
+        elif color in ['blue', 'BLUE', 'Blue']:
+            color = Fore.GREEN
+
+    if b == '':
+        print(color + Style.BRIGHT + str(a) + Style.RESET_ALL)
     else:
-        print(color+Style.BRIGHT+str(a)+Style.RESET_ALL,repr(b))
+        print(color + Style.BRIGHT + str(a) + Style.RESET_ALL, repr(b))
 
 
 def bit_strings(n, rev=False):
@@ -278,7 +311,6 @@ def bit_strings(n, rev=False):
         return [(bin(j)[2:].zfill(n))[::-1] for j in list(range(2 ** n))]
     else:
         return [(bin(j)[2:].zfill(n)) for j in list(range(2 ** n))]
-
 
 
 def register_names_qubits(qs, qrs, rev=False):
@@ -310,13 +342,13 @@ def register_names_qubits(qs, qrs, rev=False):
     return relevant_names
 
 
-
 def get_module_directory():
-
-    from QREM import name_holder
-    name_holder = name_holder.__file__
+    from QREM import __init__
+    name_holder = __init__.__file__
 
     return name_holder[0:-15]
+
+
 from povms_qi import ancillary_functions
 
 
@@ -352,11 +384,83 @@ def print_array_nicely(arrray_to_print,
             elif (arrray_to_print.shape[1] == 1):
                 print([np.round(x[0], rounding_decimal) for x in arrray_to_print])
         else:
-
             B = copy.deepcopy(arrray_to_print)
             C = round_matrix(B, rounding_decimal)
             D = zeros_to_dots(C, rounding_decimal)
             print(pd.DataFrame(D))
     except(IndexError):
-        print(pd.DataFrame(np.array(np.round(arrray_to_print, rounding_decimal))))
+        if len(arrray_to_print.shape) == 1:
+            print([np.round(x, rounding_decimal) for x in arrray_to_print])
+        else:
+            print(pd.DataFrame(np.array(np.round(arrray_to_print, rounding_decimal))))
 
+
+def save_results_pickle(input_dict,
+                        directory,
+                        custom_name='no',
+                        getcwd=False):
+    if (directory != None):
+        fp0 = [s for s in directory]
+
+        if (fp0[len(fp0) - 1] != '/'):
+            fp0.append('/')
+        fp = ''.join(fp0)
+
+
+    else:
+        fp = ''
+    # Time& date
+    if (getcwd):
+        cwd = os.getcwd()
+    else:
+        cwd = ''
+    ct0 = str(dt.datetime.today())
+    ct1 = str.replace(ct0, ':', '_')
+    ct2 = str.replace(ct1, '.', '_')
+    ct3 = ct2[0:19]
+    # original_umask = os.umask(0)
+    # os.umask(original_umask)
+
+    main_directory = cwd + fp
+
+    # permission_mode=int('0777',8)
+    # os.chmod(main_directory,permission_mode)
+    check_dir = os.path.exists(main_directory)
+
+    if (check_dir == False):
+        # print()
+        #
+        # # oldmask = os.umask(000)
+        # print(main_directory)
+
+        try:
+            os.makedirs(main_directory)
+
+        except(FileExistsError):
+            import shutil
+            try:
+                shutil.rmtree(main_directory)
+                os.makedirs(main_directory)
+            except(FileExistsError):
+                os.makedirs(main_directory)
+
+        print(
+            Fore.CYAN + Style.BRIGHT + 'Attention: ' + Style.RESET_ALL + 'Directory ' + '"' + main_directory + '"' + ' was created.')
+        # os.umask(oldmask)
+        # os.chmod(main_directory,permission_mode)
+    if (custom_name == 'no'):
+        file_path = str(main_directory + 'Results_Object' + '___' + str(ct3))
+    else:
+        file_path = str(main_directory + custom_name)
+
+    # os.chmod(main_directory)
+    dict_results = input_dict
+
+    add_end = ''
+
+    if (file_path[len(file_path) - 4:len(file_path)] != '.pkl'):
+        add_end = '.pkl'
+
+    # os.chmod(file_path)
+    with open(file_path + add_end, 'wb') as f:
+        pickle.dump(dict_results, f, pickle.HIGHEST_PROTOCOL)

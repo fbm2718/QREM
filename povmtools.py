@@ -407,7 +407,7 @@ def is_valid_probability_vector(examined_vector: List[float], threshold=1e-5) ->
 
     Parameters:
         :param examined_vector: Vector of probabilities for which the validity is checked.
-        :param threshold: Error threshold when determining probabilities sum condition.
+        :param threshold: Error cluster_threshold when determining probabilities sum condition.
 
     Returns:
         Information whether  is a valid probability vector or not.

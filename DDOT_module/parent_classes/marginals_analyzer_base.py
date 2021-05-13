@@ -4,21 +4,51 @@ Created on 28.04.2021
 @author: Filip Maciejewski
 @contact: filip.b.maciejewski@gmail.com
 """
-from typing import Optional, Dict
-from DDOT_module.parent_classes.marginals_analyzer_interface import MarginalsAnalyzerInterface
+
 import numpy as np
+import re
+from typing import Optional, Dict, List
+from DDOT_module.parent_classes.marginals_analyzer_interface import MarginalsAnalyzerInterface
 from DDOT_module.functions import functions_data_analysis as fda
 from QREM import ancillary_functions as anf
-from typing import List
-import re
 
 
 class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
     '''
     This is base class for all the classes that will operate on marginal probability distributions.
     Methods of this class allow to calculate marginal distributions from experimental results.
-    Please note how we format results of experiments and marginal distributions
-    in the description of __init__.
+
+    In this class and its children, we use the following convention for:
+
+     1. Generic experimental results:
+    :param results_dictionary: Nested dictionary with following structure:
+
+    results_dictionary[label_of_experiment][bitstring_outcome] = number_of_occurrences
+
+    where:
+        -label_of_experiment is arbitrary label for particular experiment,
+        -bitstring_outcome is label for measurement outcome,
+        -number_of_occurrences is number of times that bitstring_outcome was recorded
+
+        Hence top-level key labels particular experiment
+        (one can think about quantum circuit implementation)
+        and its value is another dictionary with results of given experiment in the form
+        of dictionary of measurement outcomes
+
+
+    2. Results represented as marginal probability distributions:
+        :param marginals_dictionary: Nested dictionary with the following structure:
+
+        marginals_dictionary[label_of_experiment][label_of_subset] = marginal_probability_vector
+
+        where:
+            -label_of_experiment is the same as in results_dictionary and it labels results from which
+            marginal distributions were calculated
+            -label_of_subset is a label for qubits subset for which marginals were calculated.
+            We use convention that such label if of the form "q5q8q12..." etc., hence it is bitsring of
+            qubits labels starting from "q".
+            -marginal_probability_vector marginal distribution stored as vector
+
     '''
 
     def __init__(self,
@@ -33,38 +63,14 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
             It requires to provide results of experiments and information whether bitstrings should be
             read from right to left (when interpreting qubit labels)
 
-        :param results_dictionary: Nested dictionary with following structure:
-
-        results_dictionary[label_of_experiment][bitstring_outcome] = number_of_occurrences
-
-        where:
-        -label_of_experiment is arbitrary label for particular experiment,
-        -bitstring_outcome is label for measurement outcome,
-        -number_of_occurrences is number of times that bitstring_outcome was recorded
-
-        Hence top-level key labels particular experiment
-        (one can think about quantum circuit implementation)
-        and its value is another dictionary with results of given experiment in the form
-        of dictionary of measurement outcomes
-
+        :param results_dictionary: see class description
 
         :param bitstrings_right_to_left: specify whether bitstrings
                                     should be read from right to left (when interpreting qubit labels)
-        :param marginals_dictionary: Nested dictionary with the following structure:
-
-        marginals_dictionary[label_of_experiment][label_of_subset] = marginal_probability_vector
-
-        where:
-        -label_of_experiment is the same as in results_dictionary and it labels results from which
-        marginal distributions were calculated
-        -label_of_subset is a label for qubits subset for which marginals were calculated.
-        We use convention that such label if of the form "q5q8q12..." etc., hence it is bitsring of
-        qubits labels starting from "q".
-        -marginal_probability_vector marginal distribution stored as vector
+        :param marginals_dictionary: see class description
 
         NOTE: when user does not provide marginals_dictionary we create it during class initialization.
-        To this aim, we create "key_dependent_dicts"
-
+        To this aim, we create "key_dependent_dicts" (see below)
 
         """
 
@@ -153,45 +159,66 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         self._marginals_dictionary = {**self._marginals_dictionary,
                                       **marginals_dictionary_new}
 
-    def normalize_marginals(self):
+    def normalize_marginals(self,
+                            experiments_keys: Optional[List[str]] = None,
+                            marginals_keys: Optional[List[str]] = None) -> None:
+        """Go through marginals_dictionary stored as class' property
+           and normalize marginal distributions
+        :param experiments_keys: labels for experiments
+        :param marginals_keys: labels for qubit subsets
+        """
+        # If no labels of experiments are provided, we take all of them
+        if experiments_keys is None:
+            experiments_keys = self._marginals_dictionary.keys()
+
         # Loop through all experiments and marginals and normalize them.
-        for key_experiment in self._marginals_dictionary.keys():
-            for key_marginal in self._marginals_dictionary[key_experiment].keys():
+        for key_experiment in experiments_keys:
+            if marginals_keys is None:
+                # if no marginal keys are provided, we take all of them
+                looping_over = self._marginals_dictionary[key_experiment].keys()
+            else:
+                looping_over = marginals_keys
+            for key_marginal in looping_over:
                 self._marginals_dictionary[key_experiment][key_marginal] *= 1 / np.sum(
                     self._marginals_dictionary[key_experiment][key_marginal])
 
     def compute_marginals(self,
-                          experiment_key: str,
+                          experiment_keys: List[str],
                           subsets_list: List[List[int]]) -> None:
         """Return dictionary of marginal probability distributions from counts dictionary
-        :param experiment_key: key that labels experiment for which marginals should be taken
+        :param experiment_keys: list of keys that label experiments for which marginals should be taken
         :param subsets_list: list of subsets of qubits for which marginals should be calculated
         """
-        experimental_results = self._results_dictionary[experiment_key]
 
-        for subset in subsets_list:
-            # initialize marginal distribution
-            marginal_vector_now = np.zeros((int(2 ** len(subset)), 1),
-                                           dtype=float)
+        if isinstance(experiment_keys, str):
+            experiment_keys = [experiment_keys]
 
-            for outcome_bitstring, number_of_occurrences in experimental_results.items():
-                if self._bitstrings_right_to_left:
-                    # here we change the order of bitstring if it was specified
-                    outcome_bitstring = outcome_bitstring[::-1]
+        subset_strings_list = [self.get_qubits_key(subset) for subset in subsets_list]
+        for experiment_label in experiment_keys:
+            experimental_results = self._results_dictionary[experiment_label]
 
-                # get bitstring denoting state of qubits in the subset
-                marginal_key_now = ''.join([outcome_bitstring[b] for b in subset])
+            for subset_index in range(len(subsets_list)):
+                subset, subset_string = subsets_list[subset_index], subset_strings_list[subset_index]
+                # initialize marginal distribution
+                marginal_vector_now = np.zeros((int(2 ** len(subset)), 1),
+                                               dtype=float)
 
-                # add counts to the marginal distribution
-                marginal_vector_now[int(marginal_key_now, 2)] += number_of_occurrences
+                for outcome_bitstring, number_of_occurrences in experimental_results.items():
+                    if self._bitstrings_right_to_left:
+                        # here we change the order of bitstring if it was specified
+                        outcome_bitstring = outcome_bitstring[::-1]
 
-            qubits_string = self.get_qubits_key(subset)
+                    # get bitstring denoting state of qubits in the subset
+                    marginal_key_now = ''.join([outcome_bitstring[b] for b in subset])
 
-            # Here if there is no "qubits_string" KEY we use the fact that defaultly we use
-            # "key_dependent_dictionary". See description of __init__.
-            self._marginals_dictionary[experiment_key][qubits_string] += marginal_vector_now
+                    # add counts to the marginal distribution
+                    marginal_vector_now[int(marginal_key_now, 2)] += number_of_occurrences
 
-        self.normalize_marginals()
+                # Here if there is no "qubits_string" KEY we use the fact that defaultly we use
+                # "key_dependent_dictionary". See description of __init__.
+                self._marginals_dictionary[experiment_label][subset_string] += marginal_vector_now
+
+        self.normalize_marginals(experiment_keys, subset_strings_list)
 
     def compute_all_marginals(self,
                               subsets_list: List[List[int]],
@@ -212,7 +239,7 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
             keys_list_range = tqdm(keys_list_range)
 
         for key_index in keys_list_range:
-            self.compute_marginals(keys_list[key_index], subsets_list)
+            self.compute_marginals([keys_list[key_index]], subsets_list)
 
     def get_marginals(self,
                       experiment_key: str,
@@ -236,9 +263,9 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
             subset, key_now = subsets_list[i], keys_list[i]
 
             if experiment_key not in self._marginals_dictionary.keys():
-                self.compute_marginals(experiment_key, [subset])
+                self.compute_marginals([experiment_key], [subset])
             elif key_now not in self._marginals_dictionary[experiment_key].keys():
-                self.compute_marginals(experiment_key, [subset])
+                self.compute_marginals([experiment_key], [subset])
 
         return {key_now: self._marginals_dictionary[experiment_key][key_now]
                 for key_now in keys_list}

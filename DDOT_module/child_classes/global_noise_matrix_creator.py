@@ -5,23 +5,19 @@ Created on 29.04.2021
 @contact: filip.b.maciejewski@gmail.com
 """
 import numpy as np
-from typing import Optional
+from typing import Optional, Dict, List, Union
 
 
 class GlobalNoiseMatrixCreator:
     def __init__(self,
-                 noise_matrices_dictionary: dict,
-                 clusters_dictionary: Optional[dict] = None,
-                 neighborhoods: Optional[dict] = None,
+                 noise_matrices_dictionary: Dict[
+                     str, Union[np.ndarray, Dict[str, Dict[str, np.ndarray]]]],
+                 clusters_list: Optional[List[List[int]]] = None,
+                 neighborhoods: Optional[Dict[str, List[int]]] = None,
                  ) -> None:
 
         self._noise_matrices_dictionary = noise_matrices_dictionary
-        if clusters_dictionary is None:
-            clusters_dictionary = {}
-        if neighborhoods is None:
-            neighborhoods = {}
-
-        self._clusters_dictionary = clusters_dictionary
+        self._clusters_list = clusters_list
         self._neighborhoods = neighborhoods
 
         self._matrix_elements_dictionary = {}
@@ -31,25 +27,26 @@ class GlobalNoiseMatrixCreator:
         return 'q' + 'q'.join([str(s) for s in list_of_qubits])
 
     def compute_global_noise_matrix(self,
-                                    clusters_list: list,
-                                    neighbors_of_clusters: Optional[list] = None,
-                                    state_of_neighbors: Optional[str] = None,
-                                    mapping_cluster_qubits: Optional[dict] = None):
+                                    clusters_list: Optional[List[List[int]]] = None,
+                                    neighbors_of_clusters: Optional[List[List[int]]] = None,
+                                    state_of_neighbors: Optional[str] = None):
+
+        if clusters_list is None:
+            if self._clusters_list is None:
+                raise ValueError('Please provide clusters list.')
+
+            clusters_list = self._clusters_list
 
         if neighbors_of_clusters is None:
+            if self._neighborhoods is None:
+                raise ValueError('Please provide neighbors list')
             neighbors_of_clusters = []
-            for clust in clusters_list:
-                neighbors_of_clusters.append(self._neighborhoods[self.get_qubits_key(clust)])
-
-
-
+            for cluster in clusters_list:
+                neighbors_of_clusters.append(self._neighborhoods[self.get_qubits_key(cluster)])
 
         lambdas = [self._noise_matrices_dictionary[self.get_qubits_key(clust)] for clust in
                    clusters_list]
         number_of_qubits = sum([len(inds) for inds in clusters_list])
-
-        if mapping_cluster_qubits is None:
-            mapping_cluster_qubits = {q: q for q in range(50)}
 
         d = int(2 ** number_of_qubits)
 
@@ -88,8 +85,12 @@ class GlobalNoiseMatrixCreator:
                         # print(ideal_state, neighbours_now, neighbors_string, input_state_neighbors)
                         # print(lambdas[cluster_index])
                         # print(lambdas[cluster_index].keys())
-                        lambda_of_interest = lambdas[cluster_index][neighbors_string][
-                            input_state_neighbors]
+                        if neighbors_string in lambdas[cluster_index].keys():
+                            lambda_of_interest = lambdas[cluster_index][neighbors_string][
+                                input_state_neighbors]
+                        else:
+                            lambda_of_interest = lambdas[cluster_index][
+                                input_state_neighbors]
 
                     else:
                         # print(lambdas[cluster_index])
@@ -97,19 +98,17 @@ class GlobalNoiseMatrixCreator:
                             lambda_of_interest = lambdas[cluster_index]['averaged']
                         except(KeyError):
                             try:
-                                print(cluster_index, clusters_list[cluster_index], neighbours_now,
-                                      lambdas)
+                                # print(cluster_index, clusters_list[cluster_index], neighbours_now,
+                                #       lambdas)
                                 lambda_of_interest = lambdas[cluster_index]['']
                             except(KeyError):
                                 # print('this:',neighbours_now,lambdas[cluster_index])
                                 raise KeyError('Something wrong with averaged lambda')
 
                     small_string_ideal = ''.join(
-                        [list(ideal_state)[mapping_cluster_qubits[b]] for b in
-                         indices_of_interest_now])
+                        [list(ideal_state)[b] for b in indices_of_interest_now])
                     small_string_measured = ''.join(
-                        [list(measured_state)[mapping_cluster_qubits[b]] for b in
-                         indices_of_interest_now])
+                        [list(measured_state)[b] for b in indices_of_interest_now])
 
                     element *= lambda_of_interest[
                         int(small_string_measured, 2), int(small_string_ideal, 2)]

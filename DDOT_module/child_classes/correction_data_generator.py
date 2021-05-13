@@ -9,58 +9,85 @@ import copy
 import numpy as np
 from typing import Optional, Dict, Union, List
 from QREM import ancillary_functions as anf
-from DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
+from DDOT_module.child_classes.noise_model_generator_vanilla import NoiseModelGenerator
 from DDOT_module.child_classes.global_noise_matrix_creator import GlobalNoiseMatrixCreator
 
 
-class CorrectionDataGenerator(DDTMarginalsAnalyzer):
+class CorrectionDataGenerator(NoiseModelGenerator):
     """
         1
     """
 
     def __init__(self,
-                 results_dictionary_ddot: Dict[str, Dict[str, int]],
+                 results_dictionary_ddt: Dict[str, Dict[str, int]],
                  bitstrings_right_to_left: bool,
                  number_of_qubits: int,
-                 marginals_dictionary: Dict[str, Dict[str, np.ndarray]],
-                 clusters_list: List[List[int]],
-                 neighborhoods: Dict[str, List[int]],
+                 marginals_dictionary: Optional[Dict[str, Dict[str, np.ndarray]]] = None,
+                 clusters_list: Optional[List[List[int]]]=None,
+                 neighborhoods: Optional[Dict[str, List[int]]]=None,
                  noise_matrices_dictionary: Optional[
                      Dict[str, Union[np.ndarray, Dict[str, Dict[str, np.ndarray]]]]] = None
                  ) -> None:
 
-        super().__init__(results_dictionary_ddot,
+        super().__init__(results_dictionary_ddt,
                          bitstrings_right_to_left,
+                         number_of_qubits,
                          marginals_dictionary,
-                         noise_matrices_dictionary
+                         noise_matrices_dictionary,
+                         clusters_list,
+                         neighborhoods
                          )
         self._number_of_qubits = number_of_qubits
         self._qubit_indices = range(number_of_qubits)
 
-        self._clusters_list = clusters_list
-        self._neighborhoods = neighborhoods
+        if clusters_list is None:
+            clusters_dictionary = {}
 
-        clusters_dictionary = {'q%s' % qi: [] for qi in self._qubit_indices}
-        for cluster in clusters_list:
-            for qi in cluster:
-                for qj in cluster:
-                    if qi != qj:
-                        clusters_dictionary['q%s' % qi].append(qj)
+        else:
+            clusters_dictionary = {'q%s' % qi: [] for qi in self._qubit_indices}
+            for cluster in self._clusters_list:
+                for qi in cluster:
+                    for qj in cluster:
+                        if qi != qj:
+                            clusters_dictionary['q%s' % qi].append(qj)
 
-        self._clusters_dictionary = clusters_dictionary
 
         self._noise_matrices = {}
         self._correction_matrices = {}
         self._mitigation_errors = {}
         self._correction_indices = {}
 
+        self._clusters_dictionary = clusters_dictionary
+
+    # TODO FBM: add higher locality of hamiltonians
+
+
+    def set_clusters_dictionary(self):
+        clusters_dictionary = {'q%s' % qi: [] for qi in self._qubit_indices}
+        for cluster in self._clusters_list:
+            for qi in cluster:
+                for qj in cluster:
+                    if qi != qj:
+                        clusters_dictionary['q%s' % qi].append(qj)
+        self._clusters_dictionary = clusters_dictionary
+
+
+
+
+
     def compute_pairs_correction_matrices(self,
                                           pairs_list: List[List[int]]) -> None:
 
-        #TODO FBM: split this into several smaller functions
+        # TODO FBM: split this into several smaller functions
+
+        # TODO FBM: generalize for more than two-qubit subsets
 
         # TODO FBM: add mitigation errors
         calculate_mitigation_errors = False
+
+        self.set_clusters_dictionary()
+
+        testing_averagin = True
 
         highly_correlated_qubits = []
 
@@ -84,15 +111,36 @@ class CorrectionDataGenerator(DDTMarginalsAnalyzer):
                 # Check if clusters overlap. If yes, we treat them as single, big cluster
                 # and construct cluster-neighborhood noise model
                 dependencies_clusters_i_j = sorted(
-                    anf.lists_sum(neighborhoods_cluster_i, neighborhoods_cluster_j))
+                    anf.lists_sum(neighborhoods_cluster_i,
+                                  neighborhoods_cluster_j))
 
-                matrices_clusters = self.get_noise_matrix_dependent(
-                    anf.lists_sum(cluster_i, cluster_j),
-                    dependencies_clusters_i_j)
+                if testing_averagin:
+                    averaged_matrix_clusters_i_j = self._get_noise_matrix_averaged(
+                        sorted(anf.lists_sum(cluster_i, cluster_j)))
 
-                averaged_matrix_clusters_i_j = sum(
-                    [lam for lam in matrices_clusters.values()]) / 2 ** (
-                                                   len(dependencies_clusters_i_j))
+                    # matrices_clusters_test = self.get_noise_matrix_dependent(
+                    #     anf.lists_sum(cluster_i, cluster_j),
+                    #     dependencies_clusters_i_j)
+                    # np.testing.assert_array_almost_equal(averaged_matrix_clusters_i_j,
+                    #                                      sum(
+                    #                                          [lam for lam in
+                    #                                           matrices_clusters_test.values()]) / 2 ** (
+                    #                                          len(dependencies_clusters_i_j))
+                    #                                      )
+
+                else:
+                    matrices_clusters = self.get_noise_matrix_dependent(
+                        anf.lists_sum(cluster_i, cluster_j),
+                        dependencies_clusters_i_j)
+
+                    averaged_matrix_clusters_i_j = sum(
+                        [lam for lam in matrices_clusters.values()]) / 2 ** (
+                                                       len(dependencies_clusters_i_j))
+
+
+
+
+
 
                 if calculate_mitigation_errors:
                     mitigation_errors_ij = 0
@@ -122,16 +170,25 @@ class CorrectionDataGenerator(DDTMarginalsAnalyzer):
                                                                         cluster_i)
 
                 if len(intersection_i) == 0 and len(intersection_j) == 0:
-
-                    # Check if clusters contain each others all_neighbors.
+                    # Check if clusters contain each others neighbors.
                     # If not, the noise matrix is simply a tensor product of clusters.
-                    averaged_matrix_cluster_i = sum(
-                        [lam_i for lam_i in matrices_cluster_i.values()]) / 2 ** (
-                                                    len(dependencies_cluster_i))
 
-                    averaged_matrix_cluster_j = sum(
-                        [lam_j for lam_j in matrices_cluster_j.values()]) / 2 ** (
-                                                    len(dependencies_cluster_j))
+                    if testing_averagin:
+                        averaged_matrix_cluster_i = self._get_noise_matrix_averaged(cluster_i)
+                        averaged_matrix_cluster_j = self._get_noise_matrix_averaged(cluster_j)
+
+                        # np.testing.assert_array_almost_equal(averaged_matrix_cluster_i,sum(
+                        #     [lam_i for lam_i in matrices_cluster_i.values()]) / 2 ** (
+                        #                                 len(dependencies_cluster_i)))
+
+
+                    else:
+                        averaged_matrix_cluster_i = sum(
+                            [lam_i for lam_i in matrices_cluster_i.values()]) / 2 ** (
+                                                        len(dependencies_cluster_i))
+                        averaged_matrix_cluster_j = sum(
+                            [lam_j for lam_j in matrices_cluster_j.values()]) / 2 ** (
+                                                        len(dependencies_cluster_j))
 
                     averaged_matrix_clusters_i_j = np.kron(averaged_matrix_cluster_i,
                                                            averaged_matrix_cluster_j)
@@ -167,7 +224,7 @@ class CorrectionDataGenerator(DDTMarginalsAnalyzer):
                             mitigation_errors_ij = 0
 
                 else:
-                    # Check if clusters are each others all_neighbors.
+                    # Check if clusters are each others neighbors.
                     # If yes, the noise matrix needs to be constructed using
                     # cluster-neighborhoods noise model with treating
                     # some members of clusters as neighbours
@@ -226,7 +283,7 @@ class CorrectionDataGenerator(DDTMarginalsAnalyzer):
                     neighbors_for_construction = neighbors_for_construction_modified
 
                     big_lambda_creator_now = GlobalNoiseMatrixCreator(
-                        noise_matrices_dictionary=properly_formatted_lambdas)
+                        properly_formatted_lambdas)
                     averaged_matrix_clusters_i_j = \
                         big_lambda_creator_now.compute_global_noise_matrix(
                             qubit_indices_for_construction,
@@ -377,23 +434,22 @@ class CorrectionDataGenerator(DDTMarginalsAnalyzer):
         self._mitigation_errors = {}
         self._correction_indices = {}
 
+        range_pairs = range(len(pairs_list))
+
         if show_progress_bar:
             from tqdm import tqdm
+            range_pairs = tqdm(range_pairs)
 
-            for pair_index in tqdm(range(len(pairs_list))):
-                pair = pairs_list[pair_index]
-                pair_key = self.get_qubits_key(pair)
-                if pair_key not in self._correction_indices.keys():
-                    self.compute_pairs_correction_matrices([pair], False)
-        else:
-            for pair in pairs_list:
-                pair_key = self.get_qubits_key(pair)
-
-                if pair_key not in self._correction_indices.keys():
-                    self.compute_pairs_correction_matrices([pair], False)
+        for pair_index in range_pairs:
+            pair = pairs_list[pair_index]
+            pair_key = self.get_qubits_key(pair)
+            if pair_key not in self._correction_indices.keys():
+                self.compute_pairs_correction_matrices([pair])
 
         correction_data = {'correction_matrices': self._correction_matrices,
                            'noise_matrices': self._noise_matrices,
                            'correction_indices': self._correction_indices}
+
+
 
         return correction_data
