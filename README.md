@@ -80,7 +80,7 @@ we will use prefix _m__, to mark all matrices.
 by classical post-processing based on detector tomography", 
 [Quantum 4, 257 (2020)](https://quantum-journal.org/papers/q-2020-04-24-257/)
 
-[0.5] Filip B. Maciejewski, Flavio Baccari Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of realistic readout noise with applications to the Quantum Approximate Optimization Algorithm", 
+[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of realistic readout noise with applications to the Quantum Approximate Optimization Algorithm", 
 [arxiv:	arXiv:2101.02331 (2021)](https://arxiv.org/abs/2101.02331)
   
 **Important quantum information ideas appearing in the code are, to a higher or lower degree, described in following 

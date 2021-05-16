@@ -14,7 +14,7 @@ from QREM import ancillary_functions as anf
 
 
 class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
-    '''
+    """
     This is base class for all the classes that will operate on marginal probability distributions.
     Methods of this class allow to calculate marginal distributions from experimental results.
 
@@ -45,11 +45,13 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
             -label_of_experiment is the same as in results_dictionary and it labels results from which
             marginal distributions were calculated
             -label_of_subset is a label for qubits subset for which marginals were calculated.
-            We use convention that such label if of the form "q5q8q12..." etc., hence it is bitsring of
+            We use convention that such label if of the form "q5q8q12..." etc., hence it is bitstring of
             qubits labels starting from "q".
             -marginal_probability_vector marginal distribution stored as vector
 
-    '''
+    """
+
+    #TODO FBM: add coarse-graining functions for marginals as class methods
 
     def __init__(self,
                  results_dictionary: Dict[str, Dict[str, int]],
@@ -58,11 +60,6 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
                  ) -> None:
 
         """
-        Description:
-            This is default constructor for MarginalsAnalyzerBase objects.
-            It requires to provide results of experiments and information whether bitstrings should be
-            read from right to left (when interpreting qubit labels)
-
         :param results_dictionary: see class description
 
         :param bitstrings_right_to_left: specify whether bitstrings
@@ -71,7 +68,6 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
 
         NOTE: when user does not provide marginals_dictionary we create it during class initialization.
         To this aim, we create "key_dependent_dicts" (see below)
-
         """
 
         if marginals_dictionary is None:
@@ -214,7 +210,7 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
                     # add counts to the marginal distribution
                     marginal_vector_now[int(marginal_key_now, 2)] += number_of_occurrences
 
-                # Here if there is no "qubits_string" KEY we use the fact that defaultly we use
+                # Here if there is no "qubits_string" KEY we use the fact that by default we use
                 # "key_dependent_dictionary". See description of __init__.
                 self._marginals_dictionary[experiment_label][subset_string] += marginal_vector_now
 
@@ -281,12 +277,12 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         :param bits_of_interest: bits we are interested in (so we average over other bits)
                                 Assuming that qubits are labeled
                                 from 0 to log2(len(global_probability_distribution))
-        :param register_names: bitstrings register bistring_names, default is
+        :param register_names: bitstrings register, default is
                                '00...00', '000...01', '000...10', ..., etc.
 
         :return: marginal_distribution : marginal probability distribution
 
-        NOTE: we identify bits with qubits in the variables bistring_names
+        NOTE: we identify bits with qubits in the variables bitstring_names
 
         #TODO FBM: do some speed tests on some details of those solutions
         """
@@ -304,17 +300,17 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         dimension_of_marginal = 2 ** number_of_bits_in_marginal
 
         if register_names is None:
-            bistring_names = anf.register_names_qubits(range(global_number_of_qubits),
-                                                       global_number_of_qubits)
+            bitstring_names = anf.register_names_qubits(range(global_number_of_qubits),
+                                                        global_number_of_qubits)
         else:
-            bistring_names = register_names
+            bitstring_names = register_names
 
         marginal_distribution = np.zeros((dimension_of_marginal, 1), dtype=float)
         for j in range(global_dimension):
             # this is slightly faster than going through "for bitstring_global in bitstring_names
             # and then converting bitstring_global to integer
             # and also faster than creating the global bitstring in situ
-            bitstring_global = bistring_names[j]
+            bitstring_global = bitstring_names[j]
 
             bitstring_local = ''.join(
                 [bitstring_global[qubit_index] for qubit_index in bits_of_interest])

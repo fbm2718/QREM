@@ -135,7 +135,7 @@ def indices_array(m_as, k=2, x=[], p=0):
     # p - logical help, do not change
 
     # returns ordered array of size (k**(len(arrray_to_print)))
-    # element i,j,k means Ai otimes Aj otimes Ak etc
+    # element i_index,j,k means Ai otimes Aj otimes Ak etc
 
     if k == 1:
         return m_as
@@ -182,10 +182,10 @@ def euler_angles_1q(unitary_matrix):
     phase = la.det(unitary_matrix) ** (-1.0 / 2.0)
     U = phase * unitary_matrix  # U in SU(2)
     # OpenQASM SU(2) parameterization:
-    # U[0, 0] = exp(-i(phi+lambda)/2) * cos(theta/2)
-    # U[0, 1] = -exp(-i(phi-lambda)/2) * sin(theta/2)
-    # U[1, 0] = exp(i(phi-lambda)/2) * sin(theta/2)
-    # U[1, 1] = exp(i(phi+lambda)/2) * cos(theta/2)
+    # U[0, 0] = exp(-i_index(phi+lambda)/2) * cos(theta/2)
+    # U[0, 1] = -exp(-i_index(phi-lambda)/2) * sin(theta/2)
+    # U[1, 0] = exp(i_index(phi-lambda)/2) * sin(theta/2)
+    # U[1, 1] = exp(i_index(phi+lambda)/2) * cos(theta/2)
     theta = 2 * math.atan2(abs(U[1, 0]), abs(U[0, 0]))
 
     # Find phi and lambda
@@ -403,7 +403,7 @@ def get_diagonal_povm_part(povm: List[np.ndarray]) -> List[np.ndarray]:
 def is_valid_probability_vector(examined_vector: List[float], threshold=1e-5) -> bool:
     """
     Description:
-        Checks if given vector is valid probability vector i.e. has only positive values that sums to 1.
+        Checks if given vector is valid probability vector i_index.e. has only positive values that sums to 1.
 
     Parameters:
         :param examined_vector: Vector of probabilities for which the validity is checked.
@@ -460,13 +460,13 @@ def find_closest_prob_vector(quasiprobability_vector: List[float]) -> List[float
     # Initiate accumulator
     a = 0
 
-    # go from the i=d
+    # go from the i_index=d
     for i in np.arange(0, d)[::-1]:
 
         # get vector element
         mu_i = p1_sorted[i][1]
 
-        # if mu_i +a/(i+1) is negative, do the following:
+        # if mu_i +a/(i_index+1) is negative, do the following:
         if mu_i + a / (i + 1) < 0:
             # add mu_i to accumulator
             a += mu_i

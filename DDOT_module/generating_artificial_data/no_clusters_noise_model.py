@@ -5,7 +5,7 @@ Created on 05.05.2021
 @contact: filip.b.maciejewski@gmail.com
 """
 
-from QREM.DDOT_module.examples.generating_artificial_data import helper_functions as hpf
+from DDOT_module.generating_artificial_data import helper_functions as hpf
 from QREM import ancillary_functions as anf
 import numpy as np
 from QREM.DDOT_module.child_classes.global_noise_matrix_creator import GlobalNoiseMatrixCreator
@@ -23,15 +23,16 @@ p01_range = [0.015, 0.1]
 deviation_p10_range = [p10_range[0] * 0.25, p10_range[1] * 0.5]
 deviation_p01_range = [p01_range[0] * 0.75, p01_range[1] * 1]
 
+# If the number of neighbors is higher, we will make noise matrices more dependent
+# on their state. This number tells how much. (see below)
 neighbors_number_multiplier = 1.25
 
 number_of_qubits = 3
 list_of_qubits = list(range(number_of_qubits))
 number_of_neighbours_range = [0, int(np.min([number_of_qubits - 1, 3]))]
-# number_of_neighbours_range = [0,0]
 
 clusters_list_true = [[qi] for qi in list_of_qubits]
-true_noise_matrices, true_neighbors_list = {'q%s'%qi:{} for qi in range(number_of_qubits)}, []
+true_noise_matrices, true_neighbors_list = {'q%s' % qi: {} for qi in range(number_of_qubits)}, []
 
 for qubit_index in range(number_of_qubits):
     number_of_neighbours_now = int(
@@ -49,11 +50,15 @@ for qubit_index in range(number_of_qubits):
         possible_states_neighbors = anf.register_names_qubits(range(number_of_neighbours_now),
                                                               number_of_neighbours_now)
 
+        # here we account for higher numbers of neighbors in terms of how noise matrix on given qubit
+        # depends on the state of neighbors
         multiplier_now = neighbors_number_multiplier ** (1 - number_of_neighbours_now)
 
         p10_range_magnified, p01_range_magnified = [multiplier_now * pi for pi in p10_range], [
             multiplier_now * pi for pi in p01_range]
 
+        # Take one random noise matrix. The other matrices (different for each distinct neighbors
+        # state) will be related to this by small perturbations
         single_qubit_noise_matrix_base = hpf.get_random_stochastic_matrix_1q(p10_range_magnified,
                                                                              p01_range_magnified)
 
@@ -73,7 +78,7 @@ for qubit_index in range(number_of_qubits):
             noise_matrices_dictionary_now[neighbors_state_now] = state_dependent_noise_matrices[
                 neighbors_state_index]
 
-        neighbors_key = 'q'+'q'.join([str(qneigh) for qneigh in neighbours_now])
+        neighbors_key = 'q' + 'q'.join([str(qneigh) for qneigh in neighbours_now])
         true_noise_matrices['q%s' % qubit_index][neighbors_key] = noise_matrices_dictionary_now
         true_neighbors_list.append(neighbours_now)
 
@@ -118,32 +123,34 @@ noise_model_analyzer = NoiseModelGenerator(results_dictionary_ddot=results_dicti
                                            bitstrings_right_to_left=False,
                                            number_of_qubits=number_of_qubits)
 
-# # print(clusters_list_true)
-# noise_model_analyzer_naive.compute_all_marginals(clusters_list_true,
-#                                            show_progress_bar=True)
-#
-# print(noise_model_analyzer_naive.marginals_dictionary)
-#
-# raise KeyError
-noise_model_analyzer.compute_subset_noise_matrices_averaged(clusters_list_true)
-# clusters_list_
-# noise_model_analyzer_naive.clusters_list = [[qi] for qi in range(number_of_qubits)]
-# noise_model_analyzer_naive.compute_correlations_table_pairs()
 
-noise_model_analyzer._compute_clusters_naive(0.04,
-                                             max_size=5)
-#
+noise_model_analyzer.compute_subset_noise_matrices_averaged(clusters_list_true)
+
+
+#Choose function to calculate clusters
+#NOTE: see description of the class' methods
+maximal_size = 2
+method_clustering = 'pairwise'
+clustering_kwargs = {'cluster_threshold': 0.02}
+
+noise_model_analyzer.compute_clusters(maximal_size=maximal_size,
+                                      method=method_clustering,
+                                      method_kwargs=clustering_kwargs)
+
+#Choose function to calculate neighborhoods
+#NOTE: see description of the class' methods
+maximal_size = 5
+method_neighborhoods = 'holistic'
+neighborhoods_kwargs = {'chopping_threshold': 0.0,
+                          'show_progress_bar': True}
+
 noise_model_analyzer.find_all_neighborhoods(maximal_size=5,
                                             chopping_threshold=0.01)
 
-# noi
 
 
 estimated_clusters = noise_model_analyzer.clusters_list
 estimated_neighbors = noise_model_analyzer.neighborhoods
-
-
-
 
 # noise_model_analyzer_naive
 
@@ -175,15 +182,12 @@ for qi in range(number_of_qubits):
     anf.cool_print('true matrices for cluster: ', [qi], colorama.Fore.BLUE)
     print(true_matrices)
 
-
 noise_model_analyzer.clusters_list = estimated_clusters
 noise_model_analyzer.neighborhoods = estimated_neighbors
 
-
-
 global_noise_creator_estimate = GlobalNoiseMatrixCreator(
     noise_model_analyzer.noise_matrices_dictionary,
-    )
+)
 
 global_noise_matrix_estimated = global_noise_creator_estimate.compute_global_noise_matrix(
     estimated_clusters,
@@ -199,4 +203,4 @@ print('''
 anf.print_array_nicely(global_noise_matrix_true)
 anf.print_array_nicely(global_noise_matrix_estimated)
 
-anf.print_array_nicely(global_noise_matrix_estimated - global_noise_matrix_true,6)
+anf.print_array_nicely(global_noise_matrix_estimated - global_noise_matrix_true, 6)

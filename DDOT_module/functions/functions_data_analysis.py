@@ -85,7 +85,7 @@ def get_state_from_circuit_name(circuit_name):
     for string in circuit_name:
         if string in ['1', 'X', 'x']:
             state_name += '1'
-        elif string in ['0', 'I', 'i', 'id', 'Id']:
+        elif string in ['0', 'I', 'i_index', 'id', 'Id']:
             state_name += '0'
 
     return state_name
@@ -102,15 +102,13 @@ def estimate_energy_from_marginals(weights_dictionary, marginals):
         weight = weights_dictionary[key]
         marginal = marginals[key]
 
-        # print(key, marginal)
-        # raise KeyError
         qubits_number = int(np.log2(len(marginal)))
 
-        for i in range(len(marginal)):
-            bitstring = list(anf.binary_integer_format(i, qubits_number))
+        for result_index in range(len(marginal)):
+            bitstring = list(anf.binary_integer_format(result_index, qubits_number))
             bit_true = [int(x) for x in bitstring]
             parity = (-1) ** (np.count_nonzero(bit_true))
-            energy += weight * marginal[i] * parity
+            energy += weight * marginal[result_index] * parity
 
     if isinstance(energy, list) or isinstance(energy, type(np.array(1))):
         return energy[0]

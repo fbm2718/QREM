@@ -1,20 +1,37 @@
 """
 Created on 03.05.2021
 
-@author: Filip Maciejewski
+@authors: Filip Maciejewski, Oskar Słowik
 @contact: filip.b.maciejewski@gmail.com
+
+REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+"Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography",
+Quantum 4, 257 (2020)
+
+[0.5] Filip B. Maciejewski, Flavio Baccari Zoltán Zimborás, Michał Oszmaniec,
+"Modeling and mitigation of realistic readout noise
+with applications to the Quantum Approximate Optimization Algorithm",
+arxiv: arXiv:2101.02331 (2021)
+
 """
 
-import os, pickle
+import os
+import pickle
+
 from QREM import ancillary_functions as anf
-from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
+from QREM.DDOT_module.child_classes.ddt_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
 
 module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/data_for_tests/'
 
-# data used for testing
+# specify data used for testing
 backend_name = 'ASPEN-8'
 date = '2020_05_07'
+
+# Specify whether save calculated data
+saving = True
 
 # specify whether count names are read from right to left (convention used by IBM)
 if backend_name == 'ibmq_16_melbourne':
@@ -26,7 +43,8 @@ elif backend_name == 'ASPEN-8':
 else:
     raise ValueError('Wrong backend')
 
-directory = tests_directory + 'mitigation_on_marginals/' + backend_name + '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
+directory = tests_directory + 'mitigation_on_marginals/' + backend_name \
+            + '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
 
 files = os.listdir(directory)
 # print(files)
@@ -62,12 +80,13 @@ all_pairs = [[i, j] for i in list_of_qubits for j in list_of_qubits if j > i]
 marginals_analyzer_ddot.compute_all_marginals(all_pairs,
                                               show_progress_bar=True)
 
-# Save marginals
-directory = tests_directory + 'mitigation_on_marginals/' + backend_name + \
-            '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
-dictionary_data['marginals_dictionary_pairs'] = marginals_analyzer_ddot.marginals_dictionary
+if saving:
+    # Save marginals
+    directory = tests_directory + 'mitigation_on_marginals/' + backend_name + \
+                '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
+    dictionary_data['marginals_dictionary_pairs'] = marginals_analyzer_ddot.marginals_dictionary
 
-anf.save_results_pickle(dictionary_data, directory, '01_test_results_marginals_pairs')
+    anf.save_results_pickle(dictionary_data, directory, '01_test_results_marginals_pairs')
 
 # compute average noise matrices on all qubits pairs;
 # this will be used for initial noise analysis
@@ -75,9 +94,11 @@ anf.save_results_pickle(dictionary_data, directory, '01_test_results_marginals_p
 marginals_analyzer_ddot.compute_subset_noise_matrices_averaged(all_pairs,
                                                                show_progress_bar=True)
 
-# Save noise matrices
-dictionary_data['noise_matrices_dictionary_pairs'] = marginals_analyzer_ddot.noise_matrices_dictionary
+if saving:
+    # Save averaged noise matrices
+    dictionary_data['noise_matrices_dictionary_pairs'] = \
+        marginals_analyzer_ddot.noise_matrices_dictionary
 
-anf.save_results_pickle(dictionary_data,
-                        directory,
-                        '02_test_results_noise_matrices_pairs')
+    anf.save_results_pickle(dictionary_data,
+                            directory,
+                            '02_test_results_noise_matrices_pairs')

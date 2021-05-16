@@ -5,13 +5,13 @@ Created on 29.04.2021
 @contact: filip.b.maciejewski@gmail.com
 
 References:
-[1] F.B. Maciejewski, Z. Zimboras, M. Oszmaniec, "Mitigation of readout noise in near-term
+[0] F.B. Maciejewski, Z. Zimboras, M. Oszmaniec, "Mitigation of readout noise in near-term
 quantum devices by classical post-processing based on detector tomography",
 Quantum 4, 257 (2020).
-[2] F.B. Maciejewski, F. Baccari, Z. Zimboras, M. Oszmaniec, "Modeling and mitigation
+[0.5] F.B. Maciejewski, F. Baccari, Z. Zimboras, M. Oszmaniec, "Modeling and mitigation
 of realistic readout noise with applications to the Quantum Approximate Optimization Algorithm",
 arxiv:2102.02331 (2021), https://arxiv.org/abs/2101.02331.
-[3] B. Nachman, M. Urbanek, W. arrray_to_print. de Jong, C. W. Bauer,
+[1] B. Nachman, M. Urbanek, W. arrray_to_print. de Jong, C. W. Bauer,
  "Unfolding quantum computer readout noise",
  npj Quantum Inf 6, 84 (2020)
 """
@@ -19,16 +19,40 @@ arxiv:2102.02331 (2021), https://arxiv.org/abs/2101.02331.
 import numpy as np
 from typing import Optional, Dict, Union, List
 from QREM.DDOT_module.parent_classes.marginals_analyzer_base import MarginalsAnalyzerBase
+from QREM import ancillary_functions as anf
 from QREM import povmtools as pt
 
 
 class MarginalsCorrector(MarginalsAnalyzerBase):
+    """
+    This is the main class that uses correction data to reduce noise on the level of marginals.
+    Main functionalities are to correct marginal distributions of some experiments.
+
+    NOTE: please see parent class MarginalsAnalyzerBase for conventions of experimental results storage
+
+    """
+
     def __init__(self,
                  experimental_results_dictionary: Dict[str, Dict[str, int]],
                  bitstrings_right_to_left: bool,
                  correction_data_dictionary: dict,
-                 marginals_dictionary: Optional[Dict[str, Dict[str,np.ndarray]]] = None
+                 marginals_dictionary: Optional[Dict[str, Dict[str, np.ndarray]]] = None
                  ) -> None:
+        """
+        :param experimental_results_dictionary: dictionary of results of experiments we wish to correct
+        (see class' description for conventions)
+
+        :param bitstrings_right_to_left: specify whether bitstrings
+                                    should be read from right to left (when interpreting qubit labels)
+        :param correction_data_dictionary: dictionary that contains information needed for noise
+                                           mitigation on marginal probability distributions.
+
+
+        :param marginals_dictionary: in case we pre-computed some marginal distributions
+                                     (see class' description for conventions)
+
+        """
+
         super().__init__(experimental_results_dictionary,
                          bitstrings_right_to_left,
                          marginals_dictionary
@@ -39,7 +63,7 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
         if 'correction_matrices' in correction_data_dictionary.keys():
             self._correction_matrices = correction_data_dictionary['correction_matrices']
         else:
-            print('no correction matrices provided')
+            anf.cool_print('No correction matrices provided!','','red')
         self._correction_indices = correction_data_dictionary['correction_indices']
 
         self._corrected_marginals = {}
@@ -55,8 +79,6 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
     @property
     def corrected_marginals(self) -> Dict[str, Dict[str, np.ndarray]]:
         return self._corrected_marginals
-
-
 
     def get_specific_marginals_from_marginals_dictionary(self,
                                                          keys_of_interest: List[str],
@@ -108,7 +130,7 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
                                       correction_matrix: np.ndarray,
                                       ensure_physicality=True):
         """Correct probability distribution using multiplication via inverse of noise matrix.
-        See Refs. [1], [2].
+        See Refs. [0], [0.5].
 
         :param distribution: noisy distribution
         :param correction_matrix: correction matrix (inverse of noise matrix)
@@ -153,7 +175,7 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
                                  iterations_number: Optional[int] = 10,
                                  prior: Optional[np.ndarray] = None):
         """Correct probability distribution using Iterative Bayesian Unfolding (IBU)
-        See Ref. [3]
+        See Ref. [1]
 
         :param estimated_distribution: noisy distribution (to be corrected)
         :param noise_matrix: noise matrix
@@ -209,12 +231,12 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
                                           iterations_number: Optional[int] = None,
                                           prior: Optional[np.ndarray] = None):
         """
-        Correct distribution using method that is hybrid of T_matrix correction (see Refs. [1.,2])
-        and Iterative Bayesian Unfolding (IBU) (see Ref. [3]).
+        Correct distribution using method that is hybrid of T_matrix correction (see Refs. [0,0.5])
+        and Iterative Bayesian Unfolding (IBU) (see Ref. [1]).
 
         Algorithm goes like this:
         - Correct distribution using inverse of noise matrix.
-        - If distribution is physical (i.e., elements are from (0,1)), return it.
+        - If distribution is physical (i_index.e., elements are from (0,1)), return it.
         - Otherwise, perform IBU.
         - [Optional] if parameter "unphysicality_threshold" is provided,
            then it projects the result of "T_matrix" correction onto probability simplex
@@ -272,15 +294,15 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
     def correct_marginals(self,
                           marginals_dictionary: Optional[Dict[str, np.ndarray]] = None,
                           method='T_matrix',
-                          method_kwargs=None) -> Dict[str,Dict[str,np.ndarray]]:
+                          method_kwargs=None) -> Dict[str, Dict[str, np.ndarray]]:
 
         """Return dictionary of corrected marignal distributions
         :param marginals_dictionary: dictionary of (noisy) marginal distributions
         :param method: method to be used for correction of marginal probability distributions
 
         possible values:
-        - 'T_matrix' - uses inverse of noise matrix as correction (see Refs. [1,2])
-        - 'IBU' - uses Iterative Bayesian Unfolding (see Ref. [3])
+        - 'T_matrix' - uses inverse of noise matrix as correction (see Refs. [0,0.5])
+        - 'IBU' - uses Iterative Bayesian Unfolding (see Ref. [1])
         - 'hybrid_T_IBU' - uses hybrid method between 'T_matrix' and 'IBU',
                           see description of self.correct_distribution_hybrid_T_IBU
 
@@ -290,7 +312,7 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
         :return: corrected_marginals : dictionary of corrected marginal distributions
         """
 
-        #TODO FBM: make it consistent with conventions used in parent class
+        # TODO FBM: make it consistent with conventions used in parent class
         if marginals_dictionary is None:
             marginals_dictionary = self._marginals_dictionary
 

@@ -66,7 +66,7 @@ class QDTErrorMitigator:
     def __construct_transition_matrix(self) -> None:
         """
         Description:
-            Given classical description of the detector (i.e., matrix representation of POVM's elements), get the
+            Given classical description of the detector (i_index.e., matrix representation of POVM's elements), get the
             classical part of the noise from diagonal part of every effect. The classical part of the noise is
             represented by left-stochastic matrix. ASSUMING that ideal measurement is the von Neumann measurement in
             computational basis.
@@ -97,7 +97,7 @@ class QDTErrorMitigator:
     def __construct_correction_matrix(self) -> None:
         """
         Description:
-            Given classical description of the detector (i.e., matrix representation of POVM's elements), get the
+            Given classical description of the detector (i_index.e., matrix representation of POVM's elements), get the
             correction matrix based on classical part of the noise. ASSUMING that ideal measurement is the von Neumann
             measurement in computational basis. See Ref. [1] for details. In Ref. [1] this matrix is denoted as
             \Lambda^{-1}.

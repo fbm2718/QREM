@@ -1,8 +1,21 @@
 """
 Created on 29.04.2021
 
-@author: Filip Maciejewski
+
+@authors: Filip Maciejewski, Oskar Słowik
 @contact: filip.b.maciejewski@gmail.com
+
+REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+"Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography",
+Quantum 4, 257 (2020)
+
+[0.5] Filip B. Maciejewski, Flavio Baccari Zoltán Zimborás, Michał Oszmaniec,
+"Modeling and mitigation of realistic readout noise
+with applications to the Quantum Approximate Optimization Algorithm",
+arxiv: arXiv:2101.02331 (2021)
+
 """
 import numpy as np
 from typing import Optional, Dict, List, Union

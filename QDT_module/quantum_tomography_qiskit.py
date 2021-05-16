@@ -67,7 +67,7 @@ def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
     list of lists. Each list correspond to single line in the above exemplary description of tensor product, e.g.,
     second list corresponds to line id x id x X. Each of such lists consists of len(qubits_indices) pairs, saying which
     gate shall be applied to which qubit. In this example, first list will have following elements:
-    (0, 0), (2, 0), (4, 1), i.e., apply unitary number 0 to qubits 0,2 and apply unitary number 1 to qubit 4.
+    (0, 0), (2, 0), (4, 1), i_index.e., apply unitary number 0 to qubits 0,2 and apply unitary number 1 to qubit 4.
     """
 
     qubits_number = len(qubits_indices)

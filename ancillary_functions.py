@@ -39,7 +39,7 @@ def is_stochastic(a):
         one_now = sum(a[:, i])
 
         if abs(1 - one_now) >= 10 ** (-6):
-            # print(one_now,i)
+            # print(one_now,i_index)
             return False
     return True
 
@@ -293,6 +293,9 @@ def cool_print(a, b='', color=Fore.CYAN):
 
     if b == '':
         print(color + Style.BRIGHT + str(a) + Style.RESET_ALL)
+    elif b == '\n':
+        print(color + Style.BRIGHT + str(a) + Style.RESET_ALL)
+        print()
     else:
         print(color + Style.BRIGHT + str(a) + Style.RESET_ALL, repr(b))
 
@@ -343,8 +346,8 @@ def register_names_qubits(qs, qrs, rev=False):
 
 
 def get_module_directory():
-    from QREM import __init__
-    name_holder = __init__.__file__
+    from QREM import name_holder
+    name_holder = name_holder.__file__
 
     return name_holder[0:-15]
 

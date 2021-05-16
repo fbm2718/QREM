@@ -46,7 +46,7 @@ def f_clust(C_size, C_maxsize):
     return val
 
 
-# average inter-cluster attractivness function S_{i,j}
+# average inter-cluster attractivness function S_{i_index,j}
 def get_S_ij_av(C_i, C_j, correlations_table):
     val = 0
     for k in C_i:
@@ -56,7 +56,7 @@ def get_S_ij_av(C_i, C_j, correlations_table):
     return val
 
 
-# intra-cluster attractivness function S_{i}
+# intra-cluster attractivness function S_{i_index}
 def get_S_i(C_i, correlations_table):
     if len(C_i) < 2:
         return 0
@@ -69,7 +69,7 @@ def get_S_i(C_i, correlations_table):
     return val
 
 
-# intra-cluster cumulative attractivness function Sc_{i}
+# intra-cluster cumulative attractivness function Sc_{i_index}
 def get_Sc_i(C_i, correlations_table):
     if len(C_i) < 2:
         return 0
@@ -273,7 +273,7 @@ def evaluate_move_operation(partition, index_k, index_C_i, index_C_j, correlatio
     return diff, dS, True
 
 
-# returns the change of cost function cost_function_simple after a swap operation (qubit k from C_i wilh qubit l from C_j) on clusters.
+# returns the change of cost function cost_function_simple after a swap operation (qubit k from C_i wilh qubit l_index from C_j) on clusters.
 # TODO: values do not match the naive method - find an error!
 def evaluate_swap_operation(partition, index_k, index_l, index_C_i, index_C_j, correlations_table,
                             alpha, C_maxsize, S):
@@ -364,12 +364,12 @@ def get_initial_partition(correlations_table):
         pair = max(CL, key=lambda key: CL[key])
         i = pair[0]
         j = pair[1]
-        # print(i,j)
+        # print(i_index,j)
         partition.append([i, j])
         keys = list(CL.keys())
         # print(keys)
         for pair in keys:
-            # print(str(pair)+"keys:"+str(i)+str(j))
+            # print(str(pair)+"keys:"+str(i_index)+str(j))
             if pair[0] in [i, j] or pair[1] in [i, j]:
                 # print("popping"+str(pair))
                 CL.pop(pair, None)
@@ -717,8 +717,8 @@ noise=0.3
 
 correlations_table=np.full((10, 10), noise)
 
-for i in range(10):
-    correlations_table[i][i]=0
+for i_index in range(10):
+    correlations_table[i_index][i_index]=0
 
 correlations_table[0][1]=0.9
 correlations_table[1][0]=0.9

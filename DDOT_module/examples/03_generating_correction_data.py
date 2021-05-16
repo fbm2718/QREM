@@ -1,34 +1,50 @@
 """
 Created on 04.05.2021
 
-@author: Filip Maciejewski
+@authors: Filip Maciejewski, Oskar Słowik
 @contact: filip.b.maciejewski@gmail.com
+
+REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+"Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography",
+Quantum 4, 257 (2020)
+
+[0.5] Filip B. Maciejewski, Flavio Baccari Zoltán Zimborás, Michał Oszmaniec,
+"Modeling and mitigation of realistic readout noise
+with applications to the Quantum Approximate Optimization Algorithm",
+arxiv: arXiv:2101.02331 (2021)
+
 """
 
-import os, pickle, time
-from QREM import ancillary_functions as anf
-from QREM.DDOT_module.child_classes.ddot_marginal_analyzer_vanilla import DDTMarginalsAnalyzer
-from QREM.DDOT_module.child_classes.correction_data_generator import CorrectionDataGenerator
+import os
+import pickle
 
-# from QREM.DDOT_module.child_classes.marginals_corrector import MarginalsCorrector
+from QREM import ancillary_functions as anf
+from QREM.DDOT_module.child_classes.correction_data_generator import CorrectionDataGenerator
 
 module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/data_for_tests/'
 
 # data used for testing
 backend_name = 'ibmq_16_melbourne'
-number_of_qubits = 15
 date = '2020_05_07'
+
+# Specify whether save calculated data
+saving = True
 
 # specify whether count names are read from right to left (convention used by IBM)
 if backend_name == 'ibmq_16_melbourne':
-    reverse_counts = True
+    number_of_qubits = 15
+    bitstrings_right_to_left = True
 elif backend_name == 'ASPEN-8':
-    reverse_counts = False
+    number_of_qubits = 23
+    bitstrings_right_to_left = False
 else:
     raise ValueError('Wrong backend')
 
-directory = tests_directory + 'mitigation_on_marginals/' + backend_name + '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
+directory = tests_directory + 'mitigation_on_marginals/' + backend_name \
+            + '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
 
 files = os.listdir(directory)
 with open(directory + '03_test_results_noise_models.pkl', 'rb') as filein:
@@ -60,73 +76,38 @@ marginal_dictionaries_initial = dictionary_data['marginals_dictionary']
 # in this example, we precomputed noise matrices for all pairs of qubits
 noise_matrices_dictionary_initial = dictionary_data['noise_matrices_dictionary']
 
-# NAIVE CLUSTERS
-clusters_list_naive, neighborhoods_naive = dictionary_data['clusters_list_naive'], dictionary_data[
+# Get clusters and neighbors from saved data
+clusters_list, neighborhoods = dictionary_data['clusters_list'], dictionary_data[
     'neighborhoods']
 
-
-
-correction_data_generator_naive = CorrectionDataGenerator(results_dictionary_ddt=dictionary_results,
-                                                          bitstrings_right_to_left=reverse_counts,
-                                                          number_of_qubits=number_of_qubits,
-                                                          marginals_dictionary=
-                                                          marginal_dictionaries_initial,
-                                                          clusters_list=clusters_list_naive,
-                                                          neighborhoods=neighborhoods_naive,
-                                                          noise_matrices_dictionary=
-                                                          noise_matrices_dictionary_initial)
+# Get instance of correction data generator - it will generate correction matrices for marginals
+# based on provided noise model
+correction_data_generator = CorrectionDataGenerator(results_dictionary_ddt=dictionary_results,
+                                                    bitstrings_right_to_left=bitstrings_right_to_left,
+                                                    number_of_qubits=number_of_qubits,
+                                                    marginals_dictionary=
+                                                    marginal_dictionaries_initial,
+                                                    clusters_list=clusters_list,
+                                                    neighborhoods=neighborhoods,
+                                                    noise_matrices_dictionary=
+                                                    noise_matrices_dictionary_initial)
 
 all_pairs = [[qi, qj] for qi in list_of_qubits for qj in list_of_qubits if qj > qi]
 
-correction_data_naive = correction_data_generator_naive.get_pairs_correction_data(all_pairs,
-                                                                                  show_progress_bar
-                                                                                  =True)
+# Get data needed to make corrections for two-qubit marginals (for 2-local Hamiltonian problems)
+correction_data = correction_data_generator.get_pairs_correction_data(all_pairs,
+                                                                      show_progress_bar
+                                                                      =True)
 
-# NO CLUSTERS
-clusters_only_neighbors, neighborhoods_only_neighbors = dictionary_data['clusters_only_neighbors'], \
-                                                        dictionary_data[
-                                             'neighborhoods_only_neighbors_naive']
+if saving:
+    # Update dictionary to be saved
+    dictionary_data['correction_data'] = correction_data
 
-correction_data_generator_only_neighbors = CorrectionDataGenerator(
-    results_dictionary_ddt=dictionary_results,
-    bitstrings_right_to_left=reverse_counts,
-    number_of_qubits=number_of_qubits,
-    marginals_dictionary=marginal_dictionaries_initial,
-    clusters_list=clusters_only_neighbors,
-    neighborhoods=neighborhoods_only_neighbors,
-    noise_matrices_dictionary=
-    noise_matrices_dictionary_initial)
+    # Save results
+    date_save = '2020_05_07'
+    directory = tests_directory + 'mitigation_on_marginals/' + backend_name \
+                + '/N%s' % number_of_qubits + '/' + date_save + '/DDOT/'
 
-correction_data_only_neighbors = correction_data_generator_only_neighbors.get_pairs_correction_data(
-    all_pairs,
-    show_progress_bar=True)
-
-naive_clusters_list = correction_data_generator_naive.clusters_list
-
-correction_data_generator_only_clusters = CorrectionDataGenerator(
-    results_dictionary_ddt=dictionary_results,
-    bitstrings_right_to_left=reverse_counts,
-    number_of_qubits=number_of_qubits,
-    marginals_dictionary=marginal_dictionaries_initial,
-    clusters_list=naive_clusters_list,
-    neighborhoods={anf.get_qubits_key(cluster): [] for cluster in naive_clusters_list},
-    noise_matrices_dictionary=noise_matrices_dictionary_initial
-)
-
-correction_data_only_clusters = correction_data_generator_only_clusters.get_pairs_correction_data(
-    all_pairs,
-    show_progress_bar=True)
-
-dictionary_data['correction_data'] = correction_data_naive
-dictionary_data['correction_data_only_neighbors'] = correction_data_only_neighbors
-dictionary_data['correction_data_only_clusters'] = correction_data_only_clusters
-
-# marginals_corrector
-date_save = '2020_05_07'
-directory = tests_directory + 'mitigation_on_marginals/' + backend_name + '/N%s' % number_of_qubits + '/' + date_save + '/DDOT/'
-
-from povms_qi import povm_data_tools as pdt
-
-pdt.Save_Results_simple(dictionary_data,
-                        directory,
-                        '04_test_results_correction_data')
+    anf.save_results_pickle(dictionary_data,
+                            directory,
+                            '04_test_results_correction_data')

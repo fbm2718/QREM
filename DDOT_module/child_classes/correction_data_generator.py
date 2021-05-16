@@ -1,11 +1,23 @@
 """
 Created on 29.04.2021
 
-@author: Filip Maciejewski
+
+@authors: Filip Maciejewski, Oskar Słowik
 @contact: filip.b.maciejewski@gmail.com
+
+REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+"Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography",
+Quantum 4, 257 (2020)
+
+[0.5] Filip B. Maciejewski, Flavio Baccari Zoltán Zimborás, Michał Oszmaniec,
+"Modeling and mitigation of realistic readout noise
+with applications to the Quantum Approximate Optimization Algorithm",
+arxiv: arXiv:2101.02331 (2021)
+
 """
 
-import copy
 import numpy as np
 from typing import Optional, Dict, Union, List
 from QREM import ancillary_functions as anf
@@ -15,16 +27,45 @@ from DDOT_module.child_classes.global_noise_matrix_creator import GlobalNoiseMat
 
 class CorrectionDataGenerator(NoiseModelGenerator):
     """
-        1
+        Main class used to calculate data needed for noise-mitigation on marginals, based on provided
+        noise model.
+
+        NOTE: Currently it handles properly only two-qubit marginals (e.g., experiments involving
+              estimation of 2-local Hamiltonians)
+
+        The correction data consists of the following:
+        - 'correction_indices' - for each marginal of interest (e.g., 'q0q1'), specify label for
+                                 marginal that needs to be corrected and then coarse-grained in order
+                                 to perform noise-mitigation. For example, if q0 is strongly correlated
+                                 with q5 (i.e., they are in the same cluster), it is advisable to first
+                                 perform noise mitigation on marginal 'q0q1q5', and then coarse-grain
+                                 it to obtain 'q0q1'.
+
+                                 The format we use here is dictionary where KEY is label for marginal
+                                 of interest, and VALUE is label for marginal that needs to be
+                                 calculated first.
+                                 So the entry for example above would look like:
+                                 correction_indices['q0q1'] = 'q0q1q5'
+
+
+        - 'noise_matrices' - the noise matrices representing effective noise matrix acting on marginals
+                            specified by values of correction_indices dictionary
+
+                            This is dictionary where KEY is subset label and VALUE is noise matrix
+
+
+        - 'correction_matrices' - inverses of noise_matrices, convention used is the same
     """
+
+    #TODO FBM: finish this documentation
 
     def __init__(self,
                  results_dictionary_ddt: Dict[str, Dict[str, int]],
                  bitstrings_right_to_left: bool,
                  number_of_qubits: int,
                  marginals_dictionary: Optional[Dict[str, Dict[str, np.ndarray]]] = None,
-                 clusters_list: Optional[List[List[int]]]=None,
-                 neighborhoods: Optional[Dict[str, List[int]]]=None,
+                 clusters_list: Optional[List[List[int]]] = None,
+                 neighborhoods: Optional[Dict[str, List[int]]] = None,
                  noise_matrices_dictionary: Optional[
                      Dict[str, Union[np.ndarray, Dict[str, Dict[str, np.ndarray]]]]] = None
                  ) -> None:
@@ -51,7 +92,6 @@ class CorrectionDataGenerator(NoiseModelGenerator):
                         if qi != qj:
                             clusters_dictionary['q%s' % qi].append(qj)
 
-
         self._noise_matrices = {}
         self._correction_matrices = {}
         self._mitigation_errors = {}
@@ -60,7 +100,6 @@ class CorrectionDataGenerator(NoiseModelGenerator):
         self._clusters_dictionary = clusters_dictionary
 
     # TODO FBM: add higher locality of hamiltonians
-
 
     def set_clusters_dictionary(self):
         clusters_dictionary = {'q%s' % qi: [] for qi in self._qubit_indices}
@@ -71,25 +110,22 @@ class CorrectionDataGenerator(NoiseModelGenerator):
                         clusters_dictionary['q%s' % qi].append(qj)
         self._clusters_dictionary = clusters_dictionary
 
-
-
-
-
     def compute_pairs_correction_matrices(self,
                                           pairs_list: List[List[int]]) -> None:
+        """
+        :param pairs_list:
+        :return:
+        """
 
         # TODO FBM: split this into several smaller functions
 
         # TODO FBM: generalize for more than two-qubit subsets
 
         # TODO FBM: add mitigation errors
-        calculate_mitigation_errors = False
 
         self.set_clusters_dictionary()
 
-        testing_averagin = True
-
-        highly_correlated_qubits = []
+        testing_averaging = True
 
         for pair_index in range(len(pairs_list)):
             pair = pairs_list[pair_index]
@@ -114,19 +150,9 @@ class CorrectionDataGenerator(NoiseModelGenerator):
                     anf.lists_sum(neighborhoods_cluster_i,
                                   neighborhoods_cluster_j))
 
-                if testing_averagin:
+                if testing_averaging:
                     averaged_matrix_clusters_i_j = self._get_noise_matrix_averaged(
                         sorted(anf.lists_sum(cluster_i, cluster_j)))
-
-                    # matrices_clusters_test = self.get_noise_matrix_dependent(
-                    #     anf.lists_sum(cluster_i, cluster_j),
-                    #     dependencies_clusters_i_j)
-                    # np.testing.assert_array_almost_equal(averaged_matrix_clusters_i_j,
-                    #                                      sum(
-                    #                                          [lam for lam in
-                    #                                           matrices_clusters_test.values()]) / 2 ** (
-                    #                                          len(dependencies_clusters_i_j))
-                    #                                      )
 
                 else:
                     matrices_clusters = self.get_noise_matrix_dependent(
@@ -136,23 +162,6 @@ class CorrectionDataGenerator(NoiseModelGenerator):
                     averaged_matrix_clusters_i_j = sum(
                         [lam for lam in matrices_clusters.values()]) / 2 ** (
                                                        len(dependencies_clusters_i_j))
-
-
-
-
-
-
-                if calculate_mitigation_errors:
-                    mitigation_errors_ij = 0
-                    correction_norm_ij = np.linalg.norm(
-                        np.linalg.inv(averaged_matrix_clusters_i_j), ord=1)
-                    for lam in matrices_clusters.values():
-                        err_now = np.linalg.norm(averaged_matrix_clusters_i_j - lam, ord=1)
-                        if err_now > mitigation_errors_ij:
-                            mitigation_errors_ij = err_now
-                    mitigation_errors_ij *= correction_norm_ij
-
-
             else:
                 # Check if clusters overlap. If not, we treat them as separate clusters.
                 dependencies_cluster_i = sorted(self._neighborhoods[string_cluster_i])
@@ -173,14 +182,13 @@ class CorrectionDataGenerator(NoiseModelGenerator):
                     # Check if clusters contain each others neighbors.
                     # If not, the noise matrix is simply a tensor product of clusters.
 
-                    if testing_averagin:
+                    if testing_averaging:
                         averaged_matrix_cluster_i = self._get_noise_matrix_averaged(cluster_i)
                         averaged_matrix_cluster_j = self._get_noise_matrix_averaged(cluster_j)
 
                         # np.testing.assert_array_almost_equal(averaged_matrix_cluster_i,sum(
                         #     [lam_i for lam_i in matrices_cluster_i.values()]) / 2 ** (
                         #                                 len(dependencies_cluster_i)))
-
 
                     else:
                         averaged_matrix_cluster_i = sum(
@@ -192,36 +200,6 @@ class CorrectionDataGenerator(NoiseModelGenerator):
 
                     averaged_matrix_clusters_i_j = np.kron(averaged_matrix_cluster_i,
                                                            averaged_matrix_cluster_j)
-
-                    if calculate_mitigation_errors:
-                        mitigation_errors_i, mitigation_errors_j = 0., 0.
-
-                        correction_norm_i, correction_norm_j = np.linalg.norm(
-                            np.linalg.inv(averaged_matrix_cluster_i), ord=1), \
-                                                               np.linalg.norm(np.linalg.inv(
-                                                                   averaged_matrix_cluster_j),
-                                                                   ord=1)
-
-                        for lam in matrices_cluster_i.values():
-                            err_now = np.linalg.norm(averaged_matrix_cluster_i - lam, ord=1)
-
-                            if err_now > mitigation_errors_i:
-                                mitigation_errors_i = err_now
-
-                        for lam in matrices_cluster_j.values():
-                            err_now = np.linalg.norm(averaged_matrix_cluster_j - lam, ord=1)
-
-                            if err_now > mitigation_errors_j:
-                                mitigation_errors_j = err_now
-
-                        if mitigation_errors_i > 0 and mitigation_errors_j > 0:
-                            mitigation_errors_ij = mitigation_errors_i * mitigation_errors_j * correction_norm_i * correction_norm_j
-                        elif mitigation_errors_i > 0 and mitigation_errors_j == 0:
-                            mitigation_errors_ij = mitigation_errors_i * correction_norm_i
-                        elif mitigation_errors_i == 0 and mitigation_errors_j > 0:
-                            mitigation_errors_ij = mitigation_errors_j * correction_norm_j
-                        else:
-                            mitigation_errors_ij = 0
 
                 else:
                     # Check if clusters are each others neighbors.
@@ -255,9 +233,9 @@ class CorrectionDataGenerator(NoiseModelGenerator):
                         cluster_i + cluster_j)
 
                     qubit_indices_for_construction = []
-                    for clust in [cluster_i, cluster_j]:
+                    for cluster_now in [cluster_i, cluster_j]:
                         qubit_indices_for_construction.append(
-                            [rev_map_enumerated[ci] for ci in clust])
+                            [rev_map_enumerated[ci] for ci in cluster_now])
 
                     properly_formatted_lambdas = {
                         self.get_qubits_key(
@@ -290,74 +268,6 @@ class CorrectionDataGenerator(NoiseModelGenerator):
                             neighbors_for_construction
                         )
 
-                    if calculate_mitigation_errors:
-                        # TODO: FIX THIS PART
-                        # qubits_clusters_ij = anf.get_reversed_enumerated_from_indices(anf.lists_sum_multi([cluster_i,cluster_j]))
-                        qubits_ij = anf.get_reversed_enumerated_from_indices(anf.lists_sum_multi(
-                            [cluster_i, cluster_j, dependencies_cluster_i,
-                             dependencies_cluster_j]))
-
-                        clu_i, clu_j = [qubits_ij[qc] for qc in cluster_i], [qubits_ij[qc] for qc
-                                                                             in cluster_j],
-                        deps_i, deps_j = [qubits_ij[qc] for qc in dependencies_cluster_i], [
-                            qubits_ij[qc] for qc in dependencies_cluster_j]
-
-                        all_qubit_ij = anf.lists_sum_multi([deps_i, deps_j])
-                        all_qubits_outside_ij = list(
-                            set(all_qubit_ij).difference(set(clu_i + clu_j)))
-
-                        possible_states_ij_outside = anf.register_names_qubits(
-                            range(len(all_qubits_outside_ij)), len(all_qubits_outside_ij))
-
-                        possible_states_ij = []
-                        for k in range(len(possible_states_ij_outside)):
-                            state_here = possible_states_ij_outside[k]
-                            better_statesize = len(list(state_here)) + len(clu_i) + len(clu_j)
-                            new_state = np.zeros((better_statesize), dtype=str)
-
-                            for ciiiii in clu_i:
-                                new_state[ciiiii] = '0'
-                            for cjjjjj in clu_j:
-                                new_state[cjjjjj] = '0'
-                            for kurde in range(len(state_here)):
-                                new_state[all_qubits_outside_ij[kurde]] = state_here[kurde]
-                            new_state = ''.join([x for x in new_state])
-                            possible_states_ij.append(new_state)
-
-                        map_cluster = anf.get_reversed_enumerated_from_indices(
-                            sorted(clu_i + clu_j))
-
-                        matrices_cluster_i_proper, matrices_cluster_j_proper = copy.deepcopy(
-                            matrices_cluster_i), copy.deepcopy(matrices_cluster_j)
-                        if len(deps_i) == 0:
-                            matrices_cluster_i_proper['neighbours'] = None
-                        else:
-                            matrices_cluster_i_proper['neighbours'] = deps_i
-
-                        if len(deps_j) == 0:
-                            matrices_cluster_j_proper['neighbours'] = None
-                        else:
-                            matrices_cluster_j_proper['neighbours'] = deps_j
-
-                        mitigation_errors_ij = 0
-                        for state_possible in possible_states_ij:
-                            big_lambda_creator_now = GlobalNoiseMatrixCreator(
-                                properly_formatted_lambdas)
-
-                            big_matrix_now = self.create_big_lambda_modified(
-                                [matrices_cluster_i_proper, matrices_cluster_j_proper],
-                                [clu_i, clu_j],
-                                state_possible,
-                                map_cluster
-                            )
-                            err_now = np.linalg.norm(averaged_matrix_clusters_i_j - big_matrix_now,
-                                                     ord=1)
-                            # print(err_now)
-                            if err_now > mitigation_errors_ij:
-                                mitigation_errors_ij = err_now
-
-                        # TODO: Does this work already?
-
             # check whether qubits are properly sorted
             sorted_quest = True
             if cluster_i == cluster_j:
@@ -377,32 +287,31 @@ class CorrectionDataGenerator(NoiseModelGenerator):
                 qubits_in_here = cluster_i + cluster_j
                 sorted_qubits_in_here = dict(enumerate(sorted(qubits_in_here)))
 
+                # TODO FBM: why is it here?
                 rev_map = anf.get_reversed_enumerated_from_indices(cluster_i + cluster_j)
 
                 qubits_in_here_dict = dict(enumerate(qubits_in_here))
 
                 while qubits_in_here_dict != sorted_qubits_in_here:
-                    for index_qubit_hehe in range(len(qubits_in_here) - 1):
-                        if qubits_in_here[index_qubit_hehe] < qubits_in_here[index_qubit_hehe + 1]:
+                    for index_qubit_here in range(len(qubits_in_here) - 1):
+                        if qubits_in_here[index_qubit_here] < qubits_in_here[index_qubit_here + 1]:
                             pass
-                        elif qubits_in_here[index_qubit_hehe + 1] < qubits_in_here[
-                            index_qubit_hehe]:
+                        elif qubits_in_here[index_qubit_here + 1] < qubits_in_here[index_qubit_here]:
                             averaged_matrix = qrem_pt.permute_matrix(averaged_matrix,
                                                                      len(whole_marginal),
-                                                                     [index_qubit_hehe + 1,
-                                                                      index_qubit_hehe + 2])
+                                                                     [index_qubit_here + 1,
+                                                                      index_qubit_here + 2])
 
                             anf.cool_print('Swapping qubits:', )
-                            print(qubits_in_here[index_qubit_hehe],
-                                  qubits_in_here[index_qubit_hehe + 1], index_qubit_hehe,
-                                  index_qubit_hehe + 1)
+                            print(qubits_in_here[index_qubit_here],
+                                  qubits_in_here[index_qubit_here + 1], index_qubit_here,
+                                  index_qubit_here + 1)
 
-                            qubits_in_here[index_qubit_hehe], qubits_in_here[
-                                index_qubit_hehe + 1] = qubits_in_here[index_qubit_hehe + 1], \
-                                                        qubits_in_here[index_qubit_hehe]
+                            qubits_in_here[index_qubit_here], qubits_in_here[
+                                index_qubit_here + 1] = qubits_in_here[index_qubit_here + 1], \
+                                                        qubits_in_here[index_qubit_here]
 
                     qubits_in_here_dict = dict(enumerate(qubits_in_here))
-
 
             else:
                 averaged_matrix = averaged_matrix_clusters_i_j
@@ -415,14 +324,6 @@ class CorrectionDataGenerator(NoiseModelGenerator):
             self._correction_indices['q%s' % j] = string_marginal
             self._noise_matrices[string_marginal] = averaged_matrix
             self._correction_matrices[string_marginal] = correction_matrix
-
-            if calculate_mitigation_errors:
-                # print(string_marginal, mitigation_errors_ij)
-                self._mitigation_errors[string_marginal] = mitigation_errors_ij
-
-                if mitigation_errors_ij / 2 >= 0.04:
-                    highly_correlated_qubits.append(
-                        {'qubits': string_marginal, 'error': mitigation_errors_ij / 2})
 
     def get_pairs_correction_data(self,
                                   pairs_list: List[List[int]],
@@ -449,7 +350,5 @@ class CorrectionDataGenerator(NoiseModelGenerator):
         correction_data = {'correction_matrices': self._correction_matrices,
                            'noise_matrices': self._noise_matrices,
                            'correction_indices': self._correction_indices}
-
-
 
         return correction_data

@@ -89,7 +89,7 @@ def get_DDOT_circuits_qiskit(qubit_indices,
     :return: circuit_names (list of strings): descriptions of circuits
     """
 
-    #How many qubits are "active" (i.e., the DDOT is performed on them)
+    #How many qubits are "active" (i_index.e., the DDOT is performed on them)
     number_of_qubits = len(circuits_description[0])
 
     #Enumerate active qubits to be consistent with circuits description
@@ -119,7 +119,7 @@ def get_DDOT_circuits_qiskit(qubit_indices,
             for ind, qind in enumerated_qubits.items():
                 if circuit_string_now[int(ind)] in ['1',1,'x','X']:
                     quantum_circuit.x(qreg[qind])
-                elif circuit_string_now[int(ind)] in ['0',0,'I','i','Id','id']:
+                elif circuit_string_now[int(ind)] in ['0',0,'I','i_index','Id','id']:
                     pass
                 else:
                     raise ValueError("Wrong circuit string: "+circuit_string_now)
@@ -144,7 +144,7 @@ def get_overlapping_QDT_single_qubit_circuits_qiskit(qubit_indices,
     """Return list qiskit circuits implementing Quantum Detector Tomography (QDT) in parallel on all qubits
     :param qubit_indices (list of ints): indices of the qubits on which QDT should be implemented
     :param quantum_register_size (int): total number of qubits in a device (or simulator) -- has to be larger or equal max(qubit_indices)!
-    :param (optional) list of vectors: list of vectors describing single-qubit pure quantum states to be used in QDT. Should be informationally-complete (i.e., span single-qubit states). Default is empty list which implements overcomplete Pauli basis (i.e., all eigenstates of Pauli matrices)
+    :param (optional) list of vectors: list of vectors describing single-qubit pure quantum states to be used in QDT. Should be informationally-complete (i_index.e., span single-qubit states). Default is empty list which implements overcomplete Pauli basis (i_index.e., all eigenstates of Pauli matrices)
     :param (optional) number_of_repetitions (int): how many times each circuit should be implemented. Default is 1.
     :param (optional) end_with_measurement (Boolean): specify whether add measurement at the end of the circuit. Default is True
 
@@ -156,7 +156,7 @@ def get_overlapping_QDT_single_qubit_circuits_qiskit(qubit_indices,
 
     circuits, circuit_names = [], []
 
-    #How many qubits are "active" (i.e., the DDOT is performed on them)
+    #How many qubits are "active" (i_index.e., the DDOT is performed on them)
     number_of_qubits = len(qubit_indices)
 
     #Enumerate active qubits to be consistent with circuits description

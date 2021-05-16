@@ -1,8 +1,20 @@
 """
 Created on 04.05.2021
 
-@author: Filip Maciejewski
+@authors: Filip Maciejewski, Oskar Słowik
 @contact: filip.b.maciejewski@gmail.com
+
+REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+"Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography",
+Quantum 4, 257 (2020)
+
+[0.5] Filip B. Maciejewski, Flavio Baccari Zoltán Zimborás, Michał Oszmaniec,
+"Modeling and mitigation of realistic readout noise
+with applications to the Quantum Approximate Optimization Algorithm",
+arxiv: arXiv:2101.02331 (2021)
+
 """
 
 import os, pickle
@@ -17,21 +29,18 @@ tests_directory = module_directory + '/data_for_tests/'
 backend_name = 'ibmq_16_melbourne'
 date = '2020_05_07'
 
+# Specify whether save calculated data
+saving = True
+
 # specify whether count names are read from right to left (convention used by IBM)
 if backend_name == 'ibmq_16_melbourne':
     number_of_qubits = 15
     reverse_counts = True
 
-    threshold_clusters = 0.04
-    threshold_neighbors = 0.01
-
 
 elif backend_name == 'ASPEN-8':
     number_of_qubits = 23
     reverse_counts = False
-
-    threshold_clusters = 0.06
-    threshold_neighbors = 0.02
 
 else:
     raise ValueError('Wrong backend')
@@ -80,17 +89,30 @@ noise_model_analyzer.compute_correlations_table_pairs()
 """
 Correlations are defined as:
 
-c_{j -> i} = 1/2 * || \Lambda_{i}^{Y_j = '0'} - \Lambda_{i}^{Y_j = '0'}||_{l1}
+c_{j -> i_index} = 1/2 * || \Lambda_{i_index}^{Y_j = '0'} - \Lambda_{i_index}^{Y_j = '0'}||_{l1}
 
-Where \Lambda_{i}^{Y_j} is an effective noise matrix on qubit "i" (averaged over all other of
-qubits except "j"), provided that input state of qubit "j" was "Y_j". Hence, c_{j -> i}
-measures how much noise on qubit "i" depends on the input state of qubit "j".
+Where \Lambda_{i_index}^{Y_j} is an effective noise matrix on qubit "i_index" (averaged over all other of
+qubits except "j"), provided that input state of qubit "j" was "Y_j". Hence, c_{j -> i_index}
+measures how much noise on qubit "i_index" depends on the input state of qubit "j".
 """
+
+
+if backend_name == 'ibmq_16_melbourne':
+    #those are values used in Ref. [0.5]
+    threshold_clusters = 0.04
+    threshold_neighbors = 0.01
+elif backend_name == 'ASPEN-8':
+    # those are values used in Ref. [0.5]
+    threshold_clusters = 0.06
+    threshold_neighbors = 0.02
+
 
 # set maximal size of cluster+neighborhood set
 maximal_size = 5
 
 # Choose clustering method and its kwargs
+# NOTE: see descriptions of the relevant functions for available options
+# NOTE 2: this is method used in Ref. [0.5]
 clustering_method = 'pairwise'
 clustering_function_arguments = {'cluster_threshold': threshold_clusters}
 
@@ -103,8 +125,10 @@ noise_model_analyzer.compute_clusters(maximal_size=maximal_size,
 clusters = noise_model_analyzer.clusters_list
 
 # Choose method for finding neighborhoods and its kwargs
+# NOTE: see descriptions of the relevant functions for available options
+# NOTE 2: this is method used in Ref. [0.5]
 neighborhoods_method = 'pairwise'
-neighborhoods_function_arguments = {'chopping_threshold': threshold_neighbors,
+neighborhoods_function_arguments = {'neighbors_threshold': threshold_neighbors,
                                     'show_progress_bar': True}
 # compute neighborhoods based on correlations treshold
 neighborhoods = noise_model_analyzer.find_all_neighborhoods(maximal_size=maximal_size,
@@ -115,19 +139,19 @@ neighborhoods = noise_model_analyzer.find_all_neighborhoods(maximal_size=maximal
 cool_print('Clusters:', clusters)
 cool_print('Neighborhoods:', neighborhoods)
 print()
+if saving:
+    dictionary_to_save = {'true_qubits': true_qubits,
+                          'list_of_qubits': list_of_qubits,
+                          'results_dictionary_preprocessed': dictionary_results,
+                          'marginals_dictionary': noise_model_analyzer.marginals_dictionary,
+                          'noise_matrices_dictionary': noise_model_analyzer.noise_matrices_dictionary,
+                          'clusters_list': clusters,
+                          'neighborhoods': neighborhoods
+                          }
 
-dictionary_to_save = {'true_qubits': true_qubits,
-                      'list_of_qubits': list_of_qubits,
-                      'results_dictionary_preprocessed': dictionary_results,
-                      'marginals_dictionary': noise_model_analyzer.marginals_dictionary,
-                      'noise_matrices_dictionary': noise_model_analyzer.noise_matrices_dictionary,
-                      'clusters_list': clusters,
-                      'neighborhoods': neighborhoods
-                      }
+    date_save = '2020_05_07'
+    directory = tests_directory + 'mitigation_on_marginals/' + backend_name + '/N%s' % number_of_qubits + '/' + date_save + '/DDOT'
 
-date_save = '2020_05_07'
-directory = tests_directory + 'mitigation_on_marginals/' + backend_name + '/N%s' % number_of_qubits + '/' + date_save + '/DDOT'
-
-anf.save_results_pickle(dictionary_to_save,
-                        directory,
-                        '03_test_results_noise_models')
+    anf.save_results_pickle(dictionary_to_save,
+                            directory,
+                            '03_test_results_noise_models')

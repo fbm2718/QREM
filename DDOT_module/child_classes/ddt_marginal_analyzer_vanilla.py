@@ -1,8 +1,21 @@
 """
 Created on 28.04.2021
 
-@author: Filip Maciejewski
+
+@authors: Filip Maciejewski, Oskar Słowik
 @contact: filip.b.maciejewski@gmail.com
+
+REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+"Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography",
+Quantum 4, 257 (2020)
+
+[0.5] Filip B. Maciejewski, Flavio Baccari Zoltán Zimborás, Michał Oszmaniec,
+"Modeling and mitigation of realistic readout noise
+with applications to the Quantum Approximate Optimization Algorithm",
+arxiv: arXiv:2101.02331 (2021)
+
 """
 
 import copy
@@ -17,8 +30,8 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
     """
         Class that handles results of Diagonal Detector Tomography.
         Main functionalities allow to calculate noise matrices on subsets of qubits.
-        This includes averaged noise matrices, i.e., averaged over states off all other qubits,
-        as well as state-dependent, i.e., conditioned on the particular
+        This includes averaged noise matrices, i_index.e., averaged over states off all other qubits,
+        as well as state-dependent, i_index.e., conditioned on the particular
         input classical state of some other qubits.
 
         In this class, and all its children, we use the following convention
@@ -35,7 +48,8 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
         where:
         - qubits_subset_string - is string labeling qubits subset (e.g., 'q1q2q15...')
         - other_qubits_subset_string - string labeling other subset
-        - input_state_bitstring - bitstring labeling input state of qubits in other_qubits_subset_string
+        - input_state_bitstring - bitstring labeling
+                                                   input state of qubits in other_qubits_subset_string
 
     """
 
@@ -85,7 +99,8 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
         self._noise_matrices_dictionary = noise_matrices_dictionary
 
     @staticmethod
-    def get_noise_matrix_from_counts_dict(results_dictionary: Dict[str, np.ndarray]) -> np.ndarray:
+    def get_noise_matrix_from_counts_dict(
+            results_dictionary: Union[Dict[str, np.ndarray], defaultdict]) -> np.ndarray:
         """Return noise matrix from counts dictionary.
         Assuming that the results are given only for qubits of interest.
         :param results_dictionary: dictionary with experiments of the form:
@@ -163,46 +178,33 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
     def _compute_noise_matrix_averaged(self,
                                        subset: List[int]) -> np.ndarray:
         """Noise matrix for subset of qubits, averaged over all other qubits
-           Defaultly takes data from self._marginals_dictionary. If data is not present, then it
+
+            :param subset: subset of qubits we are interested in
+
+           By default takes data from self._marginals_dictionary. If data is not present, then it
            calculates marginals for given subset
            and updates the class's property self.marginals_dictionary
         """
 
-        # TODO: Perhaps add possibility of using existing marginals for bigger subset that includes
+        # TODO FBM: Perhaps add possibility of using existing marginals for bigger subset that includes
         # target subset
 
         subset_key = 'q' + 'q'.join([str(s) for s in subset])
         marginals_dictionary_ddot = self._marginals_dictionary
 
-        # TODO FBM: testing some issue with normalization
-        testing_method = False
-
         # TODO FBM: refactor defaultdict usage here
         marginal_dict_now = defaultdict(float)
-
-        # anf.cool_print('I survived here')
 
         for input_state_bitstring, dictionary_marginals_now in marginals_dictionary_ddot.items():
             input_marginal = ''.join([input_state_bitstring[x] for x in subset])
 
-            # anf.cool_print('I survived here 2')
             if subset_key not in dictionary_marginals_now.keys():
                 self.compute_marginals([input_state_bitstring], [subset])
-            # anf.cool_print('I survived here 3')
-            # anf.cool_print('Bitstring now:',input_state_bitstring)
             marginal_dict_now[input_marginal] += dictionary_marginals_now[subset_key]
 
-            # TODO FBM: this perhaps is incosistend method, make sure.
-            if testing_method:
-                for key_small in marginal_dict_now.keys():
-                    marginal_dict_now[key_small] *= 1 / np.sum(marginal_dict_now[key_small])
+        for key_small in marginal_dict_now.keys():
+            marginal_dict_now[key_small] *= 1 / np.sum(marginal_dict_now[key_small])
 
-        # TODO FBM: testing some issue with normalization
-        if not testing_method:
-            for key_small in marginal_dict_now.keys():
-                marginal_dict_now[key_small] *= 1 / np.sum(marginal_dict_now[key_small])
-
-        #
         noise_matrix_averaged = self.get_noise_matrix_from_counts_dict(marginal_dict_now)
 
         if not anf.is_stochastic(noise_matrix_averaged):
@@ -217,6 +219,12 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
 
     def _get_noise_matrix_averaged(self,
                                    subset: List[int]) -> np.ndarray:
+        """
+            Like self._compute_noise_matrix_averaged but if matrix is already in class' property,
+            does not calculate it again.
+
+            :param subset: subset of qubits we are interested in
+        """
         subset_key = 'q' + 'q'.join([str(s) for s in subset])
         try:
             return self._noise_matrices_dictionary[subset_key]['averaged']
