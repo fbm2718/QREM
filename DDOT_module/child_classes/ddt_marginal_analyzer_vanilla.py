@@ -88,7 +88,8 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
         self._noise_matrices_dictionary = noise_matrices_dictionary
 
     @property
-    def noise_matrices_dictionary(self) -> dict:
+    def noise_matrices_dictionary(self) -> Dict[str, Union[
+        np.ndarray, Dict[str, Dict[str, np.ndarray]]]]:
         return self._noise_matrices_dictionary
 
     @noise_matrices_dictionary.setter
@@ -203,7 +204,7 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
             marginal_dict_now[input_marginal] += dictionary_marginals_now[subset_key]
 
         for key_small in marginal_dict_now.keys():
-            marginal_dict_now[key_small] *= 1 / np.sum(marginal_dict_now[key_small])
+            marginal_dict_now[key_small] /= np.sum(marginal_dict_now[key_small])
 
         noise_matrix_averaged = self.get_noise_matrix_from_counts_dict(marginal_dict_now)
 
@@ -341,7 +342,7 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
 
         # normalize matrices
         for neighbors_state_bitstring in classical_register_neighbours:
-            conditional_noise_matrices[neighbors_state_bitstring] *= 1 / normalization
+            conditional_noise_matrices[neighbors_state_bitstring] /= normalization
 
         # conditional_noise_matrices['all_neighbors'] = neighbors_of_interest
 
@@ -355,7 +356,7 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
                 (2 ** number_of_qubits_of_interest, 2 ** number_of_qubits_of_interest))
             for neighbors_state_bitstring in conditional_noise_matrices.keys():
                 averaged_noise_matrix += conditional_noise_matrices[neighbors_state_bitstring]
-            averaged_noise_matrix *= 1 / 2 ** number_of_qubits_of_interest
+            averaged_noise_matrix /= 2 ** number_of_qubits_of_interest
             self._noise_matrices_dictionary[cluster_string] = {'averaged': averaged_noise_matrix}
 
         self._noise_matrices_dictionary[cluster_string][neighbours_string] = conditional_noise_matrices

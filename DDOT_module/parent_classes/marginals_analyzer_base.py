@@ -73,7 +73,9 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         if marginals_dictionary is None:
             # If user does not provide dictionary with marginals, we create template.
             # Instead of standard dictionaries, we use ones that are "key dependent" (see description
-            # of that function), which is useful for some calculations.
+            # of that function), which is useful for some calculations. This is because it allows to
+            # not care whether given probability distribution was already created (as value in
+            # dictionary) - if not, it creates it on the run.
             marginals_dictionary = {key: fda.KeyDependentDictForMarginals()
                                     for key in results_dictionary.keys()}
 

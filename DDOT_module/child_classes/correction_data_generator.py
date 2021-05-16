@@ -270,9 +270,7 @@ class CorrectionDataGenerator(NoiseModelGenerator):
 
             # check whether qubits are properly sorted
             sorted_quest = True
-            if cluster_i == cluster_j:
-                pass
-            else:
+            if cluster_i != cluster_j:
                 for ccc1 in cluster_j:
                     for ccc0 in cluster_i:
                         if ccc0 > ccc1:
@@ -347,8 +345,6 @@ class CorrectionDataGenerator(NoiseModelGenerator):
             if pair_key not in self._correction_indices.keys():
                 self.compute_pairs_correction_matrices([pair])
 
-        correction_data = {'correction_matrices': self._correction_matrices,
+        return {'correction_matrices': self._correction_matrices,
                            'noise_matrices': self._noise_matrices,
                            'correction_indices': self._correction_indices}
-
-        return correction_data

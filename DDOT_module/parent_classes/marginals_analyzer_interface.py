@@ -5,11 +5,7 @@ Created on 28.04.2021
 @contact: filip.b.maciejewski@gmail.com
 """
 import abc
-
-"""
-    This file holds an interface for Marginals Analyzers. BS. 
-"""
-
+from typing import Dict, List, Optional
 
 class MarginalsAnalyzerInterface(abc.ABC):
     """
@@ -22,7 +18,6 @@ class MarginalsAnalyzerInterface(abc.ABC):
     @abc.abstractmethod
     def results_dictionary(self) -> dict:
         # dictionary of experimental results
-
         raise NotImplementedError
 
     @results_dictionary.setter
@@ -48,17 +43,17 @@ class MarginalsAnalyzerInterface(abc.ABC):
 
     @abc.abstractmethod
     def results_dictionary_update(self, results_dictionary_new: dict) -> None:
-        #Updating dictionary with results
+        # Updating dictionary with results
         raise NotImplementedError
 
     @abc.abstractmethod
     def marginals_dictionary_update(self, marginals_dictionary_new: dict) -> None:
-        #Updating dictionary with new marginals
+        # Updating dictionary with new marginals
         raise NotImplementedError
 
     @abc.abstractmethod
     def compute_marginals(self,
                           experiment_key: str,
-                          subsets: list) -> dict:
-        """Computes marginals for input subsets"""
+                          subsets: List[List[int]]) -> dict:
+        """Computes marginals for input subsets of qubits"""
         raise NotImplementedError
