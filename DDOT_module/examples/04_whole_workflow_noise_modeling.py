@@ -21,7 +21,8 @@ import os
 import pickle
 
 from QREM import ancillary_functions as anf
-from QREM.DDOT_module.child_classes.correction_data_generator import CorrectionDataGenerator
+from QREM.DDOT_module.child_classes.correction_data_generator import \
+    CorrectionDataGenerator
 
 module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/data_for_tests/'
@@ -76,9 +77,9 @@ I. PRE-PROCESSING -- getting noise model and correction data.
 Input: results of Diagonal Detector Tomography Data (DDT). 
 
 0. Get instance of CorrectionDataGenerator object.
-1. Calculate marginals on pairs of qubits.
-2. Based on those marginals, construct noise model for faulty detector.
-3. Based on that noise model, create correction matrices for marginals. 
+1. Calculate marginals_dictionary on pairs of qubits.
+2. Based on those marginals_dictionary, construct noise model for faulty detector.
+3. Based on that noise model, create correction matrices for marginals_dictionary. 
 
 '''
 
@@ -88,14 +89,14 @@ correction_data_generator = CorrectionDataGenerator(results_dictionary_ddt=dicti
                                                     bitstrings_right_to_left=bitstrings_right_to_left,
                                                     number_of_qubits=number_of_qubits)
 
-# we define list of subsystems we wish to first calculate marginals for
+# we define list of subsystems we wish to first calculate marginals_dictionary for
 all_pairs = [[qi, qj] for qi in list_of_qubits for qj in list_of_qubits if qj > qi]
 
 # 1.
 # compute marginal distributions for all experiments and all qubit pairs
 
 
-anf.cool_print('Getting marginals from DDT experiments', '...', 'green')
+anf.cool_print('Getting marginals_dictionary from DDT experiments', '...', 'green')
 correction_data_generator.compute_all_marginals(all_pairs,
                                                 show_progress_bar=True)
 anf.cool_print('DONE', '\n', 'green')
@@ -187,7 +188,7 @@ if saving:
                           'marginals_dictionary': correction_data_generator.marginals_dictionary,
                           'noise_matrices_dictionary':
                               correction_data_generator.noise_matrices_dictionary,
-                          'clusters_list': clusters, 'neighborhoods': neighborhoods,
+                          'clusters_labels_list': clusters, 'neighborhoods': neighborhoods,
                           'correction_data': correction_data}
 
     # Save results

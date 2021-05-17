@@ -4,14 +4,17 @@ Created on Fri Feb 23 00:06:42 2018
 @author: Filip Maciejewski
 """
 
-import numpy as np
 import cmath as c
-import copy, os, re
+import copy
 import datetime as dt
+import os
 import pickle
-from colorama import Fore, Style
+import re
 from collections import defaultdict
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Optional
+import pandas as pd
+import numpy as np
+from colorama import Fore, Style
 
 epsilon = 10 ** (-7)
 pauli_sigmas = {
@@ -23,51 +26,113 @@ pauli_sigmas = {
 
 
 class key_dependent_dict(defaultdict):
+    """
+    This is class used to construct dictionary which creates values of keys in situ, in case there
+    user refers to key that is not present.
+
+    COPYRIGHT NOTE
+    This code was taken from Reddit thread:
+    https://www.reddit.com/r/Python/comments/27crqg/making_defaultdict_create_defaults_that_are_a/
+
+    """
+
     def __init__(self, f_of_x=None):
-        super().__init__(None)  # base class doesn't get a factory
+        super().__init__(None)  # base class doesn't get potentially_stochastic_matrix factory
         self.f_of_x = f_of_x  # save f(x)
 
-    def __missing__(self, key):  # called when a default needed
+    def __missing__(self, key):  # called when potentially_stochastic_matrix default needed
         ret = self.f_of_x(key)  # calculate default value
         self[key] = ret  # and install it in the dict
         return ret
 
 
-def is_stochastic(a):
-    shape = a.shape[0]
-    for i in range(shape):
-        one_now = sum(a[:, i])
+def is_stochastic(potentially_stochastic_matrix: np.ndarray,
+                  stochasticity_type: Optional[str] = 'left') -> bool:
+    """
+    :param potentially_stochastic_matrix:
+    :param stochasticity_type: string specyfing what type of stochasticity we want to test
+    possible options:
 
-        if abs(1 - one_now) >= 10 ** (-6):
-            # print(one_now,i_index)
-            return False
+    - 'left' - columns are probability distributions
+    - 'right' - rows are probability distributions
+    - 'doubly' or 'ortho' - both columns and rows are probability distributions
+
+    :return:
+    """
+    shape = potentially_stochastic_matrix.shape[0]
+
+    if stochasticity_type == 'left':
+        for index_row in range(shape):
+            one_now = sum(potentially_stochastic_matrix[:, index_row])
+
+            if abs(1 - one_now) >= 10 ** (-6):
+                return False
+    elif stochasticity_type == 'right':
+        for index_row in range(shape):
+            one_now = sum(potentially_stochastic_matrix[index_row, :])
+
+            if abs(1 - one_now) >= 10 ** (-6):
+                return False
+    elif stochasticity_type == 'ortho' or stochasticity_type == 'doubly':
+        for index_both in range(shape):
+            one_now = sum(potentially_stochastic_matrix[:, index_both])
+            one_now2 = sum(potentially_stochastic_matrix[index_both, :])
+            if abs(1 - one_now) >= 10 ** (-6) or abs(1 - one_now2) >= 10 ** (-6):
+                return False
+
+    else:
+        raise ValueError('Wrong stochasticity_type of stochasticity')
+
     return True
 
 
-def binary_integer_format(integer, number_of_bits):
+def binary_integer_format(integer: int,
+                          number_of_bits: int) -> str:
+    """
+    Return binary representation of an integer
+    :param integer:
+    :param number_of_bits:
+    NOTE: number of bits can be greater than minimal needed to represent integer
+    :return:
+    """
     return "{0:b}".format(integer).zfill(number_of_bits)
 
 
-def get_reversed_enumerated_from_indices(indices):
-    enumerated_dict = dict(enumerate(indices))
-    rev_map = {}
-    for k, v in enumerated_dict.items():
-        rev_map[v] = k
-    return rev_map
+# TODO FBM: think whether the difference between this function and next matters
+# def enumerated_dictionary(some_list):
+#     return dict((sorted_i, true_j) for sorted_i, true_j in enumerate(some_list))
+
+def enumerated_dictionary(some_list):
+    return dict(enumerate(some_list))
 
 
-def get_reversed_enumerated_from_dict(enumerated_dict):
-    rev_map = {}
-    for k, v in enumerated_dict.items():
-        rev_map[v] = k
-    return rev_map
+def get_reversed_enumerated_from_dict(enumerated_dict: Dict[int, int]) -> Dict[int, int]:
+    """
+    Get inverse of enumerated dictionary.
+    :param enumerated_dict:
+    :return:
+    """
+    reversed_map = {}
+    for index_sorted, true_index in enumerated_dict.items():
+        reversed_map[true_index] = index_sorted
+    return reversed_map
 
 
-def get_qubit_indices_from_string(qubits_string,
-                                  with_q=False):
+def get_reversed_enumerated_from_indices(indices: List[int]) -> Dict[str, int]:
+    """
+    Given indices, return map which is inverse of enumerate
+    :param indices:
+    :return:
+    """
+    return get_reversed_enumerated_from_dict(enumerated_dictionary(indices))
+
+
+def get_qubit_indices_from_string(qubits_string: str,
+                                  with_q: Optional[bool] = False) -> List[int]:
     """Return list of qubit indices from the string of the form "q0q1q22q31"
     :param qubits_string (string): string which has the form of "q" followed by qubit index
-    :param (optional) with_q (Boolean): specify whether returned indices should be in form of string with letter
+    :param (optional) with_q (Boolean): specify whether returned indices
+                                        should be in form of string with letter
 
     :return: list of qubit indices:
 
@@ -102,88 +167,110 @@ def get_qubits_key(list_of_qubits: List[int]) -> str:
     return 'q' + 'q'.join([str(s) for s in list_of_qubits])
 
 
-def round_matrix(m_a, decimal):
-    typ = type(m_a[0, 0])
+def round_matrix(matrix_to_be_rounded: np.ndarray,
+                 decimal: int) -> np.ndarray:
+    """
+    This function rounds matrix in a nice way.
+    "Nice" means that it removes funny Python artifacts such as "-0.", "0j" etc.
 
-    n = m_a.shape[0]
-    m = np.size(m_a, axis=1)
+    :param matrix_to_be_rounded:
+    :param decimal:
+    :return:
+    """
 
-    m_b = np.zeros((n, m), dtype=typ)
+    data_type = type(matrix_to_be_rounded[0, 0])
 
-    for i in range(0, n):
-        for j in range(0, m):
-            x = round(np.real(m_a[i, j]), decimal)
+    first_dimension = matrix_to_be_rounded.shape[0]
+    second_dimension = np.size(matrix_to_be_rounded, axis=1)
 
-            if typ == complex or typ == np.complex128:
-                y = round(np.imag(m_a[i, j]), decimal)
+    rounded_matrix = np.zeros((first_dimension, second_dimension), dtype=data_type)
+
+    for first_index in range(0, first_dimension):
+        for second_index in range(0, second_dimension):
+            real_part = round(np.real(matrix_to_be_rounded[first_index, second_index]), decimal)
+
+            if data_type == complex or data_type == np.complex128:
+                imaginary_part = round(np.imag(matrix_to_be_rounded[first_index, second_index]),
+                                       decimal)
             else:
-                y = 0
+                imaginary_part = 0
 
-            # TODO TR: Define intention or provide a formula (or some kind of source) or describe intention.
-            # it's so complicated because I don't like the look of "minus 0"
-
-            if abs(x) != 0 and abs(y) != 0:
-                if typ == complex or typ == np.complex128:
-                    m_b[i, j] = x + 1j * y
+            # In the following we check whether some parts are 0 and then we leave it as 0
+            # Intention here is to remove some Python artifacts such as leaving "-0" instead of 0.
+            # see function's description.
+            if abs(real_part) != 0 and abs(imaginary_part) != 0:
+                if data_type == complex or data_type == np.complex128:
+                    rounded_matrix[first_index, second_index] = real_part + 1j * imaginary_part
                 else:
-                    m_b[i, j] = x
-            elif abs(x) == 0 and abs(y) == 0:
-                m_b[i, j] = 0
-            elif abs(x) == 0 and abs(y) != 0:
-                if typ == complex or typ == np.complex128:
-                    m_b[i, j] = 1j * y
+                    rounded_matrix[first_index, second_index] = real_part
+            elif abs(real_part) == 0 and abs(imaginary_part) == 0:
+                rounded_matrix[first_index, second_index] = 0
+            elif abs(real_part) == 0 and abs(imaginary_part) != 0:
+                if data_type == complex or data_type == np.complex128:
+                    rounded_matrix[first_index, second_index] = 1j * imaginary_part
                 else:
-                    m_b[i, j] = 0
-            elif abs(x) != 0 and abs(y) == 0:
-                m_b[i, j] = x
+                    rounded_matrix[first_index, second_index] = 0
+            elif abs(real_part) != 0 and abs(imaginary_part) == 0:
+                rounded_matrix[first_index, second_index] = real_part
 
-    return m_b
+    return rounded_matrix
 
 
 # TODO TR: This function should be renamed.
-def sandwich(m_a, m_u):
-    u_dg = np.matrix.getH(m_u)
-    m_x = np.matmul(m_u, np.matmul(m_a, u_dg))
-    return m_x
+def sandwich(matrix_to_be_rotated, unitary_operator):
+    return unitary_operator @ matrix_to_be_rotated @ np.matrix.getH(unitary_operator)
 
 
 # ===========================================================================
-# Functions that checks if matrix is zero. Function returns parameter, that
-# for zero matrix will be equal to 0, and for non-zero matrix - equal to 1.
-# Method: searching through all elements and thresholding.
+
 # ===========================================================================
-def zero_check(m_a, eps=epsilon):
-    size = list(m_a.shape)
-    m_b = copy.deepcopy(m_a)
-    if eps >= 1:
-        decimal = eps
-        eps = 10 ** (-decimal)
+def zero_check(potential_zero_matrix,
+               threshold=epsilon,
+               method='numpy'):
+    """
+    Functions that checks if matrix is zero.
+    :param potential_zero_matrix:
+    :param threshold:
+    :return:
+    """
 
-    if len(size) == 1:
-        m_b = m_a.reshape(size[0], 1)
-        size.append(1)
+    size = list(potential_zero_matrix.shape)
 
-    for i in range(0, size[0]):
-        for j in range(0, size[1]):
-            check_zero = np.abs(m_b[i, j])
-            if check_zero > eps:
-                return False
-    return True
+    if method == 'numpy':
+        zeros = np.zeros(size, dtype=type(potential_zero_matrix[0, 0]))
+        return np.allclose(potential_zero_matrix, zeros, rtol=threshold)
 
+    elif method == 'bruteforce':
+        m_b = copy.deepcopy(potential_zero_matrix)
+        if threshold >= 1:
+            decimal = threshold
+            threshold = 10 ** (-decimal)
 
-# TODO TR: Check whether variables has been properly renamed.
-def spectral_decomposition(m_a):
-    eigen_values, eigen_vectors = np.linalg.eig(m_a)
+        if len(size) == 1:
+            m_b = potential_zero_matrix.reshape(size[0], 1)
+            size.append(1)
 
-    d = m_a.shape[0]
-    projectors = [calculate_outer_product(np.array(eigen_vectors[:, i]).reshape(d, 1)) for i in
-                  range(d)]
-
-    return eigen_values, projectors
+        for i in range(0, size[0]):
+            for j in range(0, size[1]):
+                check_zero = np.abs(m_b[i, j])
+                if check_zero > threshold:
+                    return False
+        return True
 
 
 def calculate_outer_product(ket):
     return ket @ np.matrix.getH(ket)
+
+
+# TODO TR: Check whether variables has been properly renamed.
+def spectral_decomposition(matrix: np.ndarray):
+    eigen_values, eigen_vectors = np.linalg.eig(matrix)
+
+    dimension = matrix.shape[0]
+    projectors = [calculate_outer_product(np.array(eigen_vectors[:, i]).reshape(dimension, 1)) for i in
+                  range(dimension)]
+
+    return eigen_values, projectors
 
 
 # =======================================================================================
@@ -213,23 +300,26 @@ def thresh(m_a, decimal=7):
     return m_b
 
 
-def lists_intersection(lst1, lst2):
+def lists_intersection(lst1: list,
+                       lst2: list):
     return list(set(lst1) & set(lst2))
 
 
-def lists_difference(lst1, lst2):
+def lists_difference(lst1: list,
+                     lst2: list):
     return list(set(lst1) - set(lst2))
 
 
-def lists_sum(lst1, lst2):
-    return list(set(lst1).union(set(lst2)))
-
-
-def lists_sum_multi(lists):
+def lists_sum_multi(lists: List[list]):
     return set().union(*lists)
 
 
-def lists_intersection_multi(lists):
+def lists_sum(lst1: list,
+              lst2: list):
+    return list(set(lst1).union(set(lst2)))
+
+
+def lists_intersection_multi(lists: List[list]):
     l0 = lists[0]
     l1 = lists[1]
 
@@ -239,7 +329,7 @@ def lists_intersection_multi(lists):
     return int_list
 
 
-def check_if_there_are_common_elements(lists):
+def check_if_there_are_common_elements(lists: List[list]):
     for i in range(len(lists)):
         for j in range(i + 1, len(lists)):
             if len(lists_intersection(lists[i], lists[j])) != 0:
@@ -279,9 +369,16 @@ def find_significant_digit(x):
     return counter
 
 
-def cool_print(a, b='', color=Fore.CYAN):
-    # a is printed with color
-    # b is printed without color
+def cool_print(colored_string: str,
+               stuff_to_print: Optional = '',
+               color=Fore.CYAN) -> None:
+    """
+
+    :param colored_string:  is printed with color
+    :param stuff_to_print: is printed without color
+    :param color:
+    :return:
+    """
 
     if isinstance(color, str):
         if color in ['red', 'RED', 'Red']:
@@ -291,43 +388,61 @@ def cool_print(a, b='', color=Fore.CYAN):
         elif color in ['blue', 'BLUE', 'Blue']:
             color = Fore.GREEN
 
-    if b == '':
-        print(color + Style.BRIGHT + str(a) + Style.RESET_ALL)
-    elif b == '\n':
-        print(color + Style.BRIGHT + str(a) + Style.RESET_ALL)
+    if stuff_to_print == '':
+        print(color + Style.BRIGHT + str(colored_string) + Style.RESET_ALL)
+    elif stuff_to_print == '\n':
+        print(color + Style.BRIGHT + str(colored_string) + Style.RESET_ALL)
         print()
     else:
-        print(color + Style.BRIGHT + str(a) + Style.RESET_ALL, repr(b))
+        print(color + Style.BRIGHT + str(colored_string) + Style.RESET_ALL, repr(stuff_to_print))
 
 
-def bit_strings(n, rev=False):
+def bit_strings(number_of_qubits: int,
+                reversed: Optional[bool] = False):
     """Generate outcome bitstrings for n-qubits.
 
     Args:
-        n (int): the number of qubits.
+        number_of_qubits (int): the number of qubits.
 
     Returns:
         list: arrray_to_print list of bitstrings ordered as follows:
         Example: n=2 returns ['00', '01', '10', '11'].
 """
-    if (rev == True):
-        return [(bin(j)[2:].zfill(n))[::-1] for j in list(range(2 ** n))]
+    if (reversed == True):
+        return [(bin(j)[2:].zfill(number_of_qubits))[::-1] for j in list(range(2 ** number_of_qubits))]
     else:
-        return [(bin(j)[2:].zfill(n)) for j in list(range(2 ** n))]
+        return [(bin(j)[2:].zfill(number_of_qubits)) for j in list(range(2 ** number_of_qubits))]
 
 
-def register_names_qubits(qs, qrs, rev=False):
-    if qrs == 0:
+def register_names_qubits(qubit_indices,
+                          quantum_register_size=None,
+                          rev=False):
+    """
+    Register of qubits of size quantum_register_size, with only bits corresponding to qubit_indices
+    varying
+
+    :param qubit_indices:
+    :param quantum_register_size:
+    :param rev:
+    :return:
+    """
+
+    # TODO FBM: refactor this function.
+
+    if quantum_register_size is None:
+        quantum_register_size = len(qubit_indices)
+
+    if quantum_register_size == 0:
         return ['']
 
-    if (qrs == 1):
+    if (quantum_register_size == 1):
         return ['0', '1']
 
-    all_names = bit_strings(qrs, rev)
+    all_names = bit_strings(quantum_register_size, rev)
     not_used = []
 
-    for j in list(range(qrs)):
-        if j not in qs:
+    for j in list(range(quantum_register_size)):
+        if j not in qubit_indices:
             not_used.append(j)
 
     bad_names = []
@@ -352,18 +467,16 @@ def get_module_directory():
     return name_holder[0:-15]
 
 
-from povms_qi import ancillary_functions
-
-
-def zeros_to_dots(A, decimal):
-    m = A.shape[0]
-    n = A.shape[1]
+def zeros_to_dots(matrix,
+                  decimal):
+    m = matrix.shape[0]
+    n = matrix.shape[1]
 
     B = np.zeros((m, n), dtype=dict)
 
     for i in range(m):
         for j in range(n):
-            el = A[i, j]
+            el = matrix[i, j]
             if (abs(np.round(el, decimal)) >= 0):
                 B[i, j] = el
             else:
@@ -374,7 +487,6 @@ def zeros_to_dots(A, decimal):
 
 def print_array_nicely(arrray_to_print,
                        rounding_decimal=3):
-    import pandas as pd
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', 110)
     try:

@@ -125,7 +125,7 @@ def get_unitary_change_state(state):
 
 # TODO TR: Intentions behind the method and comments inside the function should be provided.
 # TODO FBM: So this is some old shitty function for creating list of indices (which by the way was imitating something
-#  like your Tensor). I have added new function for this in quantum_tomography_qiskit, please take a look at that (it
+#  like your Tensor). I have added new function for this in quantum_tomography_qiskit, please take potentially_stochastic_matrix look at that (it
 #  might use simplifiactions). Function here can be deleted.
 def indices_array(m_as, k=2, x=[], p=0):
     # ONLY k=2 so far
@@ -161,7 +161,7 @@ def euler_angles_1q(unitary_matrix):
     # TODO FBM: This is slightly modified copied qiskit function
     _CUTOFF_PRECISION = 10 ** (-7)
 
-    """Compute Euler angles for a single-qubit gate.
+    """Compute Euler angles for potentially_stochastic_matrix single-qubit gate.
 
     Find angles (theta, phi, lambda) such that
     unitary_matrix = phase * Rz(phi) * Ry(theta) * Rz(lambda)
@@ -276,14 +276,14 @@ def get_enumerated_rev_map_from_indices(indices):
 
 
 def bit_strings(n, rev=True, form=str):
-    """Generate outcome bitstrings for n-qubits.
+    """Generate outcome bitstrings for number_of_qubits-qubits.
 
     Args:
         n (int): the number of qubits.
 
     Returns:
         list: arrray_to_print list of bitstrings ordered as follows:
-        Example: n=2 returns ['00', '01', '10', '11'].
+        Example: number_of_qubits=2 returns ['00', '01', '10', '11'].
 """
     if (form == str):
         if (rev == True):
@@ -389,7 +389,7 @@ def get_off_diagonal_povm_part(povm: List[np.ndarray]) -> List[np.ndarray]:
 def get_diagonal_povm_part(povm: List[np.ndarray]) -> List[np.ndarray]:
     """
     Description:
-        From given povm get only diagonal part as a list.
+        From given povm get only diagonal part as potentially_stochastic_matrix list.
 
     Parameters:
         :param povm: arrray_to_print POVM from effects of which diagonal parts shall be extracted.
@@ -410,7 +410,7 @@ def is_valid_probability_vector(examined_vector: List[float], threshold=1e-5) ->
         :param threshold: Error cluster_threshold when determining probabilities sum condition.
 
     Returns:
-        Information whether  is a valid probability vector or not.
+        Information whether  is potentially_stochastic_matrix valid probability vector or not.
     """
     values_sum = 0
 
@@ -466,7 +466,7 @@ def find_closest_prob_vector(quasiprobability_vector: List[float]) -> List[float
         # get vector element
         mu_i = p1_sorted[i][1]
 
-        # if mu_i +a/(i_index+1) is negative, do the following:
+        # if mu_i +potentially_stochastic_matrix/(i_index+1) is negative, do the following:
         if mu_i + a / (i + 1) < 0:
             # add mu_i to accumulator
             a += mu_i
@@ -491,8 +491,8 @@ def find_closest_prob_vector(quasiprobability_vector: List[float]) -> List[float
 
 
 def permute_matrix(matrix, n, transposition):
-    # Swap qubits (subspaces) in 2**n dimensional matrix
-    # n - number of qubits
+    # Swap qubits (subspaces) in 2**number_of_qubits dimensional matrix
+    # number_of_qubits - number of qubits
     # transposition - which qubits to SWAP.
     # IMPORTANT: in transposition they are numbered from 1
 
@@ -501,7 +501,7 @@ def permute_matrix(matrix, n, transposition):
 
 
 def qubit_swap(n, transposition=(1, 1)):
-    # create swap between two qubits in 2**n dimensional space
+    # create swap between two qubits in 2**number_of_qubits dimensional space
     # labels inside transpositions start from 1.
 
     D = 2 ** n
@@ -578,7 +578,7 @@ def reorder_probabilities(probabilities, new_order):
 
 
 def get_CBT_norm(J, n, m, rev=False):
-    # Get completely bounded trace norm of Choi-matrix J representing quantum channel from n-dimensional space to m-dimensional space
+    # Get completely bounded trace norm of Choi-matrix J representing quantum channel from number_of_qubits-dimensional space to m-dimensional space
     J = cvx.matrix(J)
     prob = pic.Problem(verbose=0)
     X = prob.add_variable("X", (n * m, n * m), vtype='complex')
@@ -598,7 +598,7 @@ def get_CBT_norm(J, n, m, rev=False):
         # TODO FBM: add reference to paper
 
         # This is convention REVERSED with respect to the paper,
-        # and seems that this is a proper one????
+        # and seems that this is potentially_stochastic_matrix proper one????
         C0 = pic.kron(rho0, I)
         C1 = pic.kron(rho1, I)
     else:
@@ -713,7 +713,7 @@ def get_statistical_error_bound(number_of_measurement_outcomes: int,
 def get_coherent_error_bound(povm: np.ndarray) -> float:
     """
     Description:
-        Get distance between diagonal part of the POVM and the whole POVM. This quantity might be interpreted as a
+        Get distance between diagonal part of the POVM and the whole POVM. This quantity might be interpreted as potentially_stochastic_matrix
         measure of "non-classicality" or coherence present in measurement noise. See Ref. [1] for details.
 
     Parameters:
@@ -869,8 +869,8 @@ def counts_dict_to_frequencies_vector(count_dict: dict, reverse_order=False) -> 
 def get_possible_n_qubit_outcomes(n: int) -> list:
     """
     Description:
-        For given number of qubits n generates a list of possible outcome states (as strings) and returns them in
-        ascending order. All states len is n.
+        For given number of qubits number_of_qubits generates potentially_stochastic_matrix list of possible outcome states (as strings) and returns them in
+        ascending order. All states len is number_of_qubits.
     :param n: Number of qubits.
     :return: List of possible outcomes as strings.
     """

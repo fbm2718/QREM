@@ -130,7 +130,7 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
           Given dictionary of noise matrices, average them over some qubits.
 
          :param matrices_cluster: dictionary for which KEY is classical INPUT state of neighbors,
-                                  and VALUE is a noise matrix
+                                  and VALUE is potentially_stochastic_matrix noise matrix
          :param all_neighbors: list of neighbors of given cluster
          :param qubits_to_be_left: qubits which we are interested in and we do not average over them
 
@@ -138,6 +138,9 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
                     depending on the state of neighbors MINUS qubits_to_be_averaged_over
 
          """
+
+        if all_neighbors is None or len(all_neighbors)==0:
+            return {'averaged': matrices_cluster['averaged']}
 
         reversed_enumerated = anf.get_reversed_enumerated_from_indices(all_neighbors)
         averaging_normalization = int(2 ** (len(all_neighbors) - len(qubits_to_be_left)))
@@ -151,7 +154,7 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
             states_after_averaging}
 
         qubits_to_be_averaged_over = list(set(all_neighbors).difference(set(qubits_to_be_left)))
-        qubits_to_be_averaged_over_mapped = [reversed_enumerated[q] for q in
+        qubits_to_be_averaged_over_mapped = [reversed_enumerated[q_index] for q_index in
                                              qubits_to_be_averaged_over]
 
         for neighbors_state, conditional_noise_matrix in matrices_cluster.items():
@@ -162,15 +165,6 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
 
             string_neighbors = ''.join(list_string_neighbors_to_be_left)
 
-            # TODO FBM: make sure this commented check is not needed anymore
-            # if string_neighbors == '' or string_neighbors:
-            #     try:
-            #         averaged_matrices_cluster['averaged'] +=
-            #         conditional_noise_matrix / averaging_normalization
-            #     except(KeyError):
-            #         averaged_matrices_cluster['averaged'] =
-            #         conditional_noise_matrix/averaging_normalization
-            # else:
             averaged_matrices_cluster[
                 string_neighbors] += conditional_noise_matrix / averaging_normalization
 
@@ -183,11 +177,11 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
             :param subset: subset of qubits we are interested in
 
            By default takes data from self._marginals_dictionary. If data is not present, then it
-           calculates marginals for given subset
+           calculates marginals_dictionary for given subset
            and updates the class's property self.marginals_dictionary
         """
 
-        # TODO FBM: Perhaps add possibility of using existing marginals for bigger subset that includes
+        # TODO FBM: Perhaps add possibility of using existing marginals_dictionary for bigger subset that includes
         # target subset
 
         subset_key = 'q' + 'q'.join([str(s) for s in subset])

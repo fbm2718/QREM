@@ -17,7 +17,9 @@ def get_random_bitstring(number_of_qubits):
 
     :return: (list of str ('0' or '1') of length len(number_of_qubits))
     """
-    #TODO: decide whether we want string or int. Probably STR is better because later we pass names of circuits to qiskit (and they are strings) so this avoid later data conversions.
+    # TODO FBM: decide whether we want string or int.
+    # TODO FBM: Probably STR is better because later we pass names of circuits to qiskit
+    # TODO FBM: (and they are strings) so this avoid later data conversions.
 
 
     return [str(np.random.randint(0,2)) for i in range(number_of_qubits)]
@@ -29,10 +31,10 @@ def get_random_ddot_family(number_of_qubits, number_of_circuits, method = 'rando
     :param number_of_circuits (int): number of circuits in the collection. The first two circuits are always taken to be "000..." and "111..."
     :param method (str): possible values:
     'random' - uses random combinations of bitstrings
-    :#TODO:  1 'hash_functions" - uses random hash functions (ADD LATER)
-    #TODO: 2 The lists of strings are later concateneted to strings (e.g., ['0','0','1'] -> '001") using function "get_circuits_description_from_family".
-    #TODO: 2 The initial format is better to analyze the properties of the family while the final format is better to label circuits...
-    #TODO: 2 we might wish to change this
+    #TODO FBM:  1 'hash_functions" - uses random hash functions (ADD LATER)
+    #TODO FBM: 2 The lists of strings are later concateneted to strings (e.g., ['0','0','1'] -> '001") using function "get_circuits_description_from_family".
+    #TODO FBM: 2 The initial format is better to analyze the properties of the family while the final format is better to label circuits...
+    #TODO FBM: 2 we might wish to change this
 
 
 
@@ -79,7 +81,7 @@ def get_DDOT_circuits_qiskit(qubit_indices,
                              end_with_measurement = True):
     """Return list qiskit circuits implementing DDOT on subset of qubits with given description
     :param qubit_indices (list of ints): indices of the qubits on which DDOT should be implemented
-    :param quantum_register_size (int): total number of qubits in a device (or simulator) -- has to be larger or equal max(qubit_indices)!
+    :param quantum_register_size (int): total number of qubits in potentially_stochastic_matrix device (or simulator) -- has to be larger or equal max(qubit_indices)!
     :param circuits_description (dictionary): dictionary returned by function "get_circuits_description_from_family"
     :param (optional) number_of_repetitions (int): how many times each circuit should be implemented. Default is 1.
     :param (optional) end_with_measurement (Boolean): specify whether add measurement at the end of the circuit. Default is True
@@ -143,7 +145,7 @@ def get_overlapping_QDT_single_qubit_circuits_qiskit(qubit_indices,
 
     """Return list qiskit circuits implementing Quantum Detector Tomography (QDT) in parallel on all qubits
     :param qubit_indices (list of ints): indices of the qubits on which QDT should be implemented
-    :param quantum_register_size (int): total number of qubits in a device (or simulator) -- has to be larger or equal max(qubit_indices)!
+    :param quantum_register_size (int): total number of qubits in potentially_stochastic_matrix device (or simulator) -- has to be larger or equal max(qubit_indices)!
     :param (optional) list of vectors: list of vectors describing single-qubit pure quantum states to be used in QDT. Should be informationally-complete (i_index.e., span single-qubit states). Default is empty list which implements overcomplete Pauli basis (i_index.e., all eigenstates of Pauli matrices)
     :param (optional) number_of_repetitions (int): how many times each circuit should be implemented. Default is 1.
     :param (optional) end_with_measurement (Boolean): specify whether add measurement at the end of the circuit. Default is True

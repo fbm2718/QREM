@@ -44,14 +44,14 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         where:
             -label_of_experiment is the same as in results_dictionary and it labels results from which
             marginal distributions were calculated
-            -label_of_subset is a label for qubits subset for which marginals were calculated.
+            -label_of_subset is potentially_stochastic_matrix label for qubits subset for which marginals_dictionary were calculated.
             We use convention that such label if of the form "q5q8q12..." etc., hence it is bitstring of
             qubits labels starting from "q".
             -marginal_probability_vector marginal distribution stored as vector
 
     """
 
-    #TODO FBM: add coarse-graining functions for marginals as class methods
+    #TODO FBM: add coarse-graining functions for marginals_dictionary as class methods
 
     def __init__(self,
                  results_dictionary: Dict[str, Dict[str, int]],
@@ -71,7 +71,7 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         """
 
         if marginals_dictionary is None:
-            # If user does not provide dictionary with marginals, we create template.
+            # If user does not provide dictionary with marginals_dictionary, we create template.
             # Instead of standard dictionaries, we use ones that are "key dependent" (see description
             # of that function), which is useful for some calculations. This is because it allows to
             # not care whether given probability distribution was already created (as value in
@@ -169,7 +169,7 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         if experiments_keys is None:
             experiments_keys = self._marginals_dictionary.keys()
 
-        # Loop through all experiments and marginals and normalize them.
+        # Loop through all experiments and marginals_dictionary and normalize them.
         for key_experiment in experiments_keys:
             if marginals_keys is None:
                 # if no marginal keys are provided, we take all of them
@@ -184,8 +184,8 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
                           experiment_keys: List[str],
                           subsets_list: List[List[int]]) -> None:
         """Return dictionary of marginal probability distributions from counts dictionary
-        :param experiment_keys: list of keys that label experiments for which marginals should be taken
-        :param subsets_list: list of subsets of qubits for which marginals should be calculated
+        :param experiment_keys: list of keys that label experiments for which marginals_dictionary should be taken
+        :param subsets_list: list of subsets of qubits for which marginals_dictionary should be calculated
         """
 
         if isinstance(experiment_keys, str):
@@ -224,7 +224,7 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         """
         Implements self.compute_marginals for all experimental keys.
 
-        :param subsets_list: list of subsets of qubits for which marginals should be calculated
+        :param subsets_list: list of subsets of qubits for which marginals_dictionary should be calculated
         :param show_progress_bar: if True, shows progress bar. Requires "tqdm" package
         """
 
@@ -242,15 +242,15 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
     def get_marginals(self,
                       experiment_key: str,
                       subsets_list: List[List[int]]) -> Dict[str, Dict[str, np.ndarray]]:
-        """Like self.compute_marginals but first checks if the marginals are already computed
+        """Like self.compute_marginals but first checks if the marginals_dictionary are already computed
             and it returns them.
 
-        :param experiment_key: key that labels experiment from which marginals should be taken
-        :param subsets_list: list of subsets of qubits for which marginals should be calculated
+        :param experiment_key: key that labels experiment from which marginals_dictionary should be taken
+        :param subsets_list: list of subsets of qubits for which marginals_dictionary should be calculated
 
         :return: marginals_dictionary:
                 dictionary in which KEY is label for experiment, and VALUE is dictionary with KEYS
-                being qubit subset identifiers (in a format "q1q5q23" etc.), and VALUES being marginal
+                being qubit subset identifiers (in potentially_stochastic_matrix format "q1q5q23" etc.), and VALUES being marginal
                 probability vectors (see __init__ description)
         """
 

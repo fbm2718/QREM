@@ -29,8 +29,8 @@ from DDOT_module.functions.functions_noise_model_heuristic import partition_algo
 
 class NoiseModelGenerator(DDTMarginalsAnalyzer):
     """
-        This is class that uses results of Diagonal Detector Tomography (DDT) to construct a noise
-        model for a measuring device. The model is classical and based on Ref. [0.5].
+        This is class that uses results of Diagonal Detector Tomography (DDT) to construct potentially_stochastic_matrix noise
+        model for potentially_stochastic_matrix measuring device. The model is classical and based on Ref. [0.5].
 
         The main functionalities include computing sets of strongly correlated qubits (clusters)
         and for each such set, computing the qubits which affect the exact form of the noise
@@ -142,7 +142,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
 
            :param chopping_threshold: numerical value, for which correlations lower than
                   chopping_threshold are set to 0. If not provided, does not chop.
-                  In general, it is a advisable to set such cluster_threshold that
+                  In general, it is potentially_stochastic_matrix advisable to set such cluster_threshold that
                   cuts off values below expected statistical fluctuations.
 
            :return: correlations_table (ARRAY):
@@ -193,7 +193,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
                                    cluster_threshold: float
                                    ) -> list:
         """
-            Get partition of qubits in a device into disjoint "clusters". This function uses "naive"
+            Get partition of qubits in potentially_stochastic_matrix device into disjoint "clusters". This function uses "naive"
             method by assigning qubits to the same cluster if correlations between them are higher
             than some "neighbors_threshold". It restricts size of the cluster to "maximal_size"
             by disregarding the lowest correlations (that are above neighbors_threshold).
@@ -203,7 +203,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
                  to the same cluster
           :param maximal_size: maximal allowed size of the cluster
 
-          :return: clusters_list: list of lists, each representing a single cluster
+          :return: clusters_labels_list: list of lists, each representing potentially_stochastic_matrix single cluster
              """
         self._clusters_list = []
 
@@ -276,7 +276,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
                                             maximal_size: int,
                                             chopping_threshold: Optional[float] = 0.) -> List[int]:
         """
-        For a given cluster of qubits, find qubits which are their neighbors, i.e., they affect the
+        For potentially_stochastic_matrix given cluster of qubits, find qubits which are their neighbors, i.e., they affect the
         noise matrix of cluster significantly. Figure of merit for correlations here is:
 
         c_{j -> cluster} = 1/2 || Lambda_{cluster}^{Y_j='0'}- Lambda_{cluster}^{Y_j='1'}||_{l1}
@@ -286,7 +286,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
         See also description of self._compute_clusters_pairwise.
 
 
-        :param cluster: list of labels of qubits in a cluster
+        :param cluster: list of labels of qubits in potentially_stochastic_matrix cluster
         :param maximal_size: maximal allowed size of the set "cluster+neighborhood"
         :param chopping_threshold: numerical value, for which correlations lower than
               chopping_threshold are set to 0.
@@ -294,7 +294,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
 
 
 
-        :return: neighbors_list: list of lists, each representing a single cluster
+        :return: neighbors_list: list of lists, each representing potentially_stochastic_matrix single cluster
         """
 
         size_cut = maximal_size - len(cluster)
@@ -368,12 +368,12 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
         NOTE: see description of self._find_neighbors_of_cluster_holistic
                                             for definition of correlations' measure we use
 
-        :param cluster: list of labels of qubits in a cluster
+        :param cluster: list of labels of qubits in potentially_stochastic_matrix cluster
         :param maximal_size: maximal allowed size of the set "cluster+neighborhood"
         :param neighbors_threshold: numerical value, for which correlations higher than
               neighbors_threshold assign qubit to the neighborhood of other qubit
 
-        :return: neighbors_list: list of lists, each representing a single cluster
+        :return: neighbors_list: list of lists, each representing potentially_stochastic_matrix single cluster
         """
 
         qubit_indices = self._qubit_indices
@@ -442,12 +442,12 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
                          method: Optional[str] = 'holistic_v1',
                          method_kwargs: Optional[dict] = None) -> list:
         """
-        Get partition of qubits in a device into disjoint "clusters".
+        Get partition of qubits in potentially_stochastic_matrix device into disjoint "clusters".
         This function uses various heuristic methods, specified via string "version".
         It uses table of correlations from class property self._correlations_table_pairs
 
         :param maximal_size: maximal allowed size of the cluster
-        :param method: string specifying type of heuristic
+        :param method: string specifying stochasticity_type of heuristic
         Possible values:
             'pairwise' - heuristic that uses Algorithm 3 from Ref.[]
             'holistic_v1' - heuristic that uses function partition_algorithm_v1_cummulative
@@ -455,7 +455,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
         :param method_kwargs: potential arguments that will be passed to clustering function.
                            For possible parameters see descriptions of particular functions.
 
-        :return: clusters_list: list of lists, each representing a single cluster
+        :return: clusters_labels_list: list of lists, each representing potentially_stochastic_matrix single cluster
         """
         self._clusters_list = []
 

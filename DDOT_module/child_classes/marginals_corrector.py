@@ -25,7 +25,7 @@ from QREM import povmtools as pt
 
 class MarginalsCorrector(MarginalsAnalyzerBase):
     """
-    This is the main class that uses correction data to reduce noise on the level of marginals.
+    This is the main class that uses correction data to reduce noise on the level of marginals_dictionary.
     Main functionalities are to correct marginal distributions of some experiments.
 
     NOTE: please see parent class MarginalsAnalyzerBase for conventions of experimental results storage
@@ -84,9 +84,9 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
                                                          keys_of_interest: List[str],
                                                          corrected=False) -> \
             Dict[str, Dict[str, np.ndarray]]:
-        """From dictionary of marginals take only those which are in "marginals_labels_hamiltonian".
-        Furthermore, for all keys, calculate also two-qubit and single-qubit marginals for qubits
-        inside those marginals.
+        """From dictionary of marginals_dictionary take only those which are in "marginals_labels_hamiltonian".
+        Furthermore, for all keys, calculate also two-qubit and single-qubit marginals_dictionary for qubits
+        inside those marginals_dictionary.
 
         :param keys_of_interest: list of strings representing qubit indices, e.g., 'q1q3q15'
 
@@ -139,7 +139,7 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
 
         :return: array representing corrected distribution
 
-        #TODO: add option to return mitigation error
+        #TODO FBM: add option to return mitigation errors
         """
 
         # Consistent formatting

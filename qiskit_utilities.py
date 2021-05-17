@@ -25,7 +25,7 @@ def get_frequencies_array_from_results(results_list: List[Result]) -> np.ndarray
     if all_circuits_number == 0:
         return np.ndarray(shape=0)
 
-    # The length of a state describes how many qubits were used during experiment.
+    # The length of potentially_stochastic_matrix state describes how many qubits were used during experiment.
     states_len = len(next(iter(results_list[0].get_counts(0).keys())))
 
     possible_states = ["{0:b}".format(i).zfill(states_len) for i in range(2 ** states_len)]

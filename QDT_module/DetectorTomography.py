@@ -71,12 +71,12 @@ class QDTCalibrationSetup:
             This method generates Calibration setup objects directly from qiskit job results and probe kets used
             to generate circuits for these jobs. This method should be interpreted as sort of additional constructor
             for qiskit users.
-        :param results_list: List of qiskit jobs results. In case of single job result it should still be a list.
+        :param results_list: List of qiskit jobs results. In case of single job result it should still be potentially_stochastic_matrix list.
         :param probe_kets: Prove kets (in form of list of np.arrays) used to generate calibration circuits.
         :return: Instance of QDT calibration setup from given job.
         """
         frequencies_array = get_frequencies_array_from_results(results_list)
-        # This qubits_number calculation is a little elaborate, but necessary.
+        # This qubits_number calculation is potentially_stochastic_matrix little elaborate, but necessary.
         circuits_number = sum(len(results.results) for results in results_list)
         qubits_number = int(log(circuits_number, len(probe_kets)))
         return cls(qubits_number, probe_kets, frequencies_array)
@@ -109,7 +109,7 @@ class QDTCalibrationSetup:
 class DetectorTomographyFitter:
     """
         This class is meant to resemble qiskit's state tomography and process tomography fitters and to calculate the
-        maximum likelihood povm estimator describing a detector basing on QDT job results and used probe states.
+        maximum likelihood povm estimator describing potentially_stochastic_matrix detector basing on QDT job results and used probe states.
     """
 
     def __init__(self, algorithm_convergence_threshold=1e-6):
@@ -119,12 +119,12 @@ class DetectorTomographyFitter:
         """
         Description:
             Given results of Quantum Detector Tomography experiments and list of probe states, return the Maximum
-            Likelihood estimation of POVM describing a detector. Uses recursive method from [1]. See also [2].
+            Likelihood estimation of POVM describing potentially_stochastic_matrix detector. Uses recursive method from [1]. See also [2].
         Parameters:
             :param calibration_setup: QDTCalibrationSetup object that consists data upon which maximum likelihood POVM
             estimator should be calculated.
         Returns
-            Maximum likelihood estimator of POVM describing a detector.
+            Maximum likelihood estimator of POVM describing potentially_stochastic_matrix detector.
         """
 
         number_of_probe_states = calibration_setup.frequencies_array.shape[0]
@@ -194,8 +194,8 @@ class DetectorTomographyFitter:
         Parameters:
             :param m_m: Effect for which R operator is calculated.
             :param index_of_povm_effect: Index of povm effect for which R is calculated.
-            :param frequencies_array: frequencies_array - array with size (m x n), where m means number of probe states,
-            n means number of POSSIBLE outcomes.
+            :param frequencies_array: frequencies_array - array with size (m x number_of_qubits), where m means number of probe states,
+            number_of_qubits means number of POSSIBLE outcomes.
             :param probe_states: arrray_to_print list of probe states density matrices.
         Returns:
             The R operator as described in Ref. [1].
@@ -228,7 +228,7 @@ class DetectorTomographyFitter:
         Description:
             Calculates Lagrange matrix used in Lagrange multipliers optimization method.
         Parameters:
-            :param r_matrices: arrray_to_print list of R matrices described in a method generating them.
+            :param r_matrices: arrray_to_print list of R matrices described in potentially_stochastic_matrix method generating them.
             :param povms: arrray_to_print list of effects for which Lagrange matrix will be calculated.
         Returns:
            Lagrange matrix for given parameters.
@@ -274,11 +274,11 @@ def join_povms(povms: List[List[np.ndarray]],
                sort_outcomes = True) -> List[np.ndarray]:
     """
     Description:
-        Generates a POVM from given list of POVMs and qubit indices.
+        Generates potentially_stochastic_matrix POVM from given list of POVMs and qubit indices.
     Parameter:
         :param povms: List of POVMs corresponding to qubits indices.
         :param qubit_indices_lists: Indices of qubits for which POVMs were calculated.
-        :param sort_outcomes: indicates whether to sort effects of POVM in such a way that they correspond
+        :param sort_outcomes: indicates whether to sort effects of POVM in such potentially_stochastic_matrix way that they correspond
                               to standard classical register -- WORKS ONLY FOR d-outcome measurements!
     Return:
         POVM describing whole detector.
@@ -313,7 +313,7 @@ def join_povms(povms: List[List[np.ndarray]],
     povm = general_tensor_calculator.calculate_tensor_to_increasing_list(swapped_povms)
 
     if sort_outcomes:
-        # We've obtained a POVM, but it is still ordered according to qubit indices. We want to undo that.
+        # We've obtained potentially_stochastic_matrix POVM, but it is still ordered according to qubit indices. We want to undo that.
         indices_order = []
         for indices_list in qubit_indices_lists:
             indices_order = indices_order + indices_list

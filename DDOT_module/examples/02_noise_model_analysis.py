@@ -26,7 +26,7 @@ module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/data_for_tests/'
 
 # data used for testing
-backend_name = 'ibmq_16_melbourne'
+backend_name = 'ASPEN-8'
 date = '2020_05_07'
 
 # Specify whether save calculated data
@@ -69,7 +69,7 @@ dictionary_results = dictionary_data['results_dictionary_preprocessed']
 
 # dictionary for which each KEY is classical INPUT state, and VALUE is dictionary of
 # marginal distributions on all pairs of qubits
-# in this example, we precomputed marginals for all experiments and all pairs of qubits
+# in this example, we precomputed marginals_dictionary for all experiments and all pairs of qubits
 marginal_dictionaries_pairs = dictionary_data['marginals_dictionary_pairs']
 
 # dictionary for which each KEY is label for qubits subset
@@ -145,7 +145,7 @@ if saving:
                           'results_dictionary_preprocessed': dictionary_results,
                           'marginals_dictionary': noise_model_analyzer.marginals_dictionary,
                           'noise_matrices_dictionary': noise_model_analyzer.noise_matrices_dictionary,
-                          'clusters_list': clusters,
+                          'clusters_labels_list': clusters,
                           'neighborhoods': neighborhoods
                           }
 

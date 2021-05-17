@@ -98,7 +98,7 @@ def cost_function_simple_cummulative(partition, correlations_table, alpha, C_max
     return val
 
 
-# returns the value of cost function (simpler method; no badness) and S table - a symmetric matrix which is defined by S_ij=S_ij_av (off-diagonal) and S_ii=S_i (diagonal). Raises error if minus infinity.
+# returns the value of cost function (simpler method; no badness) and S table - potentially_stochastic_matrix symmetric matrix which is defined by S_ij=S_ij_av (off-diagonal) and S_ii=S_i (diagonal). Raises error if minus infinity.
 def cost_function_simple(partition, correlations_table, alpha, C_maxsize):
     no_of_clusters = len(partition)
     S = np.zeros((no_of_clusters, no_of_clusters))
@@ -183,7 +183,7 @@ def evaluate_swap_operation_naive(partition, index_k, index_l, index_C_i, index_
     return diff, dS
 
 
-# returns the change of cost function cost_function_simple after a move operation (qubit k from C_i to C_j) on clusters.
+# returns the change of cost function cost_function_simple after potentially_stochastic_matrix move operation (qubit k from C_i to C_j) on clusters.
 def evaluate_move_operation(partition, index_k, index_C_i, index_C_j, correlations_table, alpha,
                             C_maxsize, S):
     no_of_clusters = len(partition)
@@ -273,7 +273,7 @@ def evaluate_move_operation(partition, index_k, index_C_i, index_C_j, correlatio
     return diff, dS, True
 
 
-# returns the change of cost function cost_function_simple after a swap operation (qubit k from C_i wilh qubit l_index from C_j) on clusters.
+# returns the change of cost function cost_function_simple after potentially_stochastic_matrix swap operation (qubit k from C_i wilh qubit l_index from C_j) on clusters.
 # TODO: values do not match the naive method - find an error!
 def evaluate_swap_operation(partition, index_k, index_l, index_C_i, index_C_j, correlations_table,
                             alpha, C_maxsize, S):

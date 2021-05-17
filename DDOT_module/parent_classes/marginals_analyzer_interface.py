@@ -11,7 +11,7 @@ class MarginalsAnalyzerInterface(abc.ABC):
     """
     This is interface for classes that will analyze marginal probability distributions.
     It requires those child classes to have basic functionalities that should be included.
-    for analyzing marginals.
+    for analyzing marginals_dictionary.
     """
 
     @property
@@ -48,12 +48,12 @@ class MarginalsAnalyzerInterface(abc.ABC):
 
     @abc.abstractmethod
     def marginals_dictionary_update(self, marginals_dictionary_new: dict) -> None:
-        # Updating dictionary with new marginals
+        # Updating dictionary with new marginals_dictionary
         raise NotImplementedError
 
     @abc.abstractmethod
     def compute_marginals(self,
                           experiment_key: str,
                           subsets: List[List[int]]) -> dict:
-        """Computes marginals for input subsets of qubits"""
+        """Computes marginals_dictionary for input subsets of qubits"""
         raise NotImplementedError

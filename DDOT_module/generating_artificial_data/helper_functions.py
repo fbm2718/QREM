@@ -29,7 +29,7 @@ def get_random_stochastic_matrix_1q(p10_range: list,
 
     :param p10_range: [min,max] value of probability of getting outcome "1" if input was |0>
     :param p01_range: [min,max] value of probability of getting outcome "0" if input was |1>
-    :param distribution_name: type of distribution
+    :param distribution_name: stochasticity_type of distribution
     possible options:
     - "uniform"
 

@@ -5,20 +5,20 @@ Created on 01.03.2021
 @contact: filip.b.maciejewski@gmail.com
 """
 
-import numpy as np
-import copy
-import QREM
-
-from QREM import ancillary_functions as anf
 from collections import defaultdict
+from typing import Dict
+
+import numpy as np
+from QREM import ancillary_functions as anf
+from QREM import povmtools
 
 
 class KeyDependentDictForMarginals(defaultdict):
     """
     This is class used to store marginal probability distributions in dictionary.
     It is "key dependent" in the sense that if user tries to refer to non-existing value for some
-    KEY, then this value is created as a marginal distribution which size depends on the KEY
-    NOTE: We assume that provided KEY is a string denoting  qubits subset
+    KEY, then this value is created as potentially_stochastic_matrix marginal distribution which size depends on the KEY
+    NOTE: We assume that provided KEY is potentially_stochastic_matrix string denoting  qubits subset
     (see self.value_creating_function)
 
 
@@ -49,17 +49,8 @@ class KeyDependentDictForMarginals(defaultdict):
 
 class key_dependent_dict_for_marginals(defaultdict):
     """
-    This is class used to store marginal probability distributions in dictionary.
-    It is "key dependent" in the sense that if user tries to refer to non-existing value for some
-    KEY, then this value is created as a marginal distribution which size depends on the KEY
-    NOTE: We assume that provided KEY is a string denoting  qubits subset
-    (see self.value_creating_function)
-
-
-    COPYRIGHT NOTE
-    The main idea of this code was taken from Reddit thread:
-    https://www.reddit.com/r/Python/comments/27crqg/making_defaultdict_create_defaults_that_are_a/
-
+    same as KeyDependentDictForMarginals but different name
+    TODO FBM: refactor this
     """
 
     def __init__(self):
@@ -92,15 +83,24 @@ def get_state_from_circuit_name(circuit_name):
 
 
 def get_mini_dict(number_of_qubits):
-    register = QREM.povmtools.register_names_qubits(range(number_of_qubits), number_of_qubits)
+    register = povmtools.register_names_qubits(range(number_of_qubits), number_of_qubits)
     return {key: np.zeros((int(2 ** number_of_qubits), 1)) for key in register}
 
 
-def estimate_energy_from_marginals(weights_dictionary, marginals):
+def estimate_energy_from_marginals(weights_dictionary:Dict[str,float],
+                                   marginals_dictionary:Dict[str,np.ndarray]):
+    """
+    Compute energy of Hamiltonian from dictionary of marginal distributions.
+
+    :param weights_dictionary:
+    :param marginals_dictionary:
+    :return:
+    """
+
     energy = 0
-    for key in weights_dictionary.keys():
-        weight = weights_dictionary[key]
-        marginal = marginals[key]
+    for key_local_term in weights_dictionary.keys():
+        weight = weights_dictionary[key_local_term]
+        marginal = marginals_dictionary[key_local_term]
 
         qubits_number = int(np.log2(len(marginal)))
 
@@ -110,7 +110,7 @@ def estimate_energy_from_marginals(weights_dictionary, marginals):
             parity = (-1) ** (np.count_nonzero(bit_true))
             energy += weight * marginal[result_index] * parity
 
-    if isinstance(energy, list) or isinstance(energy, type(np.array(1))):
+    if isinstance(energy, list) or isinstance(energy, np.ndarray):
         return energy[0]
     else:
         return energy

@@ -24,7 +24,7 @@ def create_undirected_nxgraph_from_partition(partition):
                 G.add_edge(C[i],C[j])
     return G
  
-#prints clusters with edges only within a cluster 
+#prints clusters with edges only within potentially_stochastic_matrix cluster
 def print_partition(partition):
     G=create_undirected_nxgraph_from_partition(partition)
     nx.draw_circular(G, with_labels=True)

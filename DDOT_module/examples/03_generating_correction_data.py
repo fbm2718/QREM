@@ -21,13 +21,16 @@ import os
 import pickle
 
 from QREM import ancillary_functions as anf
-from QREM.DDOT_module.child_classes.correction_data_generator import CorrectionDataGenerator
+from QREM.DDOT_module.child_classes.correction_data_generator import \
+    CorrectionDataGenerator
+
+# from QREM.DDOT_module.child_classes.correction_data_generator import CorrectionDataGenerator
 
 module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/data_for_tests/'
 
 # data used for testing
-backend_name = 'ibmq_16_melbourne'
+backend_name = 'ASPEN-8'
 date = '2020_05_07'
 
 # Specify whether save calculated data
@@ -68,7 +71,7 @@ dictionary_results = dictionary_data['results_dictionary_preprocessed']
 
 # dictionary for which each KEY is classical INPUT state, and VALUE is dictionary of
 # marginal distributions on all pairs of qubits
-# in this example, we precomputed marginals for all experiments and all pairs of qubits
+# in this example, we precomputed marginals_dictionary for all experiments and all pairs of qubits
 marginal_dictionaries_initial = dictionary_data['marginals_dictionary']
 
 # dictionary for which each KEY is label for qubits subset
@@ -77,10 +80,10 @@ marginal_dictionaries_initial = dictionary_data['marginals_dictionary']
 noise_matrices_dictionary_initial = dictionary_data['noise_matrices_dictionary']
 
 # Get clusters and neighbors from saved data
-clusters_list, neighborhoods = dictionary_data['clusters_list'], dictionary_data[
+clusters_list, neighborhoods = dictionary_data['clusters_labels_list'], dictionary_data[
     'neighborhoods']
 
-# Get instance of correction data generator - it will generate correction matrices for marginals
+# Get instance of correction data generator - it will generate correction matrices for marginals_dictionary
 # based on provided noise model
 correction_data_generator = CorrectionDataGenerator(results_dictionary_ddt=dictionary_results,
                                                     bitstrings_right_to_left=bitstrings_right_to_left,
@@ -94,7 +97,7 @@ correction_data_generator = CorrectionDataGenerator(results_dictionary_ddt=dicti
 
 all_pairs = [[qi, qj] for qi in list_of_qubits for qj in list_of_qubits if qj > qi]
 
-# Get data needed to make corrections for two-qubit marginals (for 2-local Hamiltonian problems)
+# Get data needed to make corrections for two-qubit marginals_dictionary (for 2-local Hamiltonian problems)
 correction_data = correction_data_generator.get_pairs_correction_data(all_pairs,
                                                                       show_progress_bar
                                                                       =True)

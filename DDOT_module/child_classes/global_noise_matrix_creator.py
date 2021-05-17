@@ -17,45 +17,152 @@ with applications to the Quantum Approximate Optimization Algorithm",
 arxiv: arXiv:2101.02331 (2021)
 
 """
+from QREM import ancillary_functions as anf
 import numpy as np
 from typing import Optional, Dict, List, Union
 
 
 class GlobalNoiseMatrixCreator:
+    """
+    This is class that, given noise matrices on clusters of qubits as function of input state of their
+    neighbors, constructs global noise model on all qubits.
+    """
+
     def __init__(self,
                  noise_matrices_dictionary: Dict[
                      str, Union[np.ndarray, Dict[str, Dict[str, np.ndarray]]]],
-                 clusters_list: Optional[List[List[int]]] = None,
-                 neighborhoods: Optional[Dict[str, List[int]]] = None,
+                 clusters_list: List[List[int]],
+                 neighborhoods: Dict[str, List[int]]
                  ) -> None:
 
         self._noise_matrices_dictionary = noise_matrices_dictionary
         self._clusters_list = clusters_list
+
+        for cluster_key, neighbors_list in neighborhoods.items():
+            if neighbors_list is not None:
+                if len(neighbors_list) == 0:
+                    neighborhoods[cluster_key] = None
+
         self._neighborhoods = neighborhoods
 
+        clusters_labels_list, neighbors_labels_list = [], []
+        for cluster_index in range(len(self._clusters_list)):
+            key_cluster = self.get_qubits_key(self._clusters_list[cluster_index])
+            clusters_labels_list.append(key_cluster)
+            neighbors_labels_list.append(self.get_qubits_key(self._neighborhoods[key_cluster]))
+
+        self._clusters_labels_list = clusters_labels_list
+        self._neighbors_labels_list = neighbors_labels_list
+
         self._matrix_elements_dictionary = {}
+        self._number_of_qubits = sum([len(indices) for indices in clusters_list])
+        self._global_noise_matrix = np.zeros((self._number_of_qubits, self._number_of_qubits),
+                                             dtype=float)
 
     @staticmethod
     def get_qubits_key(list_of_qubits):
+        if list_of_qubits is None:
+            return None
         return 'q' + 'q'.join([str(s) for s in list_of_qubits])
 
-    def compute_global_noise_matrix(self,
-                                    clusters_list: Optional[List[List[int]]] = None,
-                                    neighbors_of_clusters: Optional[List[List[int]]] = None,
-                                    state_of_neighbors: Optional[str] = None):
+    def update_labels_lists(self):
+        clusters_labels_list, neighbors_labels_list = [], []
+        for cluster_index in range(len(self._clusters_list)):
+            key_cluster = self.get_qubits_key(self._clusters_list[cluster_index])
+            clusters_labels_list.append(key_cluster)
+            neighbors_labels_list.append(self.get_qubits_key(self._neighborhoods[key_cluster]))
 
+        self._clusters_labels_list = clusters_labels_list
+        self._neighbors_labels_list = neighbors_labels_list
+
+    def compute_matrix_element(self,
+                               input_state: str,
+                               output_state: str):
+        """
+        Function that computes single global noise matrix element.
+
+       :param input_state: bitstring denoting INPUT classical state
+       :param output_state: bitstring denoting OUTPUT classical state
+        """
+
+        matrix_element = 1
+        for cluster_index in range(len(self._clusters_list)):
+            cluster_label_now = self._clusters_labels_list[cluster_index]
+            neighbors_now = self._neighborhoods[cluster_label_now]
+            neighbors_label_now = self._neighbors_labels_list[cluster_index]
+            qubits_now = self._clusters_list[cluster_index]
+
+            if neighbors_now is None:
+                neighbors_input_state_now = 'averaged'
+            else:
+                neighbors_input_state_now = ''.join([input_state[s] for s in neighbors_now])
+
+            cluster_input_state = ''.join([input_state[s] for s in qubits_now])
+            cluster_output_state = ''.join([output_state[s] for s in qubits_now])
+
+            if neighbors_label_now in self._noise_matrices_dictionary[cluster_label_now].keys():
+                cluster_matrix = \
+                    self._noise_matrices_dictionary[cluster_label_now][neighbors_label_now][
+                        neighbors_input_state_now]
+            else:
+                if neighbors_now is None:
+                    try:
+                        cluster_matrix = self._noise_matrices_dictionary[cluster_label_now][
+                            'averaged']
+                    except(KeyError):
+                        cluster_matrix = self._noise_matrices_dictionary[cluster_label_now][
+                            '']
+                else:
+                    cluster_matrix = self._noise_matrices_dictionary[cluster_label_now][
+                        neighbors_input_state_now]
+
+            matrix_element *= cluster_matrix[int(cluster_output_state, 2),
+                                             int(cluster_input_state, 2)]
+
+        return matrix_element
+
+    def compute_global_noise_matrix(self):
+        """
+            This method is faster than other one
+        """
+        number_of_qubits = self._number_of_qubits
+
+        dimension = int(2 ** number_of_qubits)
+
+        classical_register = anf.register_names_qubits(range(number_of_qubits))
+
+        self._global_noise_matrix = np.zeros((dimension, dimension))
+
+        for input_state_bitstring in classical_register:
+            for output_state_bitstring in classical_register:
+                self._global_noise_matrix[int(output_state_bitstring, 2),
+                                          int(input_state_bitstring, 2)] = \
+                    self.compute_matrix_element(input_state_bitstring, output_state_bitstring)
+
+        return self._global_noise_matrix
+
+    def compute_global_noise_matrix_old(self,
+                                        clusters_list: Optional[List[List[int]]] = None,
+                                        neighbors_of_clusters: Optional[List[List[int]]] = None):
+        updated_lists = False
         if clusters_list is None:
             if self._clusters_list is None:
                 raise ValueError('Please provide clusters list.')
+            else:
+                self.update_labels_lists()
+                updated_lists = True
 
             clusters_list = self._clusters_list
 
         if neighbors_of_clusters is None:
             if self._neighborhoods is None:
                 raise ValueError('Please provide neighbors list')
-            neighbors_of_clusters = []
-            for cluster in clusters_list:
-                neighbors_of_clusters.append(self._neighborhoods[self.get_qubits_key(cluster)])
+            else:
+                if not updated_lists:
+                    self.update_labels_lists()
+
+                neighbors_of_clusters = [self._neighborhoods[self.get_qubits_key(clust)] for clust in
+                                         clusters_list]
 
         lambdas = [self._noise_matrices_dictionary[self.get_qubits_key(clust)] for clust in
                    clusters_list]
@@ -66,66 +173,42 @@ class GlobalNoiseMatrixCreator:
         big_lambda = np.zeros((d, d))
 
         for input_state_integer in range(d):
-            ideal_state = "{0:b}".format(input_state_integer).zfill(number_of_qubits)
-            for measured_state_integer in range(d):
-                measured_state = "{0:b}".format(measured_state_integer).zfill(number_of_qubits)
+            input_state_bitstring = "{0:b}".format(input_state_integer).zfill(number_of_qubits)
+            for output_state_integer in range(d):
+                output_state_bitstring = "{0:b}".format(output_state_integer).zfill(number_of_qubits)
 
                 element = 1
                 for cluster_index in range(len(lambdas)):
-                    indices_of_interest_now = clusters_list[cluster_index]
-
+                    qubits_now = clusters_list[cluster_index]
                     neighbours_now = neighbors_of_clusters[cluster_index]
-                    # print(neighbours_now)
 
                     if neighbours_now is not None:
-                        # intersection_now = anf.lists_intersection_multi(
-                        #     [neighbours_now] + clusters_list)
-                        # neighbours_string_ideal0 = [state_of_neighbors[x] for x in neighbours_now]
-                        #
-                        # # TODO: something weird here
-                        # for b in intersection_now:
-                        #     neighbours_string_ideal0[mapping_cluster_qubits[b]] = ideal_state[
-                        #         mapping_cluster_qubits[b]]
-                        #
-                        #
-                        if state_of_neighbors is None:
-                            input_state_neighbors = ''.join([ideal_state[a] for a in neighbours_now])
-                        else:
-                            input_state_neighbors = state_of_neighbors
-
+                        input_state_neighbors = ''.join(
+                            [input_state_bitstring[a] for a in neighbours_now])
                         neighbors_string = self.get_qubits_key(neighbours_now)
-
-                        # print(ideal_state, neighbours_now, neighbors_string, input_state_neighbors)
-                        # print(lambdas[cluster_index])
-                        # print(lambdas[cluster_index].keys())
                         if neighbors_string in lambdas[cluster_index].keys():
                             lambda_of_interest = lambdas[cluster_index][neighbors_string][
                                 input_state_neighbors]
                         else:
                             lambda_of_interest = lambdas[cluster_index][
                                 input_state_neighbors]
-
                     else:
-                        # print(lambdas[cluster_index])
                         try:
                             lambda_of_interest = lambdas[cluster_index]['averaged']
                         except(KeyError):
                             try:
-                                # print(cluster_index, clusters_list[cluster_index], neighbours_now,
-                                #       lambdas)
                                 lambda_of_interest = lambdas[cluster_index]['']
                             except(KeyError):
-                                # print('this:',neighbours_now,lambdas[cluster_index])
                                 raise KeyError('Something wrong with averaged lambda')
 
                     small_string_ideal = ''.join(
-                        [list(ideal_state)[b] for b in indices_of_interest_now])
+                        [list(input_state_bitstring)[b] for b in qubits_now])
                     small_string_measured = ''.join(
-                        [list(measured_state)[b] for b in indices_of_interest_now])
+                        [list(output_state_bitstring)[b] for b in qubits_now])
 
                     element *= lambda_of_interest[
                         int(small_string_measured, 2), int(small_string_ideal, 2)]
 
-                big_lambda[measured_state_integer, input_state_integer] = element
+                big_lambda[output_state_integer, input_state_integer] = element
 
         return big_lambda

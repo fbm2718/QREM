@@ -60,7 +60,6 @@ with open(directory + '04_test_results_correction_data.pkl', 'rb') as filein:
 # in this exemplary file, the "true qubits" are labels of physical qubits
 true_qubits = dictionary_data['true_qubits']
 
-print(dictionary_data.keys())
 # in this example qubits will be labeled from 0 to len(true_qubits)-1
 list_of_qubits = dictionary_data['list_of_qubits']
 number_of_qubits = len(list_of_qubits)
@@ -76,7 +75,7 @@ dictionary_results = dictionary_data['results_dictionary_preprocessed']
 
 # dictionary for which each KEY is classical INPUT state, and VALUE is dictionary of
 # marginal distributions on all pairs of qubits
-# in this example, we precomputed marginals for all experiments and all pairs of qubits
+# in this example, we precomputed marginals_dictionary for all experiments and all pairs of qubits
 marginal_dictionaries_pairs = dictionary_data['marginals_dictionary']
 
 # dictionary for which each KEY is label for qubits subset
@@ -94,13 +93,13 @@ I. POST-PROCESSING -- using created noise model and correction data
                       to mitigate noise in experimental results.
 
 Input: 
-a) correction data obtained from DDT experiments (above)
-b) results of experiments we wish to correct on the level of marginals 
+potentially_stochastic_matrix) correction data obtained from DDT experiments (above)
+b) results of experiments we wish to correct on the level of marginals_dictionary 
 
 0. Get instance of MarginalsCorrector object.
-1. Get marginals from experimental results - the ones needed for your experiment, and the ones 
+1. Get marginals_dictionary from experimental results - the ones needed for your experiment, and the ones 
                                              needed to correct it (see descriptions in the code).
-2. Correct marginals.
+2. Correct marginals_dictionary.
 '''
 
 ################## GET RESULTS OF BENCHMARKS ##################
@@ -135,11 +134,11 @@ if backend_name == 'ASPEN-8':
 
 ################## ESTIMATE ENERGIES OF LOCAL HAMILTONIANS ##################
 
-# Get instance of marginals analyzer to estimate noisy marginals (which will be later corrected)
+# Get instance of marginals_dictionary analyzer to estimate noisy marginals_dictionary (which will be later corrected)
 # marginals_analyzer_noisy = MarginalsAnalyzerBase(results_dictionary=results_dictionary_ground_states,
 #                                                  bitstrings_right_to_left=bitstrings_right_to_left)
 
-# Get instance of marginals corrector which will be used, well, to correct marginals
+# Get instance of marginals_dictionary corrector which will be used, well, to correct marginals_dictionary
 marginals_corrector = MarginalsCorrector(
     experimental_results_dictionary=results_dictionary_ground_states,
     bitstrings_right_to_left=reverse_counts,
@@ -148,7 +147,7 @@ marginals_corrector = MarginalsCorrector(
 
 errors_noisy, errors_corrected = [], []
 
-# Choose the noise mitigation method implemented on marginals
+# Choose the noise mitigation method implemented on marginals_dictionary
 correction_method = 'T_matrix'
 method_kwargs = {'ensure_physicality': True}
 
@@ -165,56 +164,56 @@ for h_index in tqdm(range(0, len(hamiltonians_data_keys))):
     # This the energy that should be obtained in theory
     energy_ideal = hamiltonian_data['ground_state_energy']
 
-    # We take the labels of marginals that we want to estimate
+    # We take the labels of marginals_dictionary that we want to estimate
     # (needed to estimate expected value of our Hamiltonian)
     marginals_labels_hamiltonian = list(weights_dictionary.keys())
 
-    # Here we take the labels for marginals that are needed to be corrected in order to
-    # obtain the marginals we are interested in.
+    # Here we take the labels for marginals_dictionary that are needed to be corrected in order to
+    # obtain the marginals_dictionary we are interested in.
     # This is in general NOT the same as "marginals_labels_hamiltonian" because if the qubits
     # are highly correlated it is preferable to first correct the bigger qubit subset (clusters)
     # and than coarse-grain it to obtain marginal of interest
     marginals_labels_correction = [marginals_corrector.correction_indices[key] for key in
                                    marginals_labels_hamiltonian]
 
-    # Take all labels of marginals - we want to estimate them all
+    # Take all labels of marginals_dictionary - we want to estimate them all
     marginals_labels_all = anf.lists_sum_multi(
         [marginals_labels_hamiltonian, marginals_labels_correction])
 
-    # Get subset of qubits on which marginals are defined
+    # Get subset of qubits on which marginals_dictionary are defined
     marginal_subsets = [anf.get_qubit_indices_from_string(string_marginal) for string_marginal in
                         marginals_labels_all]
 
-    # Calculate all of the marginals needed
+    # Calculate all of the marginals_dictionary needed
     marginals_corrector.compute_marginals(key_hamiltonian,
                                           marginal_subsets)
 
-    # Get dictionary with computed marginals
+    # Get dictionary with computed marginals_dictionary
     marginals_dictionary_all = marginals_corrector.marginals_dictionary[key_hamiltonian]
 
-    # Estimate energy from noisy marginals
+    # Estimate energy from noisy marginals_dictionary
     energy_noisy = fda.estimate_energy_from_marginals(weights_dictionary=weights_dictionary,
-                                                      marginals=marginals_dictionary_all)
+                                                      marginals_dictionary=marginals_dictionary_all)
 
-    # Create dictionary with marginals to-be-corrected
+    # Create dictionary with marginals_dictionary to-be-corrected
     marginals_dictionary_to_correct = {}
     for key_naive in marginals_labels_correction:
         marginals_dictionary_to_correct[key_naive] = marginals_dictionary_all[key_naive]
 
-    # Correct marginals
+    # Correct marginals_dictionary
     marginals_corrector.correct_marginals(marginals_dictionary=marginals_dictionary_to_correct,
                                           method=correction_method,
                                           method_kwargs=method_kwargs)
-    # Coarse-grain some of the corrected marginals to obtain the ones that appear in Hamiltonian
+    # Coarse-grain some of the corrected marginals_dictionary to obtain the ones that appear in Hamiltonian
     marginals_coarse_grained_corrected = \
         marginals_corrector.get_specific_marginals_from_marginals_dictionary(
             marginals_labels_hamiltonian,
             corrected=True)
 
-    # Estimate energy from corrected marginals
+    # Estimate energy from corrected marginals_dictionary
     energy_corrected = \
         fda.estimate_energy_from_marginals(weights_dictionary=weights_dictionary,
-                                           marginals=
+                                           marginals_dictionary=
                                            marginals_coarse_grained_corrected)
 
     # Get error per qubit

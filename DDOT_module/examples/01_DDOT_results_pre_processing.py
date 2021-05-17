@@ -68,7 +68,7 @@ list_of_qubits = range(number_of_qubits)
 #        number of occurrences
 dictionary_results = dictionary_data['results_dictionary_preprocessed']
 
-# get instance of marginals analyzer for ddot experiments
+# get instance of marginals_dictionary analyzer for ddot experiments
 marginals_analyzer_ddot = DDTMarginalsAnalyzer(dictionary_results,
                                                bitstrings_right_to_left)
 
@@ -81,7 +81,7 @@ marginals_analyzer_ddot.compute_all_marginals(all_pairs,
                                               show_progress_bar=True)
 
 if saving:
-    # Save marginals
+    # Save marginals_dictionary
     directory = tests_directory + 'mitigation_on_marginals/' + backend_name + \
                 '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
     dictionary_data['marginals_dictionary_pairs'] = marginals_analyzer_ddot.marginals_dictionary
