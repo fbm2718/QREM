@@ -29,7 +29,7 @@ def get_random_ddot_family(number_of_qubits, number_of_circuits, method = 'rando
     """Return list of random bitstrings
     :param number_of_qubits (int): number of qubits!
     :param number_of_circuits (int): number of circuits in the collection. The first two circuits are always taken to be "000..." and "111..."
-    :param method (str): possible values:
+    :param method_name (str): possible values:
     'random' - uses random combinations of bitstrings
     #TODO FBM:  1 'hash_functions" - uses random hash functions (ADD LATER)
     #TODO FBM: 2 The lists of strings are later concateneted to strings (e.g., ['0','0','1'] -> '001") using function "get_circuits_description_from_family".
@@ -47,7 +47,7 @@ def get_random_ddot_family(number_of_qubits, number_of_circuits, method = 'rando
         ddot_family = [zeros, ones] + [get_random_bitstring(number_of_qubits) for k in
                                                        range(number_of_circuits-2)]
     elif method == 'hash_functions':
-        raise ValueError("Hash functions are to be added, use 'random' method instead")
+        raise ValueError("Hash functions are to be added, use 'random' method_name instead")
 
     return ddot_family
 

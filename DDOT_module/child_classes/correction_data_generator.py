@@ -57,7 +57,7 @@ class CorrectionDataGenerator(NoiseModelGenerator):
         - :param: 'correction_matrices' - inverses of noise_matrices, convention used is the same
     """
 
-    # TODO FBM: generalize for more than two-qubit subsets
+    # TODO FBM: generalize for more than two-qubit subsets_list
     # TODO FBM: add mitigation errors
 
     def __init__(self,

@@ -123,7 +123,7 @@ class GlobalNoiseMatrixCreator:
 
     def compute_global_noise_matrix(self):
         """
-            This method is faster than other one
+            This method_name is faster than other one
         """
         number_of_qubits = self._number_of_qubits
 

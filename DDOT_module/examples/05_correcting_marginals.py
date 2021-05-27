@@ -147,7 +147,7 @@ marginals_corrector = MarginalsCorrector(
 
 errors_noisy, errors_corrected = [], []
 
-# Choose the noise mitigation method implemented on marginals_dictionary
+# Choose the noise mitigation method_name implemented on marginals_dictionary
 correction_method = 'T_matrix'
 method_kwargs = {'ensure_physicality': True}
 
@@ -157,7 +157,7 @@ for h_index in tqdm(range(0, len(hamiltonians_data_keys))):
     hamiltonian_data = hamiltonians_data_dictionary[key_hamiltonian]
 
     # The needed Hamiltonian data includes weights dictionary
-    # The KEYS of this dictionary are labels for qubits' subsets
+    # The KEYS of this dictionary are labels for qubits' subsets_list
     # and VALUES are corresponding coefficients in local terms of Hamiltonian
     weights_dictionary = hamiltonian_data['weights_dictionary']
 

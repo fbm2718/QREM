@@ -111,7 +111,7 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
          NOTE: this function is "dual" to self.get_qubit_indices_from_string.
         """
 
-        return 'q' + 'q'.join([str(s) for s in list_of_qubits])
+        return anf.get_qubits_key(list_of_qubits=list_of_qubits)
 
     @staticmethod
     def get_qubit_indices_from_string(qubits_string: str,
@@ -131,19 +131,12 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
 
         NOTE: this function is "dual" to self.get_qubits_key.
         """
-
-        numbers = re.findall(r'\d+', qubits_string)
-
-        if with_q:
-            qubits = ['q' + s for s in numbers]
-        else:
-            qubits = [int(s) for s in numbers]
-
-        return qubits
+        return anf.get_qubit_indices_from_string(qubits_string=qubits_string,
+                                                 with_q=with_q)
 
     def results_dictionary_update(self,
                                   results_dictionary_new: Dict[str, Dict[str, int]]) -> None:
-        # This method updates results dictionary from class property with new dictionary.
+        # This method_name updates results dictionary from class property with new dictionary.
         # Note that if there is KEY collision, then the value from new dictionary overwrites old one.
 
         self._results_dictionary = {**self._results_dictionary,
@@ -163,7 +156,7 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         """Go through marginals_dictionary stored as class' property
            and normalize marginal distributions
         :param experiments_keys: labels for experiments
-        :param marginals_keys: labels for qubit subsets
+        :param marginals_keys: labels for qubit subsets_list
         """
         # If no labels of experiments are provided, we take all of them
         if experiments_keys is None:
@@ -185,7 +178,7 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
                           subsets_list: List[List[int]]) -> None:
         """Return dictionary of marginal probability distributions from counts dictionary
         :param experiment_keys: list of keys that label experiments for which marginals_dictionary should be taken
-        :param subsets_list: list of subsets of qubits for which marginals_dictionary should be calculated
+        :param subsets_list: list of subsets_list of qubits for which marginals_dictionary should be calculated
         """
 
         if isinstance(experiment_keys, str):
@@ -224,7 +217,7 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
         """
         Implements self.compute_marginals for all experimental keys.
 
-        :param subsets_list: list of subsets of qubits for which marginals_dictionary should be calculated
+        :param subsets_list: list of subsets_list of qubits for which marginals_dictionary should be calculated
         :param show_progress_bar: if True, shows progress bar. Requires "tqdm" package
         """
 
@@ -246,7 +239,7 @@ class MarginalsAnalyzerBase(MarginalsAnalyzerInterface):
             and it returns them.
 
         :param experiment_key: key that labels experiment from which marginals_dictionary should be taken
-        :param subsets_list: list of subsets of qubits for which marginals_dictionary should be calculated
+        :param subsets_list: list of subsets_list of qubits for which marginals_dictionary should be calculated
 
         :return: marginals_dictionary:
                 dictionary in which KEY is label for experiment, and VALUE is dictionary with KEYS

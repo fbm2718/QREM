@@ -68,8 +68,8 @@ class QDTCalibrationSetup:
     def from_qiskit_results(cls, results_list: List[Result], probe_kets: List[np.array]):
         """
         Description:
-            This method generates Calibration setup objects directly from qiskit job results and probe kets used
-            to generate circuits for these jobs. This method should be interpreted as sort of additional constructor
+            This method_name generates Calibration setup objects directly from qiskit job results and probe kets used
+            to generate circuits for these jobs. This method_name should be interpreted as sort of additional constructor
             for qiskit users.
         :param results_list: List of qiskit jobs results. In case of single job result it should still be potentially_stochastic_matrix list.
         :param probe_kets: Prove kets (in form of list of np.arrays) used to generate calibration circuits.
@@ -85,7 +85,7 @@ class QDTCalibrationSetup:
     def __get_probe_states(qubits_number: int, probe_kets: List[np.array]) -> List[np.ndarray]:
         """
         Description:
-            This method generates probe states (density matrix) from results and kets
+            This method_name generates probe states (density matrix) from results and kets
             passed to maximum likelihood POVM counting object.
         Parameters:
             :param qubits_number: Number of qubits used in the calibration experiments.
@@ -119,7 +119,7 @@ class DetectorTomographyFitter:
         """
         Description:
             Given results of Quantum Detector Tomography experiments and list of probe states, return the Maximum
-            Likelihood estimation of POVM describing potentially_stochastic_matrix detector. Uses recursive method from [1]. See also [2].
+            Likelihood estimation of POVM describing potentially_stochastic_matrix detector. Uses recursive method_name from [1]. See also [2].
         Parameters:
             :param calibration_setup: QDTCalibrationSetup object that consists data upon which maximum likelihood POVM
             estimator should be calculated.
@@ -190,7 +190,7 @@ class DetectorTomographyFitter:
                          probe_states: List[np.ndarray]) -> np.ndarray:
         """
         Description:
-            This method calculates R operator as defined in Ref. [1].
+            This method_name calculates R operator as defined in Ref. [1].
         Parameters:
             :param m_m: Effect for which R operator is calculated.
             :param index_of_povm_effect: Index of povm effect for which R is calculated.
@@ -226,9 +226,9 @@ class DetectorTomographyFitter:
     def __get_lagrange_matrix(r_matrices: List[np.ndarray], povms: List[np.ndarray]) -> np.ndarray:
         """
         Description:
-            Calculates Lagrange matrix used in Lagrange multipliers optimization method.
+            Calculates Lagrange matrix used in Lagrange multipliers optimization method_name.
         Parameters:
-            :param r_matrices: arrray_to_print list of R matrices described in potentially_stochastic_matrix method generating them.
+            :param r_matrices: arrray_to_print list of R matrices described in potentially_stochastic_matrix method_name generating them.
             :param povms: arrray_to_print list of effects for which Lagrange matrix will be calculated.
         Returns:
            Lagrange matrix for given parameters.
@@ -248,9 +248,9 @@ class DetectorTomographyFitter:
     def __calculate_symmetric_m(m_lagrange_matrix: np.ndarray, m_r: np.ndarray, m_m: np.ndarray) -> np.ndarray:
         """
         Description:
-            arrray_to_print method used for calculating symmetric m matrix.
+            arrray_to_print method_name used for calculating symmetric m matrix.
         Parameters:
-            :param m_m: arrray_to_print matrix of which symmetric method will be calculated.
+            :param m_m: arrray_to_print matrix of which symmetric method_name will be calculated.
             :param m_r: Previously calculated R operator.
             :param m_lagrange_matrix:
         Returns:
@@ -268,7 +268,7 @@ class DetectorTomographyFitter:
         return symmetric_m
 
 
-# TODO TR: This method may need to be revisited and possibly reduced into several smaller ones.
+# TODO TR: This method_name may need to be revisited and possibly reduced into several smaller ones.
 def join_povms(povms: List[List[np.ndarray]],
                qubit_indices_lists: List[List[int]],
                sort_outcomes = True) -> List[np.ndarray]:

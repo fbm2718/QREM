@@ -29,7 +29,7 @@ from QREM import ancillary_functions as anf
 class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
     """
         Class that handles results of Diagonal Detector Tomography.
-        Main functionalities allow to calculate noise matrices on subsets of qubits.
+        Main functionalities allow to calculate noise matrices on subsets_list of qubits.
         This includes averaged noise matrices, i_index.e., averaged over states off all other qubits,
         as well as state-dependent, i_index.e., conditioned on the particular
         input classical state of some other qubits.
@@ -259,7 +259,7 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
                 return {'averaged': noise_matrix}
 
         # check if there is no collision between qubits_of_interest and neighbors_of_interest
-        # (if there is, then the method won't be consistent)
+        # (if there is, then the method_name won't be consistent)
         if len(anf.lists_intersection(qubits_of_interest, neighbors_of_interest)) != 0:
             print(qubits_of_interest, neighbors_of_interest)
             raise ValueError('Qubits of interest and neighbors overlap')
@@ -409,9 +409,9 @@ class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):
                                                subsets_list: List[List[int]],
                                                show_progress_bar: Optional[bool] = False) -> None:
         """Description:
-        computes averaged (over all other qubits) noise matrices on subsets of qubits
+        computes averaged (over all other qubits) noise matrices on subsets_list of qubits
 
-        :param subsets_list: subsets of qubit indices
+        :param subsets_list: subsets_list of qubit indices
         :param show_progress_bar: whether to show animated progress bar. requires tqdm package
 
         """

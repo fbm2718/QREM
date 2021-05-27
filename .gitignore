@@ -3,3 +3,5 @@
 QConfig.py
 .ipynb_checkpoints/
 __pycache__/
+/characterization_module/
+/tests/

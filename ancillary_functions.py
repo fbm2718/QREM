@@ -23,6 +23,14 @@ pauli_sigmas = {
     'Y': np.array([[0., -1j], [1j, 0]]),
     'Z': np.array([[1., 0j], [0, -1]])
 }
+___bell_states___ = {'phi+': 1 / np.sqrt(2) * np.array([1, 0, 0, 1]),
+                     'phi-': 1 / np.sqrt(2) * np.array([1, 0, 0, -1]),
+                     'psi+': 1 / np.sqrt(2) * np.array([0, 1, 1, 0]),
+                     'psi-': 1 / np.sqrt(2) * np.array([0, 1, -1, 0]), }
+
+
+def get_bell_basis():
+    return list(___bell_states___.values())
 
 
 class key_dependent_dict(defaultdict):
@@ -290,7 +298,7 @@ def identity_check(m_a, eps=epsilon):
     return True if zero_check(checking_zeros, eps) else False
 
 
-# TODO TR: Comment this method, and intention behind it.
+# TODO TR: Comment this method_name, and intention behind it.
 def thresh(m_a, decimal=7):
     m_b = np.array(copy.deepcopy(m_a))
     with np.nditer(m_b, op_flags=['readwrite']) as it:
@@ -579,3 +587,11 @@ def save_results_pickle(input_dict,
     # os.chmod(file_path)
     with open(file_path + add_end, 'wb') as f:
         pickle.dump(dict_results, f, pickle.HIGHEST_PROTOCOL)
+
+
+import itertools
+
+
+def get_k_local_subsets(number_of_qubits,
+                        locality):
+    return list(itertools.combinations(range(number_of_qubits), locality))

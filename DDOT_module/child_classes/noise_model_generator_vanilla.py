@@ -194,7 +194,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
                                    ) -> list:
         """
             Get partition of qubits in potentially_stochastic_matrix device into disjoint "clusters". This function uses "naive"
-            method by assigning qubits to the same cluster if correlations between them are higher
+            method_name by assigning qubits to the same cluster if correlations between them are higher
             than some "neighbors_threshold". It restricts size of the cluster to "maximal_size"
             by disregarding the lowest correlations (that are above neighbors_threshold).
             It uses table of correlations from class property self._correlations_table_pairs
@@ -468,7 +468,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
                 method_kwargs = default_kwargs
             elif 'maximal_size' in method_kwargs.keys():
                 if method_kwargs['maximal_size'] != maximal_size:
-                    raise ValueError('Disagreement between maximal size argument and method kwargs')
+                    raise ValueError('Disagreement between maximal size argument and method_name kwargs')
             else:
                 method_kwargs['maximal_size'] = maximal_size
             clusters_list = self._compute_clusters_pairwise(**method_kwargs)
@@ -487,7 +487,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
             elif 'C_maxsize' in method_kwargs.keys():
                 # TODO FBM, OS: this variable should have name consistent with rest of functions
                 if method_kwargs['C_maxsize'] != maximal_size:
-                    raise ValueError('Disagreement between maximal size argument and method kwargs')
+                    raise ValueError('Disagreement between maximal size argument and method_name kwargs')
             else:
                 method_kwargs['C_maxsize'] = maximal_size
 
@@ -524,7 +524,7 @@ class NoiseModelGenerator(DDTMarginalsAnalyzer):
             neighborhoods = self._find_all_neighborhoods_holistic(**method_kwargs)
 
         else:
-            raise ValueError('Wrong method name')
+            raise ValueError('Wrong method_name name')
 
         return neighborhoods
 

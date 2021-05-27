@@ -7,7 +7,7 @@ import povmtools
 def get_frequencies_array_from_results(results_list: List[Result]) -> np.ndarray:
     """
     Description:
-        Creates an array of frequencies from given qiskit job results. This method is is working with
+        Creates an array of frequencies from given qiskit job results. This method_name is is working with
         qiskit 0.16. The shape of the array is
             c x 2 ** q,
         where c denotes circuits number and q denotes number of qubits.

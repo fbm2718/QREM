@@ -302,7 +302,7 @@ def gtc_tensor_calculating_function(arguments: list):
 
 def detector_tomography_circuits_pymali(qubit_indices, probe_kets):
     """
-    Analogical method of the circuits preparing method utilizing pymali general tensor calculator.
+    Analogical method_name of the circuits preparing method_name utilizing pymali general tensor calculator.
     """
 
     qubit_indices = sorted(qubit_indices)  # Sort to ensure, that results can easily be interpreted.
@@ -329,8 +329,8 @@ def detector_tomography_circuits_pymali(qubit_indices, probe_kets):
 
             current_angles = povmtools.get_su2_parametrizing_angles(unitaries_set[j])
 
-            # TODO TR: I believe there may be more "special" cases. If so, then this should be placed in other method
-            #  or in get_su2_ ... method.
+            # TODO TR: I believe there may be more "special" cases. If so, then this should be placed in other method_name
+            #  or in get_su2_ ... method_name.
             if current_angles[0] == 'id':
                 circuit.i(qreg[qubit_indices[j]])
                 continue

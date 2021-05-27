@@ -55,5 +55,5 @@ class MarginalsAnalyzerInterface(abc.ABC):
     def compute_marginals(self,
                           experiment_key: str,
                           subsets: List[List[int]]) -> dict:
-        """Computes marginals_dictionary for input subsets of qubits"""
+        """Computes marginals_dictionary for input subsets_list of qubits"""
         raise NotImplementedError

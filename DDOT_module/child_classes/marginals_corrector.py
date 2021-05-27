@@ -231,7 +231,7 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
                                           iterations_number: Optional[int] = None,
                                           prior: Optional[np.ndarray] = None):
         """
-        Correct distribution using method that is hybrid of T_matrix correction (see Refs. [0,0.5])
+        Correct distribution using method_name that is hybrid of T_matrix correction (see Refs. [0,0.5])
         and Iterative Bayesian Unfolding (IBU) (see Ref. [1]).
 
         Algorithm goes like this:
@@ -298,15 +298,15 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
 
         """Return dictionary of corrected marignal distributions
         :param marginals_dictionary: dictionary of (noisy) marginal distributions
-        :param method: method to be used for correction of marginal probability distributions
+        :param method: method_name to be used for correction of marginal probability distributions
 
         possible values:
         - 'T_matrix' - uses inverse of noise matrix as correction (see Refs. [0,0.5])
         - 'IBU' - uses Iterative Bayesian Unfolding (see Ref. [1])
-        - 'hybrid_T_IBU' - uses hybrid method between 'T_matrix' and 'IBU',
+        - 'hybrid_T_IBU' - uses hybrid method_name between 'T_matrix' and 'IBU',
                           see description of self.correct_distribution_hybrid_T_IBU
 
-        :param method_kwargs:  keyword arguments passed to function using chosen method.
+        :param method_kwargs:  keyword arguments passed to function using chosen method_name.
                                See description of specific functions.
 
         :return: corrected_marginals : dictionary of corrected marginal distributions
@@ -351,7 +351,7 @@ class MarginalsCorrector(MarginalsAnalyzerBase):
                                                                                     key],
                                                                                 **method_kwargs)
             else:
-                raise ValueError('Wrong method name')
+                raise ValueError('Wrong method_name name')
 
             corrected_marginals[key] = corrected_marginal_now
 

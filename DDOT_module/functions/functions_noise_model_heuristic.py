@@ -98,7 +98,7 @@ def cost_function_simple_cummulative(partition, correlations_table, alpha, C_max
     return val
 
 
-# returns the value of cost function (simpler method; no badness) and S table - potentially_stochastic_matrix symmetric matrix which is defined by S_ij=S_ij_av (off-diagonal) and S_ii=S_i (diagonal). Raises error if minus infinity.
+# returns the value of cost function (simpler method_name; no badness) and S table - potentially_stochastic_matrix symmetric matrix which is defined by S_ij=S_ij_av (off-diagonal) and S_ii=S_i (diagonal). Raises error if minus infinity.
 def cost_function_simple(partition, correlations_table, alpha, C_maxsize):
     no_of_clusters = len(partition)
     S = np.zeros((no_of_clusters, no_of_clusters))
@@ -274,7 +274,7 @@ def evaluate_move_operation(partition, index_k, index_C_i, index_C_j, correlatio
 
 
 # returns the change of cost function cost_function_simple after potentially_stochastic_matrix swap operation (qubit k from C_i wilh qubit l_index from C_j) on clusters.
-# TODO: values do not match the naive method - find an error!
+# TODO: values do not match the naive method_name - find an error!
 def evaluate_swap_operation(partition, index_k, index_l, index_C_i, index_C_j, correlations_table,
                             alpha, C_maxsize, S):
     # cluster function part - contrubutes zero

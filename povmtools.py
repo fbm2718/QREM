@@ -123,7 +123,7 @@ def get_unitary_change_state(state):
         return np.matrix.getH(m_u)
 
 
-# TODO TR: Intentions behind the method and comments inside the function should be provided.
+# TODO TR: Intentions behind the method_name and comments inside the function should be provided.
 # TODO FBM: So this is some old shitty function for creating list of indices (which by the way was imitating something
 #  like your Tensor). I have added new function for this in quantum_tomography_qiskit, please take potentially_stochastic_matrix look at that (it
 #  might use simplifiactions). Function here can be deleted.
@@ -487,7 +487,7 @@ def find_closest_prob_vector(quasiprobability_vector: List[float]) -> List[float
     # get rid of indices
     p_good_format = [ordered_p[i][1] for i in range(d)]
 
-    return p_good_format
+    return np.array(p_good_format)
 
 
 def permute_matrix(matrix, n, transposition):
@@ -659,7 +659,7 @@ def operational_distance_POVMs(M, P, method='direct'):
 
 
     elif (method == 'direct'):
-        # calculate operational distance directly via bruteforce search over subsets of outcomes
+        # calculate operational distance directly via bruteforce search over subsets_list of outcomes
         biggest_norm = 0
         for k in list(range(m))[::-1]:
             current_list = list(itertools.combinations(difference, k + 1))
@@ -845,7 +845,7 @@ def counts_dict_to_frequencies_vector(count_dict: dict, reverse_order=False) -> 
 
     qubits_number = len(list(count_dict.keys())[0])  # Number of qubits in given experiment counts.
     possible_outcomes = get_possible_n_qubit_outcomes(qubits_number)
-    dict_keys = count_dict.keys()  # So we don't call the method every time.
+    dict_keys = count_dict.keys()  # So we don't call the method_name every time.
     counts_sum = 0
 
     for outcome in possible_outcomes:

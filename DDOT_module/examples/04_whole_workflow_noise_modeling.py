@@ -135,9 +135,9 @@ else:
 # set maximal size of cluster+neighborhood set
 maximal_size = 5
 
-# Choose clustering method and its kwargs
+# Choose clustering method_name and its kwargs
 # NOTE: see descriptions of the relevant functions for available options
-# NOTE 2: this is method used in Ref. [0.5]
+# NOTE 2: this is method_name used in Ref. [0.5]
 clustering_method = 'pairwise'
 clustering_function_arguments = {'cluster_threshold': threshold_clusters}
 
@@ -149,9 +149,9 @@ correction_data_generator.compute_clusters(maximal_size=maximal_size,
                                            )
 clusters = correction_data_generator.clusters_list
 
-# Choose method for finding neighborhoods and its kwargs
+# Choose method_name for finding neighborhoods and its kwargs
 # NOTE: see descriptions of the relevant functions for available options
-# NOTE 2: this is method used in Ref. [0.5]
+# NOTE 2: this is method_name used in Ref. [0.5]
 neighborhoods_method = 'pairwise'
 neighborhoods_function_arguments = {'neighbors_threshold': threshold_neighbors,
                                     'show_progress_bar': True}
@@ -165,9 +165,9 @@ anf.cool_print('DONE', '\n', 'green')
 
 # PRINT OBTAINED NOISE MODEL
 print('____')
-anf.cool_print('Used method for clusters construction:', clustering_method, 'red')
+anf.cool_print('Used method_name for clusters construction:', clustering_method, 'red')
 anf.cool_print('with kwargs:', clustering_function_arguments, 'red')
-anf.cool_print('Used method for neighborhoods construction:', neighborhoods_method, 'red')
+anf.cool_print('Used method_name for neighborhoods construction:', neighborhoods_method, 'red')
 anf.cool_print('with kwargs:', neighborhoods_function_arguments, 'red')
 print('____')
 anf.cool_print('Clusters:', clusters)

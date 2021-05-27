@@ -48,7 +48,7 @@ class QDTErrorMitigator:
     def prepare_mitigator(self, povm: List[np.ndarray]) -> None:
         """
         Description:
-            This method is main method of the class. It is used to prepare the mitigation matrix from POVM. Other
+            This method_name is main method_name of the class. It is used to prepare the mitigation matrix from POVM. Other
             methods allow to calculate errors.
 
         Parameters:
