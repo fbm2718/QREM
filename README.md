@@ -12,7 +12,7 @@ working properly.
 Recent update implements ideas from work:
 
 Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of cross-talk effects in readout noise with applications to the Quantum Approximate Optimization Algorithm", 
-[Quantum 5, 464](https://quantum-journal.org/papers/q-2021-06-01-464/)
+[Quantum 5, 464 (2021)](https://quantum-journal.org/papers/q-2021-06-01-464/)
 
 This allows to
 a) perform efficient characterization of multiqubit noise correlations via Diagonal Detector Overlapping Tomography (DDOT),
@@ -95,7 +95,7 @@ by classical post-processing based on detector tomography",
 
 [0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, 
 "Modeling and mitigation of cross-talk effects in readout noise with applications to the Quantum Approximate Optimization Algorithm", 
-[Quantum 5, 464](https://quantum-journal.org/papers/q-2021-06-01-464/)
+[Quantum 5, 464 (2021)](https://quantum-journal.org/papers/q-2021-06-01-464/)
   
 **Important quantum information ideas appearing in the code are, to a higher or lower degree, described in following 
 references:**
