@@ -21,19 +21,19 @@ backend_name = 'ASPEN-8'
 number_of_qubits = 23
 date = '2020_04_08'
 
-directory = os.getcwd() + '/data_for_tests/DDOT/' + backend_name + '/N%s' % number_of_qubits + '/' + date + '/'
+directory = os.getcwd() + '/saved_data/DDOT/' + backend_name + '/N%s' % number_of_qubits + '/' + date + '/'
 files = os.listdir(directory)
 with open(directory + files[-1], 'rb') as filein:
     data_object = pickle.load(filein)
 
 # Keys in dictionary:
 # 'converted_dict' : dictionary for which each KEY is classical INPUT state, and VALUE is dictionary of counts (results);
-#                    it is in a form such that qubits are labeled from 0 to len(outcome)
+#                    it is in potentially_stochastic_matrix form such that qubits are labeled from 0 to len(outcome)
 # 'marginal_dicionaries_initial': dictionary for which each KEY is classical INPUT state, and VALUE is dictionary of
 #                                 marginal distributions on all pairs of qubits
 # 'pairs_noise_matrices_initial': dictionary for which each KEY is index of qubits pair, e.g., 'q2q13' and VALUE is
 #                                 noise matrix on that pair (averaged over all other qubits)
-# 'list_of_qubits': true indices of qubits in a device
+# 'list_of_qubits': true indices of qubits in potentially_stochastic_matrix device
 
 dictionary_data = data_object
 dictionary_results = dictionary_data['converted_dict']
