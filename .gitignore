@@ -4,9 +4,9 @@ QConfig.py
 .ipynb_checkpoints/
 __pycache__/
 /000_not_public/
-/tests/
+/000_not_public/tests/
 /001_data_circuits_collections_private/
 /000_not_public/
-/tests/
+/000_not_public/tests/
 /002_deprecatied/
-/tests/
+/000_not_public/tests/
