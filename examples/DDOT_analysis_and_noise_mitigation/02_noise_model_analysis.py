@@ -14,36 +14,41 @@ with applications to the Quantum Approximate Optimization Algorithm",
 Quantum 5, 464 (2021).
 
 """
-
 import os, pickle
-from functions import ancillary_functions as anf
-from noise_characterization.modeling.NoiseModelGenerator import NoiseModelGenerator
-from povms_qi.ancillary_functions import cool_print
+from QREM.functions import ancillary_functions as anf
+from QREM.noise_characterization.modeling.NoiseModelGenerator import NoiseModelGenerator
+from QREM.functions.ancillary_functions import cool_print
+
+"""
+Examples here analyze data obtained in experiments described in [0.5].
+
+Please see examples/DDOT_implementation/ to create and implement new experiments.
+
+Examples 01, 02 and 03 are all merged together in example 04, which can be a starting point.
+"""
 
 module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/saved_data/'
 
 # data used for testing
-backend_name = 'ASPEN-8'
-date = '2020_05_07'
+backend_name = 'ibmq_16_melbourne'
 
 # Specify whether save calculated data
 saving = True
 
 # specify whether count names are read from right to left (convention used by IBM)
 if backend_name == 'ibmq_16_melbourne':
+    date = '2020_10_12'
     number_of_qubits = 15
-    reverse_counts = True
-
-
+    bitstrings_right_to_left = True
 elif backend_name == 'ASPEN-8':
+    date = '2020_12_31'
     number_of_qubits = 23
-    reverse_counts = False
-
+    bitstrings_right_to_left = False
 else:
-    raise ValueError('Wrong SDK_name')
+    raise ValueError('Wrong backend name')
 
-directory = tests_directory + 'mitigation_on_marginals/' + backend_name + '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
+directory = tests_directory + 'mitigation_on_marginals/' + backend_name + '/number_of_qubits_%s' % number_of_qubits + '/' + date + '/DDOT/'
 
 files = os.listdir(directory)
 with open(directory + '02_test_results_noise_matrices_pairs.pkl', 'rb') as filein:
@@ -77,7 +82,7 @@ noise_matrices_dictionary_pairs = dictionary_data['noise_matrices_dictionary_pai
 
 # initialize noise model generator
 noise_model_analyzer = NoiseModelGenerator(results_dictionary_ddot=dictionary_results,
-                                           bitstrings_right_to_left=reverse_counts,
+                                           bitstrings_right_to_left=bitstrings_right_to_left,
                                            number_of_qubits=number_of_qubits,
                                            marginals_dictionary=marginal_dictionaries_pairs,
                                            noise_matrices_dictionary=noise_matrices_dictionary_pairs)
@@ -112,6 +117,7 @@ maximal_size = 5
 clustering_method = 'pairwise'
 clustering_function_arguments = {'cluster_threshold': threshold_clusters}
 
+anf.cool_print('Got data, computing clusters...','...')
 # compute clusters based on correlations treshold
 noise_model_analyzer.compute_clusters(maximal_size=maximal_size,
                                       method=clustering_method,
@@ -145,8 +151,7 @@ if saving:
                           'neighborhoods': neighborhoods
                           }
 
-    date_save = '2020_05_07'
-    directory = tests_directory + 'mitigation_on_marginals/' + backend_name + '/N%s' % number_of_qubits + '/' + date_save + '/DDOT'
+    directory = tests_directory + 'mitigation_on_marginals/' + backend_name + '/number_of_qubits_%s' % number_of_qubits + '/' + date + '/DDOT'
 
     anf.save_results_pickle(dictionary_to_save,
                             directory,

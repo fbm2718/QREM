@@ -18,31 +18,41 @@ Quantum 5, 464 (2021).
 import os
 import pickle
 
-from functions import ancillary_functions as anf
-from noise_characterization.tomography.DDTMarginalsAnalyzer import DDTMarginalsAnalyzer
+from QREM.functions import ancillary_functions as anf
+from QREM.noise_characterization.tomography.DDTMarginalsAnalyzer import DDTMarginalsAnalyzer
+
+
+"""
+Examples here analyze data obtained in experiments described in [0.5].
+
+Please see examples/DDOT_implementation/ to create and implement new experiments.
+
+Examples 01, 02 and 03 are all merged together in example 04, which can be a starting point.
+"""
 
 module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/saved_data/'
 
 # specify data used for testing
-backend_name = 'ASPEN-8'
-date = '2020_05_07'
+backend_name = 'ibmq_16_melbourne'
 
 # Specify whether save calculated data
-saving = False
+saving = True
 
 # specify whether count names are read from right to left (convention used by IBM)
 if backend_name == 'ibmq_16_melbourne':
+    date = '2020_10_12'
     number_of_qubits = 15
     bitstrings_right_to_left = True
 elif backend_name == 'ASPEN-8':
+    date = '2020_12_31'
     number_of_qubits = 23
     bitstrings_right_to_left = False
 else:
     raise ValueError('Wrong backend name')
 
 directory = tests_directory + 'mitigation_on_marginals/' + backend_name \
-            + '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
+            + '/number_of_qubits_%s' % number_of_qubits + '/' + date + '/DDOT/'
 
 files = os.listdir(directory)
 # print(files)
@@ -81,7 +91,7 @@ marginals_analyzer_ddot.compute_all_marginals(all_pairs,
 if saving:
     # Save marginals_dictionary
     directory = tests_directory + 'mitigation_on_marginals/' + backend_name + \
-                '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
+                '/number_of_qubits_%s' % number_of_qubits + '/' + date + '/DDOT/'
     dictionary_data['marginals_dictionary_pairs'] = marginals_analyzer_ddot.marginals_dictionary
 
     anf.save_results_pickle(dictionary_data, directory, '01_test_results_marginals_pairs')

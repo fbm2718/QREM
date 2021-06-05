@@ -118,7 +118,7 @@ class CircuitsCreatorDDOT:
 
 
     @property
-    def circuit_labels_dictionary(self)->Dict[str,int]:
+    def circuits_labels_dictionary(self)->Dict[str,int]:
         return self._circuit_labels
 
     @staticmethod

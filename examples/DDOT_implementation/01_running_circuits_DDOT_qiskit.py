@@ -42,6 +42,7 @@ directory = anf.get_module_directory() + '/saved_data/data_circuits_collections/
 files = sorted(os.listdir(directory))
 
 anf.cool_print('Available files:\n', files)
+anf.cool_print('Choosing file:\n',files[-1])
 with open(directory + files[-1], 'rb') as filein:
     dictionary_data = pickle.load(filein)
 
