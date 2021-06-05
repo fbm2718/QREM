@@ -18,32 +18,41 @@ Quantum 5, 464 (2021).
 import os
 import pickle
 
-from functions import ancillary_functions as anf
-from noise_mitigation.CorrectionDataGenerator import \
+from QREM.functions import ancillary_functions as anf
+from QREM.noise_mitigation.CorrectionDataGenerator import \
     CorrectionDataGenerator
+
+"""
+Examples here analyze data obtained in experiments described in [0.5].
+
+Please see examples/DDOT_implementation/ to create and implement new experiments.
+
+Examples 01, 02 and 03 are all merged together in example 04 (here), which can be a starting point.
+"""
 
 module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/saved_data/'
 
 # specify data used for testing
-backend_name = 'ASPEN-8'
-date = '2020_05_07'
+backend_name = 'ibmq_16_melbourne'
 
 # Specify whether save calculated data
 saving = True
 
 # specify whether count names are read from right to left (convention used by IBM)
 if backend_name == 'ibmq_16_melbourne':
+    date = '2020_10_12'
     number_of_qubits = 15
     bitstrings_right_to_left = True
 elif backend_name == 'ASPEN-8':
+    date = '2020_12_31'
     number_of_qubits = 23
     bitstrings_right_to_left = False
 else:
-    raise ValueError('Wrong SDK_name')
+    raise ValueError('Wrong backend name')
 
 directory = tests_directory + 'mitigation_on_marginals/' + backend_name \
-            + '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
+            + '/number_of_qubits_%s' % number_of_qubits + '/' + date + '/DDOT/'
 
 files = os.listdir(directory)
 # print(files)
@@ -94,7 +103,7 @@ all_pairs = [[qi, qj] for qi in list_of_qubits for qj in list_of_qubits if qj > 
 # compute marginal distributions for all experiments and all qubit pairs
 
 
-anf.cool_print('Getting marginals_dictionary from DDT experiments', '...', 'green')
+anf.cool_print('Getting marginals from DDOT experiments', '...', 'green')
 correction_data_generator.compute_all_marginals(all_pairs,
                                                 show_progress_bar=True)
 anf.cool_print('DONE', '\n', 'green')
@@ -163,9 +172,9 @@ anf.cool_print('DONE', '\n', 'green')
 
 # PRINT OBTAINED NOISE MODEL
 print('____')
-anf.cool_print('Used method_name for clusters construction:', clustering_method, 'red')
+anf.cool_print('Used method for clusters construction:', clustering_method, 'red')
 anf.cool_print('with kwargs:', clustering_function_arguments, 'red')
-anf.cool_print('Used method_name for neighborhoods construction:', neighborhoods_method, 'red')
+anf.cool_print('Used method for neighborhoods construction:', neighborhoods_method, 'red')
 anf.cool_print('with kwargs:', neighborhoods_function_arguments, 'red')
 print('____')
 anf.cool_print('Clusters:', clusters)
@@ -173,7 +182,7 @@ anf.cool_print('Neighborhoods:', neighborhoods)
 print()
 
 # Based on obtained noise model, get correction data for pairs of qubits
-#                                                                     (hence for 2-local Hamiltonians)
+# (hence for 2-local Hamiltonians)
 anf.cool_print('Constructing correction data for pairs of qubits', '...', 'green')
 correction_data = correction_data_generator.get_pairs_correction_data(all_pairs,
                                                                       show_progress_bar=True)
@@ -190,9 +199,8 @@ if saving:
                           'correction_data': correction_data}
 
     # Save results
-    date_save = '2020_05_07'
     directory = tests_directory + 'mitigation_on_marginals/' + backend_name + \
-                '/N%s' % number_of_qubits + '/' + date_save + '/DDOT/'
+                '/number_of_qubits_%s' % number_of_qubits + '/' + date + '/DDOT/'
 
     anf.save_results_pickle(dictionary_to_save,
                             directory,

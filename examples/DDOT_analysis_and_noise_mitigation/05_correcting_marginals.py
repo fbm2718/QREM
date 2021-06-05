@@ -17,18 +17,22 @@ Quantum 5, 464 (2021).
 
 import os
 import pickle
-
-import numpy as np
-from noise_mitigation.MarginalsCorrector import MarginalsCorrector
-from functions import functions_data_analysis as fda, ancillary_functions as anf
 from tqdm import tqdm
+import numpy as np
+from QREM.noise_mitigation.MarginalsCorrector import MarginalsCorrector
+from QREM.functions import functions_data_analysis as fda, ancillary_functions as anf
+
+"""
+Examples here analyze data obtained in experiments described in [0.5].
+
+Please see examples/DDOT_implementation/ to create and implement new experiments.
+"""
 
 module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/saved_data/'
 
 # data used for testing
-backend_name = 'ASPEN-8'
-date = '2020_05_07'
+backend_name = 'ibmq_16_melbourne'
 
 # Specify whether save calculated data
 saving = True
@@ -38,17 +42,19 @@ name_of_hamiltonian = '2SAT'
 
 # specify whether count names are read from right to left (convention used by IBM)
 if backend_name == 'ibmq_16_melbourne':
-    reverse_counts = True
+    date = '2020_10_12'
     number_of_qubits = 15
+    bitstrings_right_to_left = True
 elif backend_name == 'ASPEN-8':
-    reverse_counts = False
+    date = '2020_12_31'
     number_of_qubits = 23
+    bitstrings_right_to_left = False
 else:
-    raise ValueError('Wrong SDK_name')
+    raise ValueError('Wrong backend name')
 
 ################## GET NOISE CHARACTERIZATION DATA ##################
 directory = tests_directory + 'mitigation_on_marginals/' + backend_name + \
-            '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
+            '/number_of_qubits_%s' % number_of_qubits + '/' + date + '/DDOT/'
 
 files = os.listdir(directory)
 with open(directory + '04_test_results_correction_data.pkl', 'rb') as filein:
@@ -112,9 +118,8 @@ NOTE: As this is just benchmark for error-mitigation, we know the answer beforeh
 is earlier solved on classical computer.
 '''
 
-date = '2020_05_07'
 directory = tests_directory + 'mitigation_on_marginals/' + backend_name \
-            + '/N%s' % number_of_qubits + '/' + date + '/ground_states/'
+            + '/number_of_qubits_%s' % number_of_qubits + '/' + date + '/ground_states/'
 
 with open(directory + '00_test_results_' + name_of_hamiltonian + '.pkl', 'rb') as filein:
     dictionary_data_ground_states = pickle.load(filein)
@@ -123,6 +128,8 @@ with open(directory + '00_test_results_' + name_of_hamiltonian + '.pkl', 'rb') a
 results_dictionary_ground_states = dictionary_data_ground_states['dictionary_results_pre_processed']
 hamiltonians_data_dictionary = dictionary_data_ground_states['hamiltonians_data_dictionary']
 hamiltonians_data_keys = list(results_dictionary_ground_states.keys())
+
+
 
 # Due to some error, in the saved data from Ref. [0.5] there is one additional Hamiltonian.
 if backend_name == 'ASPEN-8':
@@ -137,7 +144,7 @@ if backend_name == 'ASPEN-8':
 # Get instance of marginals_dictionary corrector which will be used, well, to correct marginals_dictionary
 marginals_corrector = MarginalsCorrector(
     experimental_results_dictionary=results_dictionary_ground_states,
-    bitstrings_right_to_left=reverse_counts,
+    bitstrings_right_to_left=bitstrings_right_to_left,
     correction_data_dictionary=correction_data
 )
 
@@ -253,9 +260,8 @@ if saving:
                                          'errors_corrected': errors_corrected}
 
     # Save results
-    date_save = '2020_05_07'
     directory = tests_directory + 'mitigation_on_marginals/' + backend_name \
-                + '/N%s' % number_of_qubits + '/' + date_save + '/DDOT/'
+                + '/number_of_qubits_%s' % number_of_qubits + '/' + date + '/DDOT/'
 
     anf.save_results_pickle(dictionary_data,
                             directory,
