@@ -8,7 +8,7 @@ This package is under development and new functionalities and notebooks are expe
 Currently, the methods for quantum detector tomography and measurement error mitigation based on that tomography are
 working properly. 
 
-### UPDATE January 2021
+### UPDATE June 2021
 Recent update implemented ideas from work:
 
 Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of cross-talk effects in readout noise with applications to the Quantum Approximate Optimization Algorithm", 
