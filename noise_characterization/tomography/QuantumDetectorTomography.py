@@ -121,7 +121,7 @@ class QDTCalibrationSetup:
         return general_tensor_calculator.calculate_tensor_to_increasing_list(probe_states)
 
 
-class DetectorTomographyFitter:
+class QDTFitter:
     """
         This class is meant to resemble qiskit's state tomography and process tomography fitters and to calculate the
         maximum likelihood povm estimator describing potentially_stochastic_matrix detector basing on QDT job results and used probe states.

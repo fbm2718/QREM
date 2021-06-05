@@ -26,7 +26,11 @@ from scipy.special import binom as binomial_coefficient
 
 class LabelsCreatorDDOT(LabelsBaseDDOT):
     """
-    Class for creating symbolic description of DDOT circuits.
+    Class for creating symbolic description of Diagonal Detector Overlapping Tomography (DDOT)
+    circuits.
+
+    Description of a single circuit is simply a bitstring denoting classical input state.
+
 
     """
 
