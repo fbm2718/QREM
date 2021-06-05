@@ -125,12 +125,12 @@ def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
     return final_list
 
 
-def detector_tomography_circuits(qubit_indices,
-                                 probe_kets,
-                                 number_of_repetitions=1,
-                                 qrs=None,
-                                 crs=None,
-                                 add_measurements=True):
+def QDT_circuits_qiskit(qubit_indices,
+                        probe_kets,
+                        number_of_repetitions=1,
+                        qrs=None,
+                        crs=None,
+                        add_measurements=True):
     """From list of probe kets and qubit data return quantum circuits which will be implemented to perform
     Quantum Detector Tomography (QDT).
 

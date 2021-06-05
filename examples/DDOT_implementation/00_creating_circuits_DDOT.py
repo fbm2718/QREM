@@ -18,6 +18,18 @@ Quantum 5, 464 (2021).
 from QREM.noise_characterization.tomography.LabelsCreatorDDOT import LabelsCreatorDDOT
 from functions import ancillary_functions as anf
 
+"""
+This script creates collection of symbolic circuits representation that can be used to implement 
+Diagonal Detector Overlapping Tomography (DDOT) (see [0.5]). 
+
+GENERAL WORKFLOW:
+
+1. Specify number of qubits and DDOT locality. 
+2. 
+
+"""
+
+
 # Define number of qubits you wish to create DDOT circuits for
 number_of_qubits = 15
 
