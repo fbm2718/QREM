@@ -3,3 +3,6 @@
 QConfig.py
 .ipynb_checkpoints/
 __pycache__/
+/000_not_public/
+/001_data_circuits_collections_private/
+/002_deprecatied/
