@@ -19,33 +19,41 @@ import os
 import pickle
 
 from functions import ancillary_functions as anf
-from noise_mitigation.CorrectionDataGenerator import \
+from QREM.noise_mitigation.CorrectionDataGenerator import \
     CorrectionDataGenerator
 
-# from QREM.DDOT_module.child_classes.correction_data_generator import CorrectionDataGenerator
+
+"""
+Examples here analyze data obtained in experiments described in [0.5].
+
+Please see examples/DDOT_implementation/ to create and implement new experiments.
+
+Examples 01, 02 and 03 are all merged together in example 04, which can be a starting point.
+"""
 
 module_directory = anf.get_module_directory()
 tests_directory = module_directory + '/saved_data/'
 
 # data used for testing
-backend_name = 'ASPEN-8'
-date = '2020_05_07'
+backend_name = 'ibmq_16_melbourne'
 
 # Specify whether save calculated data
 saving = True
 
 # specify whether count names are read from right to left (convention used by IBM)
 if backend_name == 'ibmq_16_melbourne':
+    date = '2020_10_12'
     number_of_qubits = 15
     bitstrings_right_to_left = True
 elif backend_name == 'ASPEN-8':
+    date = '2020_12_31'
     number_of_qubits = 23
     bitstrings_right_to_left = False
 else:
-    raise ValueError('Wrong SDK_name')
+    raise ValueError('Wrong backend name')
 
 directory = tests_directory + 'mitigation_on_marginals/' + backend_name \
-            + '/N%s' % number_of_qubits + '/' + date + '/DDOT/'
+            + '/number_of_qubits_%s' % number_of_qubits + '/' + date + '/DDOT/'
 
 files = os.listdir(directory)
 with open(directory + '03_test_results_noise_models.pkl', 'rb') as filein:
@@ -105,9 +113,8 @@ if saving:
     dictionary_data['correction_data'] = correction_data
 
     # Save results
-    date_save = '2020_05_07'
     directory = tests_directory + 'mitigation_on_marginals/' + backend_name \
-                + '/N%s' % number_of_qubits + '/' + date_save + '/DDOT/'
+                + '/number_of_qubits_%s' % number_of_qubits + '/' + date + '/DDOT/'
 
     anf.save_results_pickle(dictionary_data,
                             directory,

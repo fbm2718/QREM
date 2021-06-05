@@ -19,12 +19,12 @@ from QREM.noise_characterization.tomography.LabelsCreatorDDOT import LabelsCreat
 from functions import ancillary_functions as anf
 
 # Define number of qubits you wish to create DDOT circuits for
-number_of_qubits = 5
+number_of_qubits = 15
 
 # Locality of subsets we wish to investigate. For example, k=2 will implement all computational-basis
 # states (00, 01, 10, 11) on ALL qubit pairs.
-subsets_locality = 2
-
+subsets_locality = 5
+#
 # NOTE: the needed number of subsets scales like number_of_qubits^subsets_locality, so computing time
 #      can get big for high locality. Moreover, sampling complexity grows exponentially with subsets
 #      locality, so it is not advisable to go to subsets_locality>5.
@@ -53,6 +53,8 @@ number_of_iterations = 100
 
 # Number of circuits one wishes to add to a perfect collection in order to get better
 # properties of circuits (but at the cost of adding additional circuits)
+# if number of circuits in perfect collection + additional_circuits exceeds maximal_circuits_amount
+# it is cut to meet the treshold.
 additional_circuits = 0
 
 # See class' description for details
@@ -88,7 +90,7 @@ if saving and anf.query_yes_no('Do you still wish to save?'):
                           'circuits_properties': circuits_properties}
 
     directory = anf.get_module_directory() + '/saved_data/data_circuits_collections/DDOT/' + \
-                '/locality_%s' % subsets_locality + '/number_of_qubits_%s' % number_of_qubits + '/'
+                'locality_%s' % subsets_locality + '/number_of_qubits_%s' % number_of_qubits + '/'
 
     file_name = 'circuits_amount%s' % len(DDOT_circuits) + '_' + anf.gate_proper_date_string()
 
