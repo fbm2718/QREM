@@ -24,7 +24,7 @@ number_of_qubits = 5
 # Locality of subsets we wish to investigate. For example, k=2 will implement all computational-basis
 # states (00, 01, 10, 11) on ALL qubit pairs.
 subsets_locality = 2
-
+#
 # NOTE: the needed number of subsets scales like number_of_qubits^subsets_locality, so computing time
 #      can get big for high locality. Moreover, sampling complexity grows exponentially with subsets
 #      locality, so it is not advisable to go to subsets_locality>5.
