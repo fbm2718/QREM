@@ -1,6 +1,6 @@
 # QREM
-**QREM** - **Q**uantum **R**eadout **E**rrors **M**itigation, an open-source package for implementing techniques of
-measurement error mitigation on quantum devices.
+**QREM** - **Q**uantum **R**eadout **E**rrors **M**itigation, an open-source package for implementing 
+measurement noise characterization and mitigation on quantum devices.
 
   
 ## Status of development
@@ -9,13 +9,16 @@ Currently, the methods for quantum detector tomography and measurement error mit
 working properly. 
 
 ### UPDATE January 2021
-In the near future the repository will get a massive update implementing the ideas from work:
+Recent update implemented ideas from work:
 
-Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of realistic readout noise with applications to the Quantum Approximate Optimization Algorithm", 
-[arXiv:2101.02331](https://arxiv.org/abs/2101.02331)
+Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of cross-talk effects in readout noise with applications to the Quantum Approximate Optimization Algorithm", 
+[Quantum 5, 464](https://quantum-journal.org/papers/q-2021-06-01-464/)
 
-This will allow to a) perform efficient characterization of multiqubit noise correlations b) use characterization data to construct a noise model which can be used to mitigate errors on the level of marginal probablitiy distributions (for problems such as QAOA).
+This allows to
+a) perform efficient characterization of multiqubit noise correlations via Diagonal Detector Overlapping Tomography (DDOT),
+b) use characterization data to construct a noise model which can be used to mitigate errors on the level of marginal probablitiy distributions (for problems such as QAOA).
 
+Soon detailed tutorials will be added. 
   
 ## Dependencies
 For QREM to work properly,  the following libraries should be installed:
@@ -28,8 +31,18 @@ For QREM to work properly,  the following libraries should be installed:
 * enum
 * typing
 * pandas
-* qiskit
 * networkx
+* typing
+* collections
+* tqdm 
+* pickle
+* colorama
+* datetime
+* re
+* time
+* qiskit (optional)
+* pyquill (optional)
+
 
 ## Installing 
 The best way to install and use this package is to simply clone the repository:
@@ -54,8 +67,8 @@ The workflow for the main functionalities is following:
 ## Jupyter tutorials
 Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the
 package, we recommend to take a look at tutorials in jupyter notebooks:
-1. [Tutorial for implementing Quantum Detector Tomography](QDT_Tutorial.ipynb)
-2. [Tutorial for mitigating readout noise based on QDT](Error_Mitigation_Tutorial.ipynb)
+1. [Tutorial for implementing Quantum Detector Tomography](Tutorials/QDT/QDT_Tutorial.ipynb)
+2. [Tutorial for mitigating readout noise based on QDT](Tutorials/QDT/Error_Mitigation_Tutorial.ipynb)
 
 
 ## Code Style
@@ -80,8 +93,9 @@ we will use prefix _m__, to mark all matrices.
 by classical post-processing based on detector tomography", 
 [Quantum 4, 257 (2020)](https://quantum-journal.org/papers/q-2020-04-24-257/)
 
-[0.5] Filip B. Maciejewski, Flavio Baccari Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of realistic readout noise with applications to the Quantum Approximate Optimization Algorithm", 
-[arxiv:	arXiv:2101.02331 (2021)](https://arxiv.org/abs/2101.02331)
+[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, 
+"Modeling and mitigation of cross-talk effects in readout noise with applications to the Quantum Approximate Optimization Algorithm", 
+[Quantum 5, 464](https://quantum-journal.org/papers/q-2021-06-01-464/)
   
 **Important quantum information ideas appearing in the code are, to a higher or lower degree, described in following 
 references:**
@@ -105,14 +119,14 @@ Hewlett-Packard Labs (2003).
 
 ## Citation
 The following bibtex entry can be used to cite this repository:
-```
+
 @misc{qrem,
    url={https://github.com/fbm2718/QREM},
    title = {Quantum Readout Errors Mitigation (QREM) -- open source GitHub repository},
-   author={Maciejewski, F. B. and Rybotycki, T. and Oszmaniec, M.},
+   author={Maciejewski, F. B. and Rybotycki, T. and S\l{}owik, O., and Oszmaniec, M.},
    year={2020},
 }
-```
+
 
 
 
