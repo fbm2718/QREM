@@ -67,9 +67,13 @@ The workflow for the main functionalities is following:
 ## Jupyter tutorials
 Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the
 package, we recommend to take a look at tutorials in jupyter notebooks:
+
+(**Quantum Detector Tomography**)
 1. [Tutorial for implementing Quantum Detector Tomography](Tutorials/QDT/01_implementing_QDT.ipynb)
 2. [Tutorial for mitigating readout noise based on QDT](Tutorials/QDT/02_error_mitigation.ipynb)
 
+(**Diagonal Detector Overlapping Tomography**)
+1. Tutorials for DDOT will be added soon! In the meantime -- see [examples](examples).
 
 ## Code Style
 We use PEP8 as a code style for this project.
