@@ -12,7 +12,7 @@ working properly.
 Recent update implements ideas from work:
 
 Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of cross-talk effects in readout noise with applications to the Quantum Approximate Optimization Algorithm", 
-[Quantum 5, 464](https://quantum-journal.org/papers/q-2021-06-01-464/)
+[Quantum 5, 464 (2021)](https://quantum-journal.org/papers/q-2021-06-01-464/)
 
 This allows to
 a) perform efficient characterization of multiqubit noise correlations via Diagonal Detector Overlapping Tomography (DDOT),
@@ -67,9 +67,13 @@ The workflow for the main functionalities is following:
 ## Jupyter tutorials
 Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the
 package, we recommend to take a look at tutorials in jupyter notebooks:
-1. [Tutorial for implementing Quantum Detector Tomography](Tutorials/QDT/QDT_Tutorial.ipynb)
-2. [Tutorial for mitigating readout noise based on QDT](Tutorials/QDT/Error_Mitigation_Tutorial.ipynb)
 
+[(**Quantum Detector Tomography**)](Tutorials/QDT)
+1. [Tutorial for implementing Quantum Detector Tomography](Tutorials/QDT/01_implementing_QDT.ipynb)
+2. [Tutorial for mitigating readout noise based on QDT](Tutorials/QDT/02_error_mitigation.ipynb)
+
+(**Diagonal Detector Overlapping Tomography**)
+1. Tutorials for DDOT will be added soon! In the meantime -- see [examples](examples).
 
 ## Code Style
 We use PEP8 as a code style for this project.
@@ -95,7 +99,7 @@ by classical post-processing based on detector tomography",
 
 [0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, 
 "Modeling and mitigation of cross-talk effects in readout noise with applications to the Quantum Approximate Optimization Algorithm", 
-[Quantum 5, 464](https://quantum-journal.org/papers/q-2021-06-01-464/)
+[Quantum 5, 464 (2021)](https://quantum-journal.org/papers/q-2021-06-01-464/)
   
 **Important quantum information ideas appearing in the code are, to a higher or lower degree, described in following 
 references:**
