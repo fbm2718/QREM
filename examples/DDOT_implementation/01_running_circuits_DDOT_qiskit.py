@@ -23,6 +23,20 @@ from QREM.noise_characterization.tomography.CircuitsCreatorDDOT import CircuitsC
 from functions import functions_data_analysis as fdt, ancillary_functions as anf
 from functions.functions_SDKs.qiskit import qiskit_utilities as qkt_utils
 
+
+"""
+This script creates collection of qiskit's QuantumCircuit objects that implement 
+Diagonal Detector Overlapping Tomography (DDOT) (see [0.5]). 
+
+GENERAL WORKFLOW:
+
+1. Load circuits' labels created previously (see 00_creating_circuits_DDOT).
+2. Get instance of CircuitsCreatorDDOT and run function that creates circuits.
+3. Divide circuits into batches and send job for execution on chosen backend.
+"""
+
+
+
 # backend name
 backend_name = 'qasm_simulator'
 

@@ -5,18 +5,14 @@ measurement noise characterization and mitigation on quantum devices.
   
 ## Status of development
 This package is under development and new functionalities and notebooks are expected to be added in the future.
+
 Currently, the methods for quantum detector tomography and measurement error mitigation based on that tomography are
-working properly. 
+working properly (see Ref. [[0]](https://quantum-journal.org/papers/q-2020-04-24-257/))
 
-### UPDATE June 2021
-Recent update implements ideas from work:
-
-Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec, "Modeling and mitigation of cross-talk effects in readout noise with applications to the Quantum Approximate Optimization Algorithm", 
-[Quantum 5, 464 (2021)](https://quantum-journal.org/papers/q-2021-06-01-464/)
-
-This allows to
-a) perform efficient characterization of multiqubit noise correlations via Diagonal Detector Overlapping Tomography (DDOT),
-b) use characterization data to construct a noise model which can be used to mitigate errors on the level of marginal probablitiy distributions (for problems such as QAOA).
+Recent update implements ideas from Ref. [[0.5]](https://quantum-journal.org/papers/q-2021-06-01-464/).
+This includes
+a) efficient characterization of multiqubit noise correlations via Diagonal Detector Overlapping Tomography (DDOT),
+b) using characterization data to construct a noise model which can be used to mitigate errors on the level of marginal probablitiy distributions (for problems such as QAOA).
 
 Soon detailed tutorials will be added. 
   
@@ -56,13 +52,6 @@ git submodule init
 git submodule update
 ```
 
-## Workflow
-The workflow for the main functionalities is following:
-
-1. Characterize detector via Quantum Detector Tomography (QDT) using
-[DetectorTomographyFitter](DetectorTomography.py).
-2. Use the data from QDT to mitigate errors on any experiment using
-[QDTErrorMitigator](QDTErrorMitigator.py).
 
 ## Jupyter tutorials
 Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the
@@ -91,7 +80,7 @@ we will use prefix _m__, to mark all matrices.
 
 
  ## References
-**The workflow of this package is mainly based on the works**:
+**The workflow of this package is mainly based on works**:
   
 [0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec, "Mitigation of readout noise in near-term quantum devices
 by classical post-processing based on detector tomography", 
@@ -101,8 +90,7 @@ by classical post-processing based on detector tomography",
 "Modeling and mitigation of cross-talk effects in readout noise with applications to the Quantum Approximate Optimization Algorithm", 
 [Quantum 5, 464 (2021)](https://quantum-journal.org/papers/q-2021-06-01-464/)
   
-**Important quantum information ideas appearing in the code are, to a higher or lower degree, described in following 
-references:**
+**Further references:**
   
 [1] Z. Hradil, J. Řeháček, J. Fiurášek, and M. Ježek, “3 maximum-likelihood methods in quantum mechanics,” in Quantum
 State Estimation, edited by M. Paris and J. Řeháček (Springer Berlin Heidelberg, Berlin, Heidelberg, 2004) pp. 59–112.
