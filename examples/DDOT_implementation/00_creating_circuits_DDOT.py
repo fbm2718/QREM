@@ -25,7 +25,9 @@ Diagonal Detector Overlapping Tomography (DDOT) (see [0.5]).
 GENERAL WORKFLOW:
 
 1. Specify number of qubits and DDOT locality. 
-2. 
+2. Get instance of LabelsCreatorDDOT and run function that creates random circuits labels.
+3. Those labels will later be used to create QuantumCircuit object for implementation 
+on physical hardware (see 02_running_circuits_DDOT_qiskit).
 
 """
 
