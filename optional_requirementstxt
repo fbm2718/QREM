@@ -1,0 +1,4 @@
+pyquil==3.0.0
+amazon-braket-default-simulator==1.1.0.post1
+amazon-braket-schemas==1.1.0.post1
+amazon-braket-sdk==1.9.5
