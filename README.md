@@ -21,7 +21,7 @@ Soon detailed tutorials will be added.
 
 ### Using PIP
 
-The best way to install and use this package is to use pip (see [pypi website](https://pypi.org/project/QREM/)):
+The best way to install this package is to use pip (see [pypi website](https://pypi.org/project/QREM/)):
 ```
 pip install QREM
 ```
@@ -96,12 +96,9 @@ For QREM to work properly,  the following libraries should be installed:
 * "qiskit >= 0.28.0",
 
 ## Optional dependencies
-Dependecies for working with different backends than qiskit
+Dependecies for working with different backends than qiskit:
 * "pyquil >= 3.0.0",
 * "amazon-braket-sdk >= 1.9.5"
-
-
-
 
 
 
