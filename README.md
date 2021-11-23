@@ -89,18 +89,16 @@ Hewlett-Packard Labs (2003).
 
 ## <a name="deps_list"></a>Dependencies
 For QREM to work properly,  the following libraries should be installed:
-* "numpy>=1.20.3",
-* "scipy>=1.6.2",
-* "tqdm>=4.46.0",
-* "colorama>=0.4.3",
-* "qiskit>=0.28.0",
+* "numpy >= 1.20.3",
+* "scipy >= 1.6.2",
+* "tqdm >= 4.46.0",
+* "colorama >= 0.4.3",
+* "qiskit >= 0.28.0",
 
 ## Optional dependencies
 Dependecies for working with different backends than qiskit
-* "pyquil>=3.0.0",
-* "amazon-braket-default-simulator>=1.1.0.post1",
-* "amazon-braket-schemas>=1.1.0.post1",
-* "amazon-braket-sdk>=1.9.5"
+* "pyquil >= 3.0.0",
+* "amazon-braket-sdk >= 1.9.5"
 
 
 
