@@ -3,7 +3,15 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 [project]
 name = "QREM"
-authors = [{name = "Filip B. Maciejewski", email = "filip.b.maciejewski@gmail.com"},{name="Tomek Rybotycki", email = ""},{name="Oskar Słowik", email = ""},{name="Jan Tuziemski", email = ""},{name="Michał Oszmaniec", email = ""}]
+authors = [
+{name = "Filip B. Maciejewski"},
+{email = "filip.b.maciejewski@gmail.com"}
+{name="Tomek Rybotycki"},
+{email="amalpakropkakom@dot.com"},
+{name="Oskar Słowik"},
+{name="Jan Tuziemski"},
+{name="Michał Oszmaniec"}
+]
 readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: Apache Software License"]
