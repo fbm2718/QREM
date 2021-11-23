@@ -15,7 +15,7 @@ dependencies = [
 "scipy >=1.6.2",
 "tqdm >=4.46.0",
 "colorama >=0.4.3",
-"qiskit >=0.28.0",
+"qiskit (>=0.28.0)",
 ]
 [project.optional-dependencies]
 optional_deps = [
