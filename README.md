@@ -16,42 +16,26 @@ b) using characterization data to construct a noise model which can be used to m
 
 Soon detailed tutorials will be added. 
   
-## Dependencies
-For QREM to work properly,  the following libraries should be installed:
-* numpy
-* scipy
-* cmath
-* math
-* copy
-* itertools
-* enum
-* typing
-* pandas
-* networkx
-* typing
-* collections
-* tqdm 
-* pickle
-* colorama
-* datetime
-* re
-* time
-* qiskit (optional)
-* pyquill (optional)
-
 
 ## Installing 
-The best way to install and use this package is to simply clone the repository:
+
+### Using PIP
+
+The best way to install and use this package is to use pip (see [pypi website](https://pypi.org/project/QREM/)):
+```
+pip install QREM
+```
+
+This method will automatically install all required dependecies (see [below for list of dependecies](#deps_list)).
+
+
+### Cloning repository
+Alternatively, one can simply clone the repository:
 ```
 git clone https://github.com/fbm2718/QREM
 ```
-In order for it to work properly one also have to initialize its' submodules. To do that, execute following commands
-the repository folder:
-```
-git submodule init
-git submodule update
-```
 
+Please note that when using this method, one needs to make sure that all imports/dependecies are proper.
 
 ## Jupyter tutorials
 Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the
@@ -63,14 +47,6 @@ package, we recommend to take a look at tutorials in jupyter notebooks:
 
 (**Diagonal Detector Overlapping Tomography**)
 1. Tutorials for DDOT will be added soon! In the meantime -- see [examples](examples).
-
-## Code Style
-We use PEP8 as a code style for this project.
-
-According to PEP8 style guide all function and variable names should be in lower case. In mathematics matrices
-are usually named using capital letters, for better distinction. In order for both of these obligations to be satisfied
-we will use prefix _m__, to mark all matrices.
-
 
 ## Authors
 
@@ -109,6 +85,27 @@ Hewlett-Packard Labs (2003).
 [6] J. Cotler, F. Wilczek, "Quantum Overlapping Tomography", [Phys. Rev. Lett. 124, 100401 (2020)](https://arxiv.org/abs/1908.02754).
 
 
+
+
+## <a name="deps_list"></a>Dependencies
+For QREM to work properly,  the following libraries should be installed:
+* "numpy >= 1.20.3",
+* "scipy >= 1.6.2",
+* "tqdm >= 4.46.0",
+* "colorama >= 0.4.3",
+* "qiskit >= 0.28.0",
+
+## Optional dependencies
+Dependecies for working with different backends than qiskit
+* "pyquil >= 3.0.0",
+* "amazon-braket-sdk >= 1.9.5"
+
+
+
+
+
+
+
 ## Citation
 The following bibtex entry can be used to cite this repository:
 
@@ -118,7 +115,6 @@ The following bibtex entry can be used to cite this repository:
    author={Maciejewski, F. B. and Rybotycki, T. and S\l{}owik, O., and Oszmaniec, M.},
    year={2020},
 }
-
 
 
 

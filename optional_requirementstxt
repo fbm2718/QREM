@@ -1,0 +1,2 @@
+pyquil>=3.0.0
+amazon-braket-sdk>=1.9.5
