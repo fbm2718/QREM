@@ -11,16 +11,16 @@ dynamic = ["version", "description"]
 requires-python = ">=3.7"
 keywords = ["quantum error mitigation", "measurement noise", "readout noise"]
 dependencies = [
-"numpy >=1.20.3",
-"scipy >=1.6.2",
-"tqdm >=4.46.0",
-"colorama >=0.4.3"
+"numpy >1.20.2",
+"scipy >1.6.1",
+"tqdm >4.45.99",
+"colorama >=0.4.2",
+"qiskit >=0.27.99"
 ]
 [project.optional-dependencies]
 optional_deps = [
-"pyquil >=3.0.0",
-"amazon-braket-sdk >=1.9.5",
-"qiskit >=0.28.0"
+"pyquil >2.9.99",
+"amazon-braket-sdk >1.9.4"
 ]
 [project.urls]
 repository = "https://github.com/fbm2718/QREM"
