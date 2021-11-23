@@ -94,11 +94,6 @@ For QREM to work properly,  the following libraries should be installed:
 * "tqdm>=4.46.0",
 * "colorama>=0.4.3",
 * "qiskit>=0.28.0",
-* "qiskit-aer>=0.8.2",
-* "qiskit-aqua>=0.9.4",
-* "qiskit-ibmq-provider>=0.15.0",
-* "qiskit-ignis>=0.6.0",
-* "qiskit-terra>=0.18.0",
 
 ## Optional dependencies
 Dependecies for working with different backends than qiskit
