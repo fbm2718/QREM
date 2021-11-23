@@ -21,7 +21,7 @@ Soon detailed tutorials will be added.
 
 ### Using PIP
 
-The best way to install and use this package is to use pip (see [pypi website](https://pypi.org/project/QREM/)):
+The best way to install this package is to use pip (see [pypi website](https://pypi.org/project/QREM/)):
 ```
 pip install QREM
 ```
@@ -41,18 +41,19 @@ Please note that when using this method, one needs to make sure that all imports
 Most of the functionalities are described in detail in the comments inside the code. However, before starting to use the
 package, we recommend to take a look at tutorials in jupyter notebooks:
 
-[(**Quantum Detector Tomography**)](Tutorials/QDT)
-1. [Tutorial for implementing Quantum Detector Tomography](Tutorials/QDT/01_implementing_QDT.ipynb)
-2. [Tutorial for mitigating readout noise based on QDT](Tutorials/QDT/02_error_mitigation.ipynb)
+[(**Quantum Detector Tomography**)](QREM/Tutorials/QDT)
+1. [Tutorial for implementing Quantum Detector Tomography](QREM/Tutorials/QDT/01_implementing_QDT.ipynb)
+2. [Tutorial for mitigating readout noise based on QDT](QREM/Tutorials/QDT/02_error_mitigation.ipynb)
 
 (**Diagonal Detector Overlapping Tomography**)
-1. Tutorials for DDOT will be added soon! In the meantime -- see [examples](examples).
+1. Tutorials for DDOT will be added soon! In the meantime -- see [examples](QREM/examples).
 
 ## Authors
 
 - [Filip Maciejewski](https://github.com/fbm2718) (contact: filip.b.maciejewski@gmail.com)
 - [Tomasz Rybotycki](https://github.com/Tomev)
 - [Oskar Słowik](https://github.com/Feigenbaum4669)
+- [Jan Tuziemski](https://github.com/jan-tuz)
 
 
  ## References
@@ -96,12 +97,9 @@ For QREM to work properly,  the following libraries should be installed:
 * "qiskit >= 0.28.0",
 
 ## Optional dependencies
-Dependecies for working with different backends than qiskit
+Dependecies for working with different backends than qiskit:
 * "pyquil >= 3.0.0",
 * "amazon-braket-sdk >= 1.9.5"
-
-
-
 
 
 
