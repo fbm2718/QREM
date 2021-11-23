@@ -68,7 +68,7 @@ def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
     -------------
     SH x SH x SH
 
-    If unitaries are ordered as [id, X, H, SH], the code will identify id: 0, X: 1, H: 2, SH:3, and it will return potentially_stochastic_matrix
+    If unitaries are ordered as [id, X, H, SH], the code will identify id: 0, X: 1, H: 2, SH:3, and it will return
     list of lists. Each list correspond to single line in the above exemplary description of tensor product, e.g.,
     second list corresponds to line id x id x X. Each of such lists consists of len(qubits_indices) pairs, saying which
     gate shall be applied to which qubit. In this example, first list will have following elements:
@@ -93,8 +93,8 @@ def get_list_of_lists_indices_qdt(qubits_indices, unitaries_amount):
     for i in np.arange(1, qubits_number):
         list_of_gates = list(itertools.product(list_of_gates, single_qubit_unitaries[i]))
 
-    # TODO FBM: this code could end here if I knew how to flatten list of itertools.product() s in potentially_stochastic_matrix simple manner.
-    #  Without next steps the list is potentially_stochastic_matrix very nested tuple of tuples
+    # TODO FBM: this code could end here if I knew how to flatten list of itertools.product() in a simple manner.
+    #  Without next steps the list is a very nested tuple of tuples
 
     def flatten(container):
         # lame flattener
@@ -154,7 +154,7 @@ def QDT_circuits_qiskit(qubit_indices,
         qrs = max(qubit_indices) + 1
 
     if crs is None:
-        len(qubit_indices)
+        crs = len(qubit_indices)
     # outer loop is for copies of QDT experiment
     for number in range(number_of_repetitions):
         # inner loop goes through all circuits in QDT experiments and prepares them
