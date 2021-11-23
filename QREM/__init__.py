@@ -1,2 +1,2 @@
-"""This is test repository, hejka naklejka"""
-__version__="0.0.48"
+"""QREM - Quantum Readout Errors Mitigation, an open-source package for implementing measurement noise characterization and mitigation on quantum devices."""
+__version__="0.0.49"
