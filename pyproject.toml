@@ -3,7 +3,7 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 [project]
 name = "QREM"
-authors = [{name = "Filip B. Maciejewski", email = "filip.b.maciejewski@gmail.com"}]
+authors = [{name = "Filip B. Maciejewski", email = "filip.b.maciejewski@gmail.com"},{name="Tomek Rybotycki", email = ""},{name="Oskar Słowik", email = ""},{name="Jan Tuziemski", email = ""},{name="Michał Oszmaniec", email = ""}]
 readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: Apache Software License"]
@@ -12,28 +12,17 @@ requires-python = ">=3.7"
 keywords = ["quantum error mitigation", "measurement noise", "readout noise"]
 
 dependencies = [
-"numpy ~= 1.20.3",
-"scipy ~= 1.6.2",
-"tqdm ~= 4.46.0",
-"colorama ~= 0.4.3",
-"qiskit ~= 0.28.0",
+"numpy >= 1.20.3",
+"scipy >= 1.6.2",
+"tqdm >= 4.46.0",
+"colorama >= 0.4.3",
+"qiskit >= 0.28.0",
 ]
-# dependencies = [
-# "numpy >= 1.20.3",
-#"scipy >= 1.6.2",
-#"tqdm >= 4.46.0",
-#"colorama >= 0.4.3",
-#"qiskit >= 0.28.0",
-# ]
-
-
-
-#,{name="Tomek Rybotycki"},{name="Oskar Słowik"},{name="Jan Tuziemski"},{name="Michał Oszmaniec"}
 
 [project.optional-dependencies]
 optional_deps = [
-"pyquil ~= 3.0.0",
-"amazon-braket-sdk ~= 1.9.5"
+"pyquil >= 3.0.0",
+"amazon-braket-sdk >= 1.9.5"
 ]
 [project.urls]
 repository = "https://github.com/fbm2718/QREM"
