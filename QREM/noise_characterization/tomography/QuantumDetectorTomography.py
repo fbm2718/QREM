@@ -18,14 +18,13 @@ import scipy as sc
 import copy
 from math import log
 
-from functions.povmtools import get_density_matrix, permute_matrix, reorder_classical_register, sort_things
+from QREM.functions.povmtools import get_density_matrix, permute_matrix, reorder_classical_register, sort_things
 from qiskit.result import Result
 from typing import List
-from functions.functions_SDKs.qiskit.qiskit_utilities import get_frequencies_array_from_results
+from QREM.functions.functions_SDKs.qiskit.qiskit_utilities import get_frequencies_array_from_results
 
-from PyMaLi.GeneralTensorCalculator import GeneralTensorCalculator
+from QREM.PyMaLi.GeneralTensorCalculator import GeneralTensorCalculator
 import time
-
 
 # GTC stands for General Tensor Calculator.
 def gtc_tensor_counting_function(arguments: list):
@@ -304,7 +303,7 @@ def join_povms(povms: List[List[np.ndarray]],
     Return:
         POVM describing whole detector.
     """
-    qubits_num = sum([len(indices) for indices in qubit_indices_lists])
+    number_of_qubits = sum([len(indices) for indices in qubit_indices_lists])
 
     swapped_povms = []
 
@@ -313,18 +312,27 @@ def join_povms(povms: List[List[np.ndarray]],
         povm_now = povms[i]
 
         # extend povm to higher-dimensional space.by multiplying by complementing identity from right
-        povm_now_extended = [np.kron(Mi, np.eye(2 ** (qubits_num - len(indices_now)))) for Mi in povm_now]
+        # povm_now_extended = [np.kron(Mi, np.eye(2 ** (qubits_num - len(indices_now)))) for Mi in povm_now]
 
-        # begin swapping
-        swapped_povm = copy.copy(povm_now_extended)
+        #TODO FBM: REMOVE  THIS
+        from QREM_SECRET.functions_qrem import quantum_ancillary_functions as quanf
 
-        # go from back to ensure commuting
-        for j in range(len(indices_now))[::-1]:
-            index_qubit_now = indices_now[j]
+        swapped_povm = [quanf.embed_operator_in_bigger_hilbert_space(number_of_qubits=number_of_qubits,
+                                                                     local_operator=Mi,
+                                                                     global_indices=indices_now) for Mi in povm_now]
 
-            if index_qubit_now != j:
-                # swap qubit from jth position to proper position
-                swapped_povm = [permute_matrix(Mj, qubits_num, (j + 1, index_qubit_now + 1)) for Mj in swapped_povm]
+
+        # raise KeyError
+        # # begin swapping
+        # swapped_povm = copy.copy(povm_now_extended)
+        #
+        # # go from back to ensure commuting
+        # for j in range(len(indices_now))[::-1]:
+        #     index_qubit_now = indices_now[j]
+        #
+        #     if index_qubit_now != j:
+        #         # swap qubit from jth position to proper position
+        #         swapped_povm = [permute_matrix(Mj, number_of_qubits, (j + 1, index_qubit_now + 1)) for Mj in swapped_povm]
 
         swapped_povms.append(swapped_povm)
 

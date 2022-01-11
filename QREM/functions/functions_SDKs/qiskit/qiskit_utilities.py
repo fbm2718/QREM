@@ -5,8 +5,8 @@
 import numpy as np
 from qiskit.result import Result
 from typing import List, Dict
-from functions.povmtools import reorder_probabilities
-from functions import povmtools, ancillary_functions as anf
+from QREM.functions.povmtools import reorder_probabilities
+from QREM.functions import povmtools, ancillary_functions as anf
 import time
 from qiskit.providers.ibmq.job.ibmqjob import JobStatus
 import qiskit

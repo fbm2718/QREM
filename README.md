@@ -54,6 +54,7 @@ package, we recommend to take a look at tutorials in jupyter notebooks:
 - [Tomasz Rybotycki](https://github.com/Tomev)
 - [Oskar Słowik](https://github.com/Feigenbaum4669)
 - [Jan Tuziemski](https://github.com/jan-tuz)
+- [Michał Oszmaniec](https://www.quantin.pl)
 
 
  ## References
