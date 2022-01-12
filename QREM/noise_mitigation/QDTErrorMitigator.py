@@ -19,11 +19,10 @@ Hewlett-Packard Labs (2003).
 """
 
 import numpy as np
-from functions import povmtools
-
+from QREM.functions_qrem import povmtools
 from typing import List
 from qiskit.result import Result
-from functions.functions_SDKs.qiskit.qiskit_utilities import get_frequencies_array_from_results
+from QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities import get_frequencies_array_from_results
 
 
 class QDTErrorMitigator:

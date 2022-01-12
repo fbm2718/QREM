@@ -17,9 +17,9 @@ Quantum 5, 464 (2021).
 
 import numpy as np
 from typing import Optional, Dict, Union, List
-from noise_characterization.modeling.NoiseModelGenerator import NoiseModelGenerator
-from noise_characterization.modeling.GlobalNoiseMatrixCreator import GlobalNoiseMatrixCreator
-from functions import povmtools, ancillary_functions as anf
+from QREM.noise_characterization.modeling.NoiseModelGenerator import NoiseModelGenerator
+from QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator import GlobalNoiseMatrixCreator
+from QREM.functions_qrem import povmtools, ancillary_functions as anf
 
 
 class CorrectionDataGenerator(NoiseModelGenerator):

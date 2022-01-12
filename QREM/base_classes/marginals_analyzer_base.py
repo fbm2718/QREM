@@ -18,8 +18,8 @@ Quantum 5, 464 (2021).
 
 import numpy as np
 from typing import Optional, Dict, List
-from base_classes.marginals_analyzer_interface import MarginalsAnalyzerInterface
-from functions import functions_data_analysis as fda, ancillary_functions as anf
+from QREM.base_classes.marginals_analyzer_interface import MarginalsAnalyzerInterface
+from QREM.functions_qrem import functions_data_analysis as fda, ancillary_functions as anf
 from collections import defaultdict
 
 

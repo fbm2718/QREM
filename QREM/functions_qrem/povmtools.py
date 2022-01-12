@@ -26,7 +26,7 @@ Hewlett-Packard Labs (2003).
 import cmath as c
 import numpy as np
 import math
-from QREM.functions import ancillary_functions as anf
+from QREM.functions_qrem import ancillary_functions as anf
 import qiskit
 from enum import Enum
 from typing import List

@@ -17,12 +17,11 @@ Quantum 5, 464 (2021).
 
 from typing import Optional, List, Dict, Union
 from collections import Counter
-from functions import povmtools
+
 
 __valid_SDK_names__ = ['qiskit']
 __valid_experiments_names__ = ['DDOT', 'DDT', 'QDOT', 'QDT']
 
-import numpy as np
 
 
 class CircuitsCreatorDDOT:

@@ -48,6 +48,7 @@ __pauli_eigenkets__ = {'x+': 1 / np.sqrt(2)*np.array([[1], [1]], dtype=complex),
 
 def integer_representation(integer: int,
                            base: int):
+
     if integer > base:
         raise ValueError('Integer bigger than base!')
 
@@ -61,6 +62,7 @@ def integer_representation(integer: int,
 
 
 def integer_representation_above10(integer: int):
+
     if integer < 10:
         return str(integer)
     else:

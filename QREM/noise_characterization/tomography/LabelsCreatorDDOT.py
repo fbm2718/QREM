@@ -18,7 +18,7 @@ import copy
 from typing import Optional, List, Dict, Union
 import numpy as np
 from QREM.noise_characterization.tomography.LabelsBaseDDOT import LabelsBaseDDOT
-from functions import ancillary_functions as anf
+from QREM.functions_qrem import ancillary_functions as anf
 from tqdm import tqdm
 import time
 from scipy.special import binom as binomial_coefficient

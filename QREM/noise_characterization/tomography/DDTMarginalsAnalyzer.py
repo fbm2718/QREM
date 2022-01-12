@@ -19,8 +19,8 @@ import copy
 import numpy as np
 from typing import Optional, Dict, List, Union
 from collections import defaultdict
-from base_classes.marginals_analyzer_base import MarginalsAnalyzerBase
-from functions import ancillary_functions as anf
+from QREM.base_classes.marginals_analyzer_base import MarginalsAnalyzerBase
+from QREM.functions_qrem import ancillary_functions as anf
 
 
 class DDTMarginalsAnalyzer(MarginalsAnalyzerBase):

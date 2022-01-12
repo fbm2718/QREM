@@ -18,10 +18,10 @@ import scipy as sc
 import copy
 from math import log
 
-from QREM.functions.povmtools import get_density_matrix, permute_matrix, reorder_classical_register, sort_things
+from QREM.functions_qrem.povmtools import get_density_matrix, permute_matrix, reorder_classical_register, sort_things
 from qiskit.result import Result
 from typing import List
-from QREM.functions.functions_SDKs.qiskit.qiskit_utilities import get_frequencies_array_from_results
+from QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities import get_frequencies_array_from_results
 
 from QREM.PyMaLi.GeneralTensorCalculator import GeneralTensorCalculator
 import time

@@ -17,12 +17,12 @@ Quantum 5, 464 (2021).
 
 import numpy as np
 import copy
-import functions.ancillary_functions as anf
+import QREM.functions_qrem.ancillary_functions as anf
 from tqdm import tqdm
 from typing import Optional, List, Dict, Union
-from functions.povmtools import get_enumerated_rev_map_from_indices
-from noise_characterization.tomography.DDTMarginalsAnalyzer import DDTMarginalsAnalyzer
-from functions.functions_noise_model_heuristic import partition_algorithm_v1_cummulative
+from QREM.functions_qrem.povmtools import get_enumerated_rev_map_from_indices
+from QREM.noise_characterization.tomography.DDTMarginalsAnalyzer import DDTMarginalsAnalyzer
+from QREM.functions_qrem.functions_noise_model_heuristic import partition_algorithm_v1_cummulative
 
 
 class NoiseModelGenerator(DDTMarginalsAnalyzer):

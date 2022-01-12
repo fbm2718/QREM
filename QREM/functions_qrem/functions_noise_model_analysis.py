@@ -4,7 +4,7 @@
 """
 
 import copy
-from functions import povmtools, ancillary_functions as anf
+from QREM.functions_qrem import povmtools, ancillary_functions as anf
 
 
 def get_neighborhood_treshold_statitsical_pairs(number_of_samples,

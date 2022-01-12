@@ -7,7 +7,7 @@ from collections import defaultdict
 from typing import Dict, List
 
 import numpy as np
-from functions import povmtools, ancillary_functions as anf
+from functions_qrem import povmtools, ancillary_functions as anf
 import copy
 
 

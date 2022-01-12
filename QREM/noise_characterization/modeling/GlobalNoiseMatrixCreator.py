@@ -14,7 +14,7 @@ with applications to the Quantum Approximate Optimization Algorithm",
 Quantum 5, 464 (2021).
 
 """
-from functions import ancillary_functions as anf
+from QREM.functions_qrem import ancillary_functions as anf
 import numpy as np
 from typing import Optional, Dict, List, Union
 

@@ -7,7 +7,7 @@ import copy
 import random
 import math
 import numpy as np
-from functions import functions_data_visualization
+from QREM.functions_qrem import functions_data_visualization
 from tqdm import tqdm
 
 class InfinityException(Exception):

@@ -18,7 +18,7 @@ Quantum 5, 464 (2021).
 from typing import Optional, List, Dict, Union
 import numpy as np
 
-from functions import ancillary_functions as anf
+from QREM.functions_qrem import ancillary_functions as anf
 
 
 class LabelsBaseDDOT:
