@@ -1,0 +1,433 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QREM.base_classes.marginals_analyzer_base &#8212; QREM 0.56 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for QREM.base_classes.marginals_analyzer_base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki</span>
+<span class="sd">@contact: filip.b.maciejewski@gmail.com</span>
+
+<span class="sd">REFERENCES:</span>
+<span class="sd">[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="sd">&quot;Mitigation of readout noise in near-term quantum devices</span>
+<span class="sd">by classical post-processing based on detector tomography&quot;,</span>
+<span class="sd">Quantum 4, 257 (2020)</span>
+
+<span class="sd">[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="sd">&quot;Modeling and mitigation of cross-talk effects in readout noise</span>
+<span class="sd">with applications to the Quantum Approximate Optimization Algorithm&quot;,</span>
+<span class="sd">Quantum 5, 464 (2021).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">QREM.base_classes.marginals_analyzer_interface</span> <span class="k">import</span> <span class="n">MarginalsAnalyzerInterface</span>
+<span class="kn">from</span> <span class="nn">QREM.functions_qrem</span> <span class="k">import</span> <span class="n">functions_data_analysis</span> <span class="k">as</span> <span class="n">fda</span><span class="p">,</span> <span class="n">ancillary_functions</span> <span class="k">as</span> <span class="n">anf</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+
+
+<div class="viewcode-block" id="MarginalsAnalyzerBase"><a class="viewcode-back" href="../../../QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase">[docs]</a><span class="k">class</span> <span class="nc">MarginalsAnalyzerBase</span><span class="p">(</span><span class="n">MarginalsAnalyzerInterface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is base class for all the classes that will operate on marginal probability distributions.</span>
+<span class="sd">    Methods of this class allow to calculate marginal distributions from experimental results.</span>
+
+<span class="sd">    In this class and its children, we use the following convention for:</span>
+
+<span class="sd">     1. Generic experimental results:</span>
+<span class="sd">    :param results_dictionary: Nested dictionary with following structure:</span>
+
+<span class="sd">    results_dictionary[label_of_experiment][bitstring_outcome] = number_of_occurrences</span>
+
+<span class="sd">    where:</span>
+<span class="sd">        -label_of_experiment is arbitrary label for particular experiment,</span>
+<span class="sd">        -bitstring_outcome is label for measurement outcome,</span>
+<span class="sd">        -number_of_occurrences is number of times that bitstring_outcome was recorded</span>
+
+<span class="sd">        Hence top-level key labels particular experiment</span>
+<span class="sd">        (one can think about quantum circuit implementation)</span>
+<span class="sd">        and its value is another dictionary with results of given experiment in the form</span>
+<span class="sd">        of dictionary of measurement outcomes</span>
+
+
+<span class="sd">    2. Results represented as marginal probability distributions:</span>
+<span class="sd">        :param marginals_dictionary: Nested dictionary with the following structure:</span>
+
+<span class="sd">        marginals_dictionary[label_of_experiment][label_of_subset] = marginal_probability_vector</span>
+
+<span class="sd">        where:</span>
+<span class="sd">            -label_of_experiment is the same as in results_dictionary and it labels results from which</span>
+<span class="sd">            marginal distributions were calculated</span>
+<span class="sd">            -label_of_subset is potentially_stochastic_matrix label for qubits subset for which marginals_dictionary were calculated.</span>
+<span class="sd">            We use convention that such label if of the form &quot;q5q8q12...&quot; etc., hence it is bitstring of</span>
+<span class="sd">            qubits labels starting from &quot;q&quot;.</span>
+<span class="sd">            -marginal_probability_vector marginal distribution stored as vector</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO FBM: add coarse-graining functions for marginals_dictionary as class methods</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">results_dictionary</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+                 <span class="n">bitstrings_right_to_left</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                 <span class="n">marginals_dictionary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param results_dictionary: see class description</span>
+
+<span class="sd">        :param bitstrings_right_to_left: specify whether bitstrings</span>
+<span class="sd">                                    should be read from right to left (when interpreting qubit labels)</span>
+<span class="sd">        :param marginals_dictionary: see class description</span>
+
+<span class="sd">        NOTE: when user does not provide marginals_dictionary we create it during class initialization.</span>
+<span class="sd">        To this aim, we create &quot;key_dependent_dicts&quot; (see below)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">marginals_dictionary</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># If user does not provide dictionary with marginals_dictionary, we create template.</span>
+            <span class="c1"># Instead of standard dictionaries, we use ones that are &quot;key dependent&quot; (see description</span>
+            <span class="c1"># of that function), which is useful for some calculations. This is because it allows to</span>
+            <span class="c1"># not care whether given probability distribution was already created (as value in</span>
+            <span class="c1"># dictionary) - if not, it creates it on the run.</span>
+            <span class="n">marginals_dictionary</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">fda</span><span class="o">.</span><span class="n">KeyDependentDictForMarginals</span><span class="p">()</span>
+                                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">results_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+
+        <span class="c1"># set initial values of class properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results_dictionary</span> <span class="o">=</span> <span class="n">results_dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span> <span class="o">=</span> <span class="n">marginals_dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bitstrings_right_to_left</span> <span class="o">=</span> <span class="n">bitstrings_right_to_left</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">results_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results_dictionary</span>
+
+    <span class="nd">@results_dictionary</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">results_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results_dictionary</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results_dictionary</span> <span class="o">=</span> <span class="n">results_dictionary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">marginals_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span>
+
+    <span class="nd">@marginals_dictionary</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">marginals_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">marginals_dictionary</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span> <span class="o">=</span> <span class="n">marginals_dictionary</span>
+
+<div class="viewcode-block" id="MarginalsAnalyzerBase.get_qubits_key"><a class="viewcode-back" href="../../../QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_qubits_key">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_qubits_key</span><span class="p">(</span><span class="n">list_of_qubits</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; from subset of qubit indices get the string that labels this subset</span>
+<span class="sd">            using convention &#39;q5q6q12...&#39; etc.</span>
+<span class="sd">        :param list_of_qubits: labels of qubits</span>
+
+<span class="sd">        :return: string label for qubits</span>
+
+<span class="sd">         NOTE: this function is &quot;dual&quot; to self.get_qubit_indices_from_string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">anf</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">list_of_qubits</span><span class="o">=</span><span class="n">list_of_qubits</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MarginalsAnalyzerBase.get_qubit_indices_from_string"><a class="viewcode-back" href="../../../QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_qubit_indices_from_string">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_qubit_indices_from_string</span><span class="p">(</span><span class="n">qubits_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                      <span class="n">with_q</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;Return list of qubit indices from the string of the form &quot;q0q1q22q31&quot;</span>
+<span class="sd">        :param qubits_string: string which has the form of &quot;q&quot; followed by qubit index</span>
+<span class="sd">        :param with_q: specify whether returned indices should be in form of string with letter</span>
+
+<span class="sd">        :return: list of qubit indices:</span>
+
+<span class="sd">        depending on value of parameter &quot;with_q&quot; the mapping will be one of the following:</span>
+<span class="sd">        if with_q:</span>
+<span class="sd">            &#39;q1q5q13&#39; -&gt; [&#39;q1&#39;,&#39;q5&#39;,&#39;q13&#39;]</span>
+<span class="sd">        else:</span>
+<span class="sd">            &#39;q1q5q13&#39; -&gt; [1,5,13]</span>
+
+<span class="sd">        NOTE: this function is &quot;dual&quot; to self.get_qubits_key.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">anf</span><span class="o">.</span><span class="n">get_qubit_indices_from_string</span><span class="p">(</span><span class="n">qubits_string</span><span class="o">=</span><span class="n">qubits_string</span><span class="p">,</span>
+                                                 <span class="n">with_q</span><span class="o">=</span><span class="n">with_q</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MarginalsAnalyzerBase.results_dictionary_update"><a class="viewcode-back" href="../../../QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.results_dictionary_update">[docs]</a>    <span class="k">def</span> <span class="nf">results_dictionary_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                  <span class="n">results_dictionary_new</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># This method_name updates results dictionary from class property with new dictionary.</span>
+        <span class="c1"># Note that if there is KEY collision, then the value from new dictionary overwrites old one.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results_dictionary</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_results_dictionary</span><span class="p">,</span>
+                                    <span class="o">**</span><span class="n">results_dictionary_new</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="MarginalsAnalyzerBase.marginals_dictionary_update"><a class="viewcode-back" href="../../../QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.marginals_dictionary_update">[docs]</a>    <span class="k">def</span> <span class="nf">marginals_dictionary_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                    <span class="n">marginals_dictionary_new</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span>
+                                        <span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># See description of self.results_dictionary_update</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span><span class="p">,</span>
+                                      <span class="o">**</span><span class="n">marginals_dictionary_new</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="MarginalsAnalyzerBase.normalize_marginals"><a class="viewcode-back" href="../../../QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.normalize_marginals">[docs]</a>    <span class="k">def</span> <span class="nf">normalize_marginals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                            <span class="n">experiments_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">marginals_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Go through marginals_dictionary stored as class&#39; property</span>
+<span class="sd">           and normalize marginal distributions</span>
+<span class="sd">        :param experiments_keys: labels for experiments</span>
+<span class="sd">        :param marginals_keys: labels for qubit subsets_list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If no labels of experiments are provided, we take all of them</span>
+        <span class="k">if</span> <span class="n">experiments_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">experiments_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="c1"># Loop through all experiments and marginals_dictionary and normalize them.</span>
+        <span class="k">for</span> <span class="n">key_experiment</span> <span class="ow">in</span> <span class="n">experiments_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">marginals_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># if no marginal keys are provided, we take all of them</span>
+                <span class="n">looping_over</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span><span class="p">[</span><span class="n">key_experiment</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">looping_over</span> <span class="o">=</span> <span class="n">marginals_keys</span>
+            <span class="k">for</span> <span class="n">key_marginal</span> <span class="ow">in</span> <span class="n">looping_over</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span><span class="p">[</span><span class="n">key_experiment</span><span class="p">][</span><span class="n">key_marginal</span><span class="p">]</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span><span class="p">[</span><span class="n">key_experiment</span><span class="p">][</span><span class="n">key_marginal</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="MarginalsAnalyzerBase.compute_marginals"><a class="viewcode-back" href="../../../QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.compute_marginals">[docs]</a>    <span class="k">def</span> <span class="nf">compute_marginals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                          <span class="n">experiment_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                          <span class="n">subsets_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return dictionary of marginal probability distributions from counts dictionary</span>
+<span class="sd">        :param experiment_keys: list of keys that label experiments for which marginals_dictionary should be taken</span>
+<span class="sd">        :param subsets_list: list of subsets_list of qubits for which marginals_dictionary should be calculated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">experiment_keys</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">experiment_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">experiment_keys</span><span class="p">]</span>
+
+        <span class="n">subset_strings_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span> <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subsets_list</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">experiment_label</span> <span class="ow">in</span> <span class="n">experiment_keys</span><span class="p">:</span>
+            <span class="n">experimental_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results_dictionary</span><span class="p">[</span><span class="n">experiment_label</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">subset_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subsets_list</span><span class="p">)):</span>
+                <span class="n">subset</span><span class="p">,</span> <span class="n">subset_string</span> <span class="o">=</span> <span class="n">subsets_list</span><span class="p">[</span><span class="n">subset_index</span><span class="p">],</span> <span class="n">subset_strings_list</span><span class="p">[</span><span class="n">subset_index</span><span class="p">]</span>
+                <span class="c1"># initialize marginal distribution</span>
+                <span class="n">marginal_vector_now</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">)),</span> <span class="mi">1</span><span class="p">),</span>
+                                               <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">outcome_bitstring</span><span class="p">,</span> <span class="n">number_of_occurrences</span> <span class="ow">in</span> <span class="n">experimental_results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bitstrings_right_to_left</span><span class="p">:</span>
+                        <span class="c1"># here we change the order of bitstring if it was specified</span>
+                        <span class="n">outcome_bitstring</span> <span class="o">=</span> <span class="n">outcome_bitstring</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="c1"># get bitstring denoting state of qubits in the subset</span>
+                    <span class="n">marginal_key_now</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">outcome_bitstring</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">])</span>
+
+                    <span class="c1"># add counts to the marginal distribution</span>
+                    <span class="n">marginal_vector_now</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">marginal_key_now</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">+=</span> <span class="n">number_of_occurrences</span>
+
+                <span class="c1"># Here if there is no &quot;qubits_string&quot; KEY we use the fact that by default we use</span>
+                <span class="c1"># &quot;key_dependent_dictionary&quot;. See description of __init__.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span><span class="p">[</span><span class="n">experiment_label</span><span class="p">][</span><span class="n">subset_string</span><span class="p">]</span> <span class="o">+=</span> <span class="n">marginal_vector_now</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_marginals</span><span class="p">(</span><span class="n">experiment_keys</span><span class="p">,</span> <span class="n">subset_strings_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MarginalsAnalyzerBase.compute_all_marginals"><a class="viewcode-back" href="../../../QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.compute_all_marginals">[docs]</a>    <span class="k">def</span> <span class="nf">compute_all_marginals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">subsets_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
+                              <span class="n">show_progress_bar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Implements self.compute_marginals for all experimental keys.</span>
+
+<span class="sd">        :param subsets_list: list of subsets_list of qubits for which marginals_dictionary should be calculated</span>
+<span class="sd">        :param show_progress_bar: if True, shows progress bar. Requires &quot;tqdm&quot; package</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">keys_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">keys_list_range</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys_list</span><span class="p">))</span>
+
+        <span class="c1"># if progress bar should be shown, we use tqdm package</span>
+        <span class="k">if</span> <span class="n">show_progress_bar</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+            <span class="n">keys_list_range</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">keys_list_range</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key_index</span> <span class="ow">in</span> <span class="n">keys_list_range</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compute_marginals</span><span class="p">([</span><span class="n">keys_list</span><span class="p">[</span><span class="n">key_index</span><span class="p">]],</span> <span class="n">subsets_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MarginalsAnalyzerBase.get_marginals"><a class="viewcode-back" href="../../../QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_marginals">[docs]</a>    <span class="k">def</span> <span class="nf">get_marginals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                      <span class="n">experiment_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="n">subsets_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Like self.compute_marginals but first checks if the marginals_dictionary are already computed</span>
+<span class="sd">            and it returns them.</span>
+
+<span class="sd">        :param experiment_key: key that labels experiment from which marginals_dictionary should be taken</span>
+<span class="sd">        :param subsets_list: list of subsets_list of qubits for which marginals_dictionary should be calculated</span>
+
+<span class="sd">        :return: marginals_dictionary:</span>
+<span class="sd">                dictionary in which KEY is label for experiment, and VALUE is dictionary with KEYS</span>
+<span class="sd">                being qubit subset identifiers (in potentially_stochastic_matrix format &quot;q1q5q23&quot; etc.), and VALUES being marginal</span>
+<span class="sd">                probability vectors (see __init__ description)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">keys_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subsets_list</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subsets_list</span><span class="p">)):</span>
+            <span class="n">subset</span><span class="p">,</span> <span class="n">key_now</span> <span class="o">=</span> <span class="n">subsets_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">keys_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">experiment_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">compute_marginals</span><span class="p">([</span><span class="n">experiment_key</span><span class="p">],</span> <span class="p">[</span><span class="n">subset</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">key_now</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span><span class="p">[</span><span class="n">experiment_key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">compute_marginals</span><span class="p">([</span><span class="n">experiment_key</span><span class="p">],</span> <span class="p">[</span><span class="n">subset</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">key_now</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span><span class="p">[</span><span class="n">experiment_key</span><span class="p">][</span><span class="n">key_now</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">key_now</span> <span class="ow">in</span> <span class="n">keys_list</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="MarginalsAnalyzerBase.get_marginal_from_probability_distribution"><a class="viewcode-back" href="../../../QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_marginal_from_probability_distribution">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_marginal_from_probability_distribution</span><span class="p">(</span>
+            <span class="n">global_probability_distribution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">bits_of_interest</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+            <span class="n">register_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+
+        <span class="sd">&quot;&quot;&quot;Return marginal distribution from vector of global distribution</span>
+<span class="sd">        :param global_probability_distribution: distribution on all bits</span>
+<span class="sd">        :param bits_of_interest: bits we are interested in (so we average over other bits)</span>
+<span class="sd">                                Assuming that qubits are labeled</span>
+<span class="sd">                                from 0 to log2(len(global_probability_distribution))</span>
+<span class="sd">        :param register_names: bitstrings register, default is</span>
+<span class="sd">                               &#39;00...00&#39;, &#39;000...01&#39;, &#39;000...10&#39;, ..., etc.</span>
+
+<span class="sd">        :return: marginal_distribution : marginal probability distribution</span>
+
+<span class="sd">        NOTE: we identify bits with qubits in the variables bitstring_names</span>
+
+<span class="sd">        #TODO FBM: do some speed tests on some details of those solutions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits_of_interest</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;0 length bits list&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">global_probability_distribution</span>
+
+        <span class="n">global_dimension</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_probability_distribution</span><span class="p">)</span>
+        <span class="n">global_number_of_qubits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">global_dimension</span><span class="p">))</span>
+        <span class="n">all_qubits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">global_number_of_qubits</span><span class="p">))</span>
+        <span class="n">bits_to_average_over</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_qubits</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">bits_of_interest</span><span class="p">)))</span>
+
+        <span class="n">number_of_bits_in_marginal</span> <span class="o">=</span> <span class="n">global_number_of_qubits</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits_to_average_over</span><span class="p">)</span>
+        <span class="n">dimension_of_marginal</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">number_of_bits_in_marginal</span>
+
+        <span class="k">if</span> <span class="n">register_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bitstring_names</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">register_names_qubits</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">global_number_of_qubits</span><span class="p">),</span>
+                                                        <span class="n">global_number_of_qubits</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bitstring_names</span> <span class="o">=</span> <span class="n">register_names</span>
+
+        <span class="n">marginal_distribution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">dimension_of_marginal</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">global_dimension</span><span class="p">):</span>
+            <span class="c1"># this is slightly faster than going through &quot;for bitstring_global in bitstring_names</span>
+            <span class="c1"># and then converting bitstring_global to integer</span>
+            <span class="c1"># and also faster than creating the global bitstring in situ</span>
+            <span class="n">bitstring_global</span> <span class="o">=</span> <span class="n">bitstring_names</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+            <span class="n">bitstring_local</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">bitstring_global</span><span class="p">[</span><span class="n">qubit_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">qubit_index</span> <span class="ow">in</span> <span class="n">bits_of_interest</span><span class="p">])</span>
+
+            <span class="n">marginal_distribution</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">bitstring_local</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">+=</span> <span class="n">global_probability_distribution</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">marginal_distribution</span></div>
+
+<div class="viewcode-block" id="MarginalsAnalyzerBase.get_averaged_marginal_for_subset"><a class="viewcode-back" href="../../../QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_averaged_marginal_for_subset">[docs]</a>    <span class="k">def</span> <span class="nf">get_averaged_marginal_for_subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                              <span class="n">subset</span><span class="p">):</span>
+
+        <span class="n">subset_key</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span> <span class="o">+</span> <span class="s1">&#39;q&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">])</span>
+        <span class="n">marginals_dictionary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span>
+        <span class="n">marginal_dict_now</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">input_state_bitstring</span><span class="p">,</span> <span class="n">dictionary_marginals_now</span> <span class="ow">in</span> <span class="n">marginals_dictionary</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">input_marginal</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">input_state_bitstring</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">subset_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dictionary_marginals_now</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">compute_marginals</span><span class="p">([</span><span class="n">input_state_bitstring</span><span class="p">],</span> <span class="p">[</span><span class="n">subset</span><span class="p">])</span>
+            <span class="n">marginal_dict_now</span><span class="p">[</span><span class="n">input_marginal</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dictionary_marginals_now</span><span class="p">[</span><span class="n">subset_key</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">key_small</span> <span class="ow">in</span> <span class="n">marginal_dict_now</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">marginal_dict_now</span><span class="p">[</span><span class="n">key_small</span><span class="p">]</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">marginal_dict_now</span><span class="p">[</span><span class="n">key_small</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">marginal_dict_now</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">QREM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

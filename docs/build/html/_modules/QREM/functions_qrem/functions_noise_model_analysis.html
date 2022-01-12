@@ -1,0 +1,157 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QREM.functions_qrem.functions_noise_model_analysis &#8212; QREM 0.56 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for QREM.functions_qrem.functions_noise_model_analysis</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki</span>
+<span class="sd">@contact: filip.b.maciejewski@gmail.com</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">QREM.functions_qrem</span> <span class="k">import</span> <span class="n">povmtools</span><span class="p">,</span> <span class="n">ancillary_functions</span> <span class="k">as</span> <span class="n">anf</span>
+
+
+<div class="viewcode-block" id="get_neighborhood_treshold_statitsical_pairs"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_analysis.get_neighborhood_treshold_statitsical_pairs">[docs]</a><span class="k">def</span> <span class="nf">get_neighborhood_treshold_statitsical_pairs</span><span class="p">(</span><span class="n">number_of_samples</span><span class="p">,</span>
+                                                <span class="n">number_of_qubits</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                                <span class="n">probability_of_error</span><span class="o">=</span><span class="mf">0.001</span><span class="p">):</span>
+    <span class="n">pairs_number</span> <span class="o">=</span> <span class="n">number_of_qubits</span> <span class="o">*</span> <span class="p">(</span><span class="n">number_of_qubits</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">eps1q</span> <span class="o">=</span> <span class="n">povmtools</span><span class="o">.</span><span class="n">get_statistical_error_bound</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span>
+                                                  <span class="n">number_of_samples</span><span class="p">,</span>
+                                                  <span class="n">probability_of_error</span><span class="p">,</span>
+                                                  <span class="n">pairs_number</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">eps1q</span></div>
+
+
+<div class="viewcode-block" id="rename_clusters"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_analysis.rename_clusters">[docs]</a><span class="k">def</span> <span class="nf">rename_clusters</span><span class="p">(</span><span class="n">clusters</span><span class="p">,</span> <span class="n">true_indices</span><span class="p">):</span>
+    <span class="n">proper_clusters</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">clusters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">indices_enum_key</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">get_qubit_indices_from_string</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">indices_enum_value</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="n">key_true</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">true_indices</span><span class="p">[</span><span class="n">qi</span><span class="p">]</span> <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">indices_enum_key</span><span class="p">])</span>
+        <span class="n">value_true</span> <span class="o">=</span> <span class="p">[</span><span class="n">true_indices</span><span class="p">[</span><span class="n">qi</span><span class="p">]</span> <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">indices_enum_value</span><span class="p">]</span>
+
+        <span class="n">proper_clusters</span><span class="p">[</span><span class="n">key_true</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_true</span>
+
+    <span class="k">return</span> <span class="n">proper_clusters</span></div>
+
+
+<div class="viewcode-block" id="cut_subset_sizes"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_analysis.cut_subset_sizes">[docs]</a><span class="k">def</span> <span class="nf">cut_subset_sizes</span><span class="p">(</span><span class="n">clusters_neighbourhoods_dict</span><span class="p">,</span>
+                     <span class="n">correlations_table</span><span class="p">,</span>
+                     <span class="n">target_size</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">cutted_dict</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">clusters_neighbourhoods_dict</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">neighbours</span> <span class="ow">in</span> <span class="n">clusters_neighbourhoods_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">correlations_now</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cluster_inds</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">get_qubit_indices_from_string</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ni</span> <span class="ow">in</span> <span class="n">neighbours</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="n">cluster_inds</span><span class="p">:</span>
+                <span class="n">correlations_now</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ni</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">ci</span><span class="p">,</span> <span class="n">ni</span><span class="p">]])</span>
+
+        <span class="n">sorted_correlations</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">correlations_now</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">base_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cluster_inds</span><span class="p">)</span>
+
+        <span class="n">cut_neighbourhood</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">base_size</span> <span class="o">==</span> <span class="n">target_size</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">sorted_correlations</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">base_size</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut_neighbourhood</span><span class="p">))</span> <span class="o">==</span> <span class="n">target_size</span><span class="p">:</span>
+                    <span class="c1"># print()</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ni</span> <span class="o">=</span> <span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">ni</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cut_neighbourhood</span><span class="p">:</span>
+                        <span class="n">cut_neighbourhood</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ni</span><span class="p">)</span>
+
+        <span class="n">cutted_dict</span><span class="p">[</span><span class="n">cluster</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cut_neighbourhood</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cutted_dict</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">QREM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

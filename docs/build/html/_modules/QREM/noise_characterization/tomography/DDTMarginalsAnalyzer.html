@@ -1,0 +1,500 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QREM.noise_characterization.tomography.DDTMarginalsAnalyzer &#8212; QREM 0.56 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for QREM.noise_characterization.tomography.DDTMarginalsAnalyzer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki</span>
+<span class="sd">@contact: filip.b.maciejewski@gmail.com</span>
+
+<span class="sd">REFERENCES:</span>
+<span class="sd">[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="sd">&quot;Mitigation of readout noise in near-term quantum devices</span>
+<span class="sd">by classical post-processing based on detector tomography&quot;,</span>
+<span class="sd">Quantum 4, 257 (2020)</span>
+
+<span class="sd">[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="sd">&quot;Modeling and mitigation of cross-talk effects in readout noise</span>
+<span class="sd">with applications to the Quantum Approximate Optimization Algorithm&quot;,</span>
+<span class="sd">Quantum 5, 464 (2021).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">QREM.base_classes.marginals_analyzer_base</span> <span class="k">import</span> <span class="n">MarginalsAnalyzerBase</span>
+<span class="kn">from</span> <span class="nn">QREM.functions_qrem</span> <span class="k">import</span> <span class="n">ancillary_functions</span> <span class="k">as</span> <span class="n">anf</span>
+
+
+<div class="viewcode-block" id="DDTMarginalsAnalyzer"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer">[docs]</a><span class="k">class</span> <span class="nc">DDTMarginalsAnalyzer</span><span class="p">(</span><span class="n">MarginalsAnalyzerBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class that handles results of Diagonal Detector Tomography.</span>
+<span class="sd">        Main functionalities allow to calculate noise matrices on subsets_list of qubits.</span>
+<span class="sd">        This includes averaged noise matrices, i_index.e., averaged over states off all other qubits,</span>
+<span class="sd">        as well as state-dependent, i_index.e., conditioned on the particular</span>
+<span class="sd">        input classical state of some other qubits.</span>
+
+<span class="sd">        In this class, and all its children, we use the following convention</span>
+<span class="sd">        for storing marginal noise matrices:</span>
+
+<span class="sd">        :param noise_matrices_dictionary: nested dictionary with following structure:</span>
+
+<span class="sd">        noise_matrices_dictionary[qubits_subset_string][&#39;averaged&#39;]</span>
+<span class="sd">        = average noise matrix on qubits subset</span>
+<span class="sd">        and</span>
+<span class="sd">        noise_matrices_dictionary[qubits_subset_string][other_qubits_subset_string][input_state_bitstring]</span>
+<span class="sd">        = noise matrix on qubits subset depending on input state of other qubits.</span>
+
+<span class="sd">        where:</span>
+<span class="sd">        - qubits_subset_string - is string labeling qubits subset (e.g., &#39;q1q2q15...&#39;)</span>
+<span class="sd">        - other_qubits_subset_string - string labeling other subset</span>
+<span class="sd">        - input_state_bitstring - bitstring labeling</span>
+<span class="sd">                                                   input state of qubits in other_qubits_subset_string</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">results_dictionary_ddot</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+                 <span class="n">bitstrings_right_to_left</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                 <span class="n">marginals_dictionary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">noise_matrices_dictionary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
+                     <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]]]</span> <span class="o">=</span> <span class="kc">None</span>
+                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param results_dictionary_ddot: see description of MarginalsAnalyzerBase.</span>
+<span class="sd">        Here we use classical input states (bitstrings) of qubits as LABELS for experiments.</span>
+<span class="sd">        :param bitstrings_right_to_left: specify whether bitstrings</span>
+<span class="sd">                                 should be read from right to left (when interpreting qubit labels)</span>
+<span class="sd">        :param marginals_dictionary: see description of MarginalsAnalyzerBase.</span>
+<span class="sd">        :param noise_matrices_dictionary: nested dictionary with following structure:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">results_dictionary_ddot</span><span class="p">,</span>
+                         <span class="n">bitstrings_right_to_left</span><span class="p">,</span>
+                         <span class="n">marginals_dictionary</span>
+                         <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">noise_matrices_dictionary</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">noise_matrices_dictionary</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># TODO FBM: Make sure whether this helps in anything</span>
+            <span class="c1"># TODO FBM: (because we anyway perform checks in the functions later)</span>
+            <span class="k">if</span> <span class="n">marginals_dictionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">experiment_key</span><span class="p">,</span> <span class="n">dictionary_of_marginals</span> <span class="ow">in</span> <span class="n">marginals_dictionary</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">for</span> <span class="n">marginal_key</span> <span class="ow">in</span> <span class="n">dictionary_of_marginals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">marginal_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">noise_matrices_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                            <span class="n">noise_matrices_dictionary</span><span class="p">[</span><span class="n">marginal_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span> <span class="o">=</span> <span class="n">noise_matrices_dictionary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">noise_matrices_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span>
+
+    <span class="nd">@noise_matrices_dictionary</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">noise_matrices_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                  <span class="n">noise_matrices_dictionary</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span>
+                                      <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span> <span class="o">=</span> <span class="n">noise_matrices_dictionary</span>
+
+<div class="viewcode-block" id="DDTMarginalsAnalyzer.get_noise_matrix_from_counts_dict"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.get_noise_matrix_from_counts_dict">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_noise_matrix_from_counts_dict</span><span class="p">(</span>
+            <span class="n">results_dictionary</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">defaultdict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return noise matrix from counts dictionary.</span>
+<span class="sd">        Assuming that the results are given only for qubits of interest.</span>
+<span class="sd">        :param results_dictionary: dictionary with experiments of the form:</span>
+
+<span class="sd">        results_dictionary[input_state_bitstring] = probability_distribution</span>
+
+<span class="sd">        where:</span>
+<span class="sd">        - input_state_bitstring is bitstring denoting classical input state</span>
+<span class="sd">        - probability_distribution - estimated vector of probabilities for that input state</span>
+
+<span class="sd">        :return: noise_matrix: the array representing noise on qubits</span>
+<span class="sd">        on which the experiments were performed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">number_of_qubits</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">results_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">noise_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span> <span class="o">**</span> <span class="n">number_of_qubits</span><span class="p">,</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">number_of_qubits</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">input_state</span><span class="p">,</span> <span class="n">probability_vector</span> <span class="ow">in</span> <span class="n">results_dictionary</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">noise_matrix</span><span class="p">[:,</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_state</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">=</span> <span class="n">probability_vector</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">noise_matrix</span></div>
+
+<div class="viewcode-block" id="DDTMarginalsAnalyzer.average_noise_matrices_over_some_qubits"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.average_noise_matrices_over_some_qubits">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">average_noise_matrices_over_some_qubits</span><span class="p">(</span><span class="n">matrices_cluster</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                                                <span class="n">all_neighbors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                                                <span class="n">qubits_to_be_left</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          Given dictionary of noise matrices, average them over some qubits.</span>
+
+<span class="sd">         :param matrices_cluster: dictionary for which KEY is classical INPUT state of neighbors,</span>
+<span class="sd">                                  and VALUE is potentially_stochastic_matrix noise matrix</span>
+<span class="sd">         :param all_neighbors: list of neighbors of given cluster</span>
+<span class="sd">         :param qubits_to_be_left: qubits which we are interested in and we do not average over them</span>
+
+<span class="sd">         :return: dictionary of noise matrices</span>
+<span class="sd">                    depending on the state of neighbors MINUS qubits_to_be_averaged_over</span>
+
+<span class="sd">         &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">all_neighbors</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_neighbors</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;averaged&#39;</span><span class="p">:</span> <span class="n">matrices_cluster</span><span class="p">[</span><span class="s1">&#39;averaged&#39;</span><span class="p">]}</span>
+
+        <span class="n">reversed_enumerated</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">get_reversed_enumerated_from_indices</span><span class="p">(</span><span class="n">all_neighbors</span><span class="p">)</span>
+        <span class="n">averaging_normalization</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_neighbors</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">qubits_to_be_left</span><span class="p">)))</span>
+
+        <span class="n">states_after_averaging</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">register_names_qubits</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">qubits_to_be_left</span><span class="p">)),</span>
+                                                           <span class="nb">len</span><span class="p">(</span><span class="n">qubits_to_be_left</span><span class="p">),</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">averaged_dimension</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">matrices_cluster</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">averaged_matrices_cluster</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">state</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">averaged_dimension</span><span class="p">,</span> <span class="n">averaged_dimension</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span>
+            <span class="n">states_after_averaging</span><span class="p">}</span>
+
+        <span class="n">qubits_to_be_averaged_over</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_neighbors</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">qubits_to_be_left</span><span class="p">)))</span>
+        <span class="n">qubits_to_be_averaged_over_mapped</span> <span class="o">=</span> <span class="p">[</span><span class="n">reversed_enumerated</span><span class="p">[</span><span class="n">q_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">q_index</span> <span class="ow">in</span>
+                                             <span class="n">qubits_to_be_averaged_over</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">neighbors_state</span><span class="p">,</span> <span class="n">conditional_noise_matrix</span> <span class="ow">in</span> <span class="n">matrices_cluster</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">list_string_neighbors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">neighbors_state</span><span class="p">))</span>
+
+            <span class="n">list_string_neighbors_to_be_left</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">list_string_neighbors</span><span class="p">,</span>
+                                                              <span class="n">qubits_to_be_averaged_over_mapped</span><span class="p">))</span>
+
+            <span class="n">string_neighbors</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">list_string_neighbors_to_be_left</span><span class="p">)</span>
+
+            <span class="n">averaged_matrices_cluster</span><span class="p">[</span>
+                <span class="n">string_neighbors</span><span class="p">]</span> <span class="o">+=</span> <span class="n">conditional_noise_matrix</span> <span class="o">/</span> <span class="n">averaging_normalization</span>
+
+        <span class="k">return</span> <span class="n">averaged_matrices_cluster</span></div>
+
+    <span class="k">def</span> <span class="nf">_compute_noise_matrix_averaged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                       <span class="n">subset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Noise matrix for subset of qubits, averaged over all other qubits</span>
+
+<span class="sd">            :param subset: subset of qubits we are interested in</span>
+
+<span class="sd">           By default takes data from self._marginals_dictionary. If data is not present, then it</span>
+<span class="sd">           calculates marginals_dictionary for given subset</span>
+<span class="sd">           and updates the class&#39;s property self.marginals_dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO FBM: Perhaps add possibility of using existing marginals_dictionary for bigger subset that includes</span>
+        <span class="c1"># target subset</span>
+
+        <span class="n">subset_key</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span> <span class="o">+</span> <span class="s1">&#39;q&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">])</span>
+
+
+        <span class="n">marginal_dict_now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_averaged_marginal_for_subset</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
+
+        <span class="n">noise_matrix_averaged</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_noise_matrix_from_counts_dict</span><span class="p">(</span><span class="n">marginal_dict_now</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">anf</span><span class="o">.</span><span class="n">is_stochastic</span><span class="p">(</span><span class="n">noise_matrix_averaged</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Noise matrix not stochastic for subset:&#39;</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">subset_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">subset_key</span><span class="p">][</span><span class="s1">&#39;averaged&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">noise_matrix_averaged</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">subset_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;averaged&#39;</span><span class="p">:</span> <span class="n">noise_matrix_averaged</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">noise_matrix_averaged</span>
+
+    <span class="k">def</span> <span class="nf">_get_noise_matrix_averaged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                   <span class="n">subset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Like self._compute_noise_matrix_averaged but if matrix is already in class&#39; property,</span>
+<span class="sd">            does not calculate it again.</span>
+
+<span class="sd">            :param subset: subset of qubits we are interested in</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">subset_key</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span> <span class="o">+</span> <span class="s1">&#39;q&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">subset_key</span><span class="p">][</span><span class="s1">&#39;averaged&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">(</span><span class="ne">KeyError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_noise_matrix_averaged</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_compute_noise_matrix_dependent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                        <span class="n">qubits_of_interest</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                                        <span class="n">neighbors_of_interest</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="kc">None</span><span class="p">])</span> \
+            <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return lower-dimensional effective noise matrices acting on qubits_of_interest&quot;</span>
+<span class="sd">                    conditioned on input states of neighbors_of_interest</span>
+<span class="sd">            :param qubits_of_interest: labels of qubits in marginal  we are interested in</span>
+<span class="sd">            :param neighbors_of_interest: labels of qubits that affect noise matrix on qubits_of_interest</span>
+
+<span class="sd">            :return conditional_noise_matrices_dictionary: dictionary with structure</span>
+
+<span class="sd">            conditional_noise_matrices_dictionary[&#39;averaged&#39;] =</span>
+<span class="sd">            noise matrix on qubits_of_interest averaged over input states of other qubits</span>
+
+<span class="sd">            and</span>
+
+<span class="sd">            conditional_noise_matrices_dictionary[input_state_neighbors_bitstring] =</span>
+<span class="sd">            noise matrix on qubits_of_interest conditioned on input state of neighbors being</span>
+<span class="sd">            input_state_neighbors_bitstring</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># If there are no all_neighbors,</span>
+        <span class="c1"># then this corresponds to averaging over all qubits except qubits_of_interest</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">neighbors_of_interest</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">neighbors_of_interest</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cluster_string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">qubits_of_interest</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;averaged&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_string</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;averaged&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_string</span><span class="p">][</span><span class="s1">&#39;averaged&#39;</span><span class="p">]}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">noise_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_noise_matrix_averaged</span><span class="p">(</span><span class="n">qubits_of_interest</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;averaged&#39;</span><span class="p">:</span> <span class="n">noise_matrix</span><span class="p">}</span>
+
+        <span class="c1"># check if there is no collision between qubits_of_interest and neighbors_of_interest</span>
+        <span class="c1"># (if there is, then the method_name won&#39;t be consistent)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">anf</span><span class="o">.</span><span class="n">lists_intersection</span><span class="p">(</span><span class="n">qubits_of_interest</span><span class="p">,</span> <span class="n">neighbors_of_interest</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">qubits_of_interest</span><span class="p">,</span> <span class="n">neighbors_of_interest</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Qubits of interest and neighbors overlap&#39;</span><span class="p">)</span>
+
+        <span class="c1"># first, get averaged noise matrix on qubits of interest and all_neighbors of interest</span>
+        <span class="c1"># TODO FBM: make sure that qubit indices are correct (I think they are)</span>
+        <span class="n">all_qubits</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">qubits_of_interest</span> <span class="o">+</span> <span class="n">neighbors_of_interest</span><span class="p">)</span>
+        <span class="n">all_qubits_enumerated</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">get_reversed_enumerated_from_indices</span><span class="p">(</span><span class="n">all_qubits</span><span class="p">)</span>
+
+        <span class="c1"># we will get noise matrix on all of the qubits first, and then we will process it to get</span>
+        <span class="c1"># conditional marginal noise matrices on qubits_of_interest</span>
+        <span class="n">big_lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_noise_matrix_averaged</span><span class="p">(</span><span class="n">all_qubits</span><span class="p">)</span>
+
+        <span class="n">total_number_of_qubits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">big_lambda</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">total_dimension</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">total_number_of_qubits</span><span class="p">)</span>
+        <span class="n">number_of_qubits_of_interest</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">qubits_of_interest</span><span class="p">)</span>
+        <span class="n">number_of_neighbors</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">neighbors_of_interest</span><span class="p">)</span>
+
+        <span class="c1"># Normalization when averaging over states of non-neighbours (each with the same probability)</span>
+        <span class="n">normalization</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span>
+                <span class="n">total_number_of_qubits</span> <span class="o">-</span> <span class="n">number_of_neighbors</span> <span class="o">-</span> <span class="n">number_of_qubits_of_interest</span><span class="p">)</span>
+
+        <span class="c1"># classical register on all qubits</span>
+        <span class="n">classical_register_all_qubits</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{0:b}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">total_number_of_qubits</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                                         <span class="nb">range</span><span class="p">(</span><span class="n">total_dimension</span><span class="p">)]</span>
+
+        <span class="c1"># classical register on neighbours</span>
+        <span class="n">classical_register_neighbours</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{0:b}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">number_of_neighbors</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                                         <span class="nb">range</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">number_of_neighbors</span><span class="p">)]</span>
+
+        <span class="c1"># create dictionary of the marginal states of qubits_of_interest and neighbors_of_interest</span>
+        <span class="c1"># for the whole register (this function is storing data which could also be calculated in situ</span>
+        <span class="c1"># in the loops later, but this is faster)</span>
+        <span class="n">indices_dictionary_small</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">neighbors_state_bitstring</span> <span class="ow">in</span> <span class="n">classical_register_all_qubits</span><span class="p">:</span>
+            <span class="n">small_string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">neighbors_state_bitstring</span><span class="p">)[</span><span class="n">all_qubits_enumerated</span><span class="p">[</span><span class="n">b</span><span class="p">]]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span>
+                                    <span class="n">qubits_of_interest</span><span class="p">])</span>
+            <span class="n">neighbours_string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">neighbors_state_bitstring</span><span class="p">)[</span><span class="n">all_qubits_enumerated</span><span class="p">[</span><span class="n">b</span><span class="p">]]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span>
+                 <span class="n">neighbors_of_interest</span><span class="p">])</span>
+            <span class="c1"># first place in list is label for state of qubits_of_interest</span>
+            <span class="c1"># and second for neighbors_of_interest</span>
+            <span class="n">indices_dictionary_small</span><span class="p">[</span><span class="n">neighbors_state_bitstring</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">small_string</span><span class="p">,</span> <span class="n">neighbours_string</span><span class="p">]</span>
+
+        <span class="c1"># initiate dictionary for which KEY is input state of all_neighbors</span>
+        <span class="c1"># and VALUE will the the corresponding noise matrix on qubits_of_interest</span>
+        <span class="n">conditional_noise_matrices</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">s</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span> <span class="o">**</span> <span class="n">number_of_qubits_of_interest</span><span class="p">,</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">number_of_qubits_of_interest</span><span class="p">))</span> <span class="k">for</span> <span class="n">s</span>
+            <span class="ow">in</span>
+            <span class="n">classical_register_neighbours</span><span class="p">}</span>
+
+        <span class="c1"># go through all classical states</span>
+        <span class="k">for</span> <span class="n">measured_state_integer</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total_dimension</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">input_state_integer</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total_dimension</span><span class="p">):</span>
+                <span class="n">lambda_element</span> <span class="o">=</span> <span class="n">big_lambda</span><span class="p">[</span><span class="n">measured_state_integer</span><span class="p">,</span> <span class="n">input_state_integer</span><span class="p">]</span>
+
+                <span class="c1"># input state of all qubits in binary format</span>
+                <span class="n">input_state_bitstring</span> <span class="o">=</span> <span class="n">classical_register_all_qubits</span><span class="p">[</span><span class="n">input_state_integer</span><span class="p">]</span>
+                <span class="c1"># measured state of all qubits in binary format</span>
+                <span class="n">measured_state_bitstring</span> <span class="o">=</span> <span class="n">classical_register_all_qubits</span><span class="p">[</span><span class="n">measured_state_integer</span><span class="p">]</span>
+
+                <span class="c1"># input state of qubits_of_interest in binary format</span>
+                <span class="n">input_state_small</span> <span class="o">=</span> <span class="n">indices_dictionary_small</span><span class="p">[</span><span class="n">input_state_bitstring</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># measured state of qubits_of_interest in binary format</span>
+                <span class="n">measured_state_small</span> <span class="o">=</span> <span class="n">indices_dictionary_small</span><span class="p">[</span><span class="n">measured_state_bitstring</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c1"># input state of neighbors_of_interest in binary format</span>
+                <span class="n">input_state_neighbours</span> <span class="o">=</span> <span class="n">indices_dictionary_small</span><span class="p">[</span><span class="n">input_state_bitstring</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># element of small lambda labeled by (measured state | input state),</span>
+                <span class="c1"># and the lambda itself is labeled by input state of all_neighbors</span>
+                <span class="n">conditional_noise_matrices</span><span class="p">[</span><span class="n">input_state_neighbours</span><span class="p">][</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">measured_state_small</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_state_small</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">+=</span> <span class="n">lambda_element</span>
+
+        <span class="c1"># normalize matrices</span>
+        <span class="k">for</span> <span class="n">neighbors_state_bitstring</span> <span class="ow">in</span> <span class="n">classical_register_neighbours</span><span class="p">:</span>
+            <span class="n">conditional_noise_matrices</span><span class="p">[</span><span class="n">neighbors_state_bitstring</span><span class="p">]</span> <span class="o">/=</span> <span class="n">normalization</span>
+
+        <span class="c1"># conditional_noise_matrices[&#39;all_neighbors&#39;] = neighbors_of_interest</span>
+
+        <span class="n">cluster_string</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span> <span class="o">+</span> <span class="s1">&#39;q&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">qubits_of_interest</span><span class="p">)</span>
+        <span class="n">neighbours_string</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span> <span class="o">+</span> <span class="s1">&#39;q&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">neighbors_of_interest</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cluster_string</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># If there is no entry for our cluster in the dictionary, we create it and add</span>
+            <span class="c1"># averaged noise matrix</span>
+            <span class="n">averaged_noise_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">number_of_qubits_of_interest</span><span class="p">,</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">number_of_qubits_of_interest</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">neighbors_state_bitstring</span> <span class="ow">in</span> <span class="n">conditional_noise_matrices</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">averaged_noise_matrix</span> <span class="o">+=</span> <span class="n">conditional_noise_matrices</span><span class="p">[</span><span class="n">neighbors_state_bitstring</span><span class="p">]</span>
+            <span class="n">averaged_noise_matrix</span> <span class="o">/=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">number_of_qubits_of_interest</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_string</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;averaged&#39;</span><span class="p">:</span> <span class="n">averaged_noise_matrix</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_string</span><span class="p">][</span><span class="n">neighbours_string</span><span class="p">]</span> <span class="o">=</span> <span class="n">conditional_noise_matrices</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_string</span><span class="p">][</span><span class="n">neighbours_string</span><span class="p">]</span>
+
+<div class="viewcode-block" id="DDTMarginalsAnalyzer.get_noise_matrix_dependent"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.get_noise_matrix_dependent">[docs]</a>    <span class="k">def</span> <span class="nf">get_noise_matrix_dependent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                   <span class="n">qubits_of_interest</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                                   <span class="n">neighbors_of_interest</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Description:</span>
+<span class="sd">        like self._compute_noise_matrix_dependent</span>
+<span class="sd">        but checks whether matrices were already calculated to prevent multiple computations of the</span>
+<span class="sd">        same matrices</span>
+
+<span class="sd">        :param qubits_of_interest: labels of qubits in marginal  we are interested in</span>
+<span class="sd">        :param neighbors_of_interest: labels of qubits that affect noise matrix on qubits_of_interest</span>
+
+<span class="sd">        :return conditional_noise_matrices_dictionary:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">cluster_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">qubits_of_interest</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cluster_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compute_subset_noise_matrices_averaged</span><span class="p">([</span><span class="n">qubits_of_interest</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">neighbors_of_interest</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">neighbors_of_interest</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">neighbors_key</span> <span class="o">=</span> <span class="s1">&#39;averaged&#39;</span>
+
+            <span class="k">if</span> <span class="n">neighbors_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_key</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">anf</span><span class="o">.</span><span class="n">is_stochastic</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_key</span><span class="p">][</span><span class="s1">&#39;averaged&#39;</span><span class="p">]):</span>
+                    <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;Bug is here&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">cluster_key</span><span class="p">,</span> <span class="n">neighbors_key</span><span class="p">)</span>
+                    <span class="c1"># TODO FBM: SOMETHING IS BROKEN</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_key</span><span class="p">][</span>
+                        <span class="s1">&#39;averaged&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_noise_matrix_averaged</span><span class="p">(</span><span class="n">qubits_of_interest</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">anf</span><span class="o">.</span><span class="n">is_stochastic</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_key</span><span class="p">][</span><span class="s1">&#39;averaged&#39;</span><span class="p">]):</span>
+                        <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;And I cant fix it&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># anf.print_array_nicely(self._noise_matrices_dictionary[cluster_key][&#39;averaged&#39;])</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;averaged&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_key</span><span class="p">][</span><span class="s1">&#39;averaged&#39;</span><span class="p">]}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_noise_matrix_dependent</span><span class="p">(</span><span class="n">qubits_of_interest</span><span class="p">,</span>
+                                                            <span class="n">neighbors_of_interest</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">neighbors_key</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span> <span class="o">+</span> <span class="s1">&#39;q&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">neighbors_of_interest</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">neighbors_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_key</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices_dictionary</span><span class="p">[</span><span class="n">cluster_key</span><span class="p">][</span><span class="n">neighbors_key</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_noise_matrix_dependent</span><span class="p">(</span><span class="n">qubits_of_interest</span><span class="p">,</span>
+                                                            <span class="n">neighbors_of_interest</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DDTMarginalsAnalyzer.compute_subset_noise_matrices_averaged"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.compute_subset_noise_matrices_averaged">[docs]</a>    <span class="k">def</span> <span class="nf">compute_subset_noise_matrices_averaged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                               <span class="n">subsets_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
+                                               <span class="n">show_progress_bar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Description:</span>
+<span class="sd">        computes averaged (over all other qubits) noise matrices on subsets_list of qubits</span>
+
+<span class="sd">        :param subsets_list: subsets_list of qubit indices</span>
+<span class="sd">        :param show_progress_bar: whether to show animated progress bar. requires tqdm package</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># self.normalize_marginals()</span>
+        <span class="n">subsets_range</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subsets_list</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">show_progress_bar</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+            <span class="n">subsets_range</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">subsets_range</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">subset_index</span> <span class="ow">in</span> <span class="n">subsets_range</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_noise_matrix_averaged</span><span class="p">(</span><span class="n">subsets_list</span><span class="p">[</span><span class="n">subset_index</span><span class="p">])</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">QREM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

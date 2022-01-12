@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QREM.noise_characterization.modeling package &mdash; QREM 0.56 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> QREM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">QREM.noise_characterization.modeling package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator">QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator module</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_characterization.modeling.NoiseModelGenerator">QREM.noise_characterization.modeling.NoiseModelGenerator module</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_characterization.modeling">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QREM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>QREM.noise_characterization.modeling package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/QREM.noise_characterization.modeling.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qrem-noise-characterization-modeling-package">
+<h1>QREM.noise_characterization.modeling package<a class="headerlink" href="#qrem-noise-characterization-modeling-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator">
+<span id="qrem-noise-characterization-modeling-globalnoisematrixcreator-module"></span><h2>QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator module<a class="headerlink" href="#module-QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+“Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography”,
+Quantum 4, 257 (2020)</p>
+<p>[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
+“Modeling and mitigation of cross-talk effects in readout noise
+with applications to the Quantum Approximate Optimization Algorithm”,
+Quantum 5, 464 (2021).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.</span></span><span class="sig-name descname"><span class="pre">GlobalNoiseMatrixCreator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_matrices_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighborhoods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/GlobalNoiseMatrixCreator.html#GlobalNoiseMatrixCreator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This is class that, given noise matrices on clusters of qubits as function of input state of their
+neighbors, constructs global noise model on all qubits.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator.compute_global_noise_matrix">
+<span class="sig-name descname"><span class="pre">compute_global_noise_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/GlobalNoiseMatrixCreator.html#GlobalNoiseMatrixCreator.compute_global_noise_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator.compute_global_noise_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>This method_name is faster than other one</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator.compute_global_noise_matrix_old">
+<span class="sig-name descname"><span class="pre">compute_global_noise_matrix_old</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clusters_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbors_of_clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/GlobalNoiseMatrixCreator.html#GlobalNoiseMatrixCreator.compute_global_noise_matrix_old"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator.compute_global_noise_matrix_old" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator.compute_matrix_element">
+<span class="sig-name descname"><span class="pre">compute_matrix_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/GlobalNoiseMatrixCreator.html#GlobalNoiseMatrixCreator.compute_matrix_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator.compute_matrix_element" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Function that computes single global noise matrix element.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_state</strong> – bitstring denoting INPUT classical state</p></li>
+<li><p><strong>output_state</strong> – bitstring denoting OUTPUT classical state</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator.get_qubits_key">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_qubits_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_qubits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/GlobalNoiseMatrixCreator.html#GlobalNoiseMatrixCreator.get_qubits_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator.get_qubits_key" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator.update_labels_lists">
+<span class="sig-name descname"><span class="pre">update_labels_lists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/GlobalNoiseMatrixCreator.html#GlobalNoiseMatrixCreator.update_labels_lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator.GlobalNoiseMatrixCreator.update_labels_lists" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-QREM.noise_characterization.modeling.NoiseModelGenerator">
+<span id="qrem-noise-characterization-modeling-noisemodelgenerator-module"></span><h2>QREM.noise_characterization.modeling.NoiseModelGenerator module<a class="headerlink" href="#module-QREM.noise_characterization.modeling.NoiseModelGenerator" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+“Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography”,
+Quantum 4, 257 (2020)</p>
+<p>[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
+“Modeling and mitigation of cross-talk effects in readout noise
+with applications to the Quantum Approximate Optimization Algorithm”,
+Quantum 5, 464 (2021).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.noise_characterization.modeling.NoiseModelGenerator.</span></span><span class="sig-name descname"><span class="pre">NoiseModelGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dictionary_ddot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bitstrings_right_to_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginals_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_matrices_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighborhoods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/NoiseModelGenerator.html#NoiseModelGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer" title="QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer"><code class="xref py py-class docutils literal notranslate"><span class="pre">QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer</span></code></a></p>
+<p>This is class that uses results of Diagonal Detector Tomography (DDT) to construct potentially_stochastic_matrix noise
+model for potentially_stochastic_matrix measuring device. The model is classical and based on Ref. [0.5].</p>
+<p>The main functionalities include computing sets of strongly correlated qubits (clusters)
+and for each such set, computing the qubits which affect the exact form of the noise
+on those clusters (hence, neighborhoods of cluster)</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.clusters_list">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">clusters_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.clusters_list" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.compute_clusters">
+<span class="sig-name descname"><span class="pre">compute_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maximal_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'holistic_v1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/NoiseModelGenerator.html#NoiseModelGenerator.compute_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.compute_clusters" title="Permalink to this definition"></a></dt>
+<dd><p>Get partition of qubits in potentially_stochastic_matrix device into disjoint “clusters”.
+This function uses various heuristic methods, specified via string “version”.
+It uses table of correlations from class property self._correlations_table_pairs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>maximal_size</strong> – maximal allowed size of the cluster</p></li>
+<li><p><strong>method</strong> – string specifying stochasticity_type of heuristic</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Possible values:</dt><dd><p>‘pairwise’ - heuristic that uses Algorithm 3 from Ref.[]
+‘holistic_v1’ - heuristic that uses function partition_algorithm_v1_cummulative</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>method_kwargs</strong> – potential arguments that will be passed to clustering function.
+For possible parameters see descriptions of particular functions.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>clusters_labels_list: list of lists, each representing potentially_stochastic_matrix single cluster</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.compute_correlations_table_pairs">
+<span class="sig-name descname"><span class="pre">compute_correlations_table_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chopping_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/NoiseModelGenerator.html#NoiseModelGenerator.compute_correlations_table_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.compute_correlations_table_pairs" title="Permalink to this definition"></a></dt>
+<dd><p>From marginal noise matrices, get correlations between pairs of qubits.
+Correlations are defined as:</p>
+<dl class="simple">
+<dt>c_{j -&gt; i_index} =</dt><dd><p>1/2 * || Lambda_{i_index}^{Y_j = ‘0’} - Lambda_{i_index}^{Y_j = ‘0’}||_{l1}</p>
+</dd>
+</dl>
+<p>Where Lambda_{i_index}^{Y_j} is an effective noise matrix on qubit “i_index”
+(averaged over all other of qubits except “j”), provided that input state
+of qubit “j” was “Y_j”. Hence, c_{j -&gt; i_index} measures how much
+noise on qubit “i_index” depends on the input state of qubit “j”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qubit_indices</strong> – list of integers labeling the qubits we want to consider
+if not provided, uses class property self._qubit_indices</p></li>
+<li><p><strong>chopping_threshold</strong> – numerical value, for which correlations lower than
+chopping_threshold are set to 0. If not provided, does not chop.
+In general, it is potentially_stochastic_matrix advisable to set such cluster_threshold that
+cuts off values below expected statistical fluctuations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>correlations_table_quantum (ARRAY):
+element correlations_table_quantum[i_index,j] =
+how qubit “j” AFFECTS qubit “i_index”
+[= how noise on qubit “i_index” depends on “j”]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.correlations_table_pairs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlations_table_pairs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.correlations_table_pairs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.draw_noise_model">
+<span class="sig-name descname"><span class="pre">draw_noise_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/NoiseModelGenerator.html#NoiseModelGenerator.draw_noise_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.draw_noise_model" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.find_all_neighborhoods">
+<span class="sig-name descname"><span class="pre">find_all_neighborhoods</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maximal_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'holistic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/NoiseModelGenerator.html#NoiseModelGenerator.find_all_neighborhoods"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.find_all_neighborhoods" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.neighborhoods">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">neighborhoods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.neighborhoods" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.print_properties">
+<span class="sig-name descname"><span class="pre">print_properties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/modeling/NoiseModelGenerator.html#NoiseModelGenerator.print_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator.print_properties" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-QREM.noise_characterization.modeling">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-QREM.noise_characterization.modeling" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

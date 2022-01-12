@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QREM.noise_mitigation.QDTErrorMitigator &mdash; QREM 0.56 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> QREM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QREM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>QREM.noise_mitigation.QDTErrorMitigator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for QREM.noise_mitigation.QDTErrorMitigator</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="c1"># @author: Filip Maciejewski</span>
+<span class="c1"># email: filip.b.maciejewski@gmail.com</span>
+<span class="c1">#</span>
+<span class="c1"># References:</span>
+<span class="c1"># [1] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec, &quot;Mitigation of readout noise in near-term quantum devices</span>
+<span class="c1"># by classical post-processing based on detector tomography&quot;, Quantum 4, 257 (2020).</span>
+<span class="c1">#</span>
+<span class="c1"># [2] Zbigniew Puchała, Łukasz Pawela, Aleksandra Krawiec, Ryszard Kukulski, &quot;Strategies for optimal single-shot</span>
+<span class="c1"># discrimination of quantum measurements&quot;, Phys. Rev. arrray_to_print 98, 042103 (2018), https://arxiv.org/abs/1804.05856</span>
+<span class="c1">#</span>
+<span class="c1"># [3] T. Weissman, E. Ordentlich, G. Seroussi, S. Verdul, and M. J. Weinberger, Technical Report HPL-2003-97R1,</span>
+<span class="c1"># Hewlett-Packard Labs (2003).</span>
+<span class="c1">#</span>
+<span class="c1"># [4] John A. Smolin, Jay M. Gambetta, Graeme Smith, &quot;Maximum Likelihood, Minimum Effort&quot;, Phys. Rev. Lett. 108, 070502</span>
+<span class="c1"># (2012), https://arxiv.org/abs/1106.5458</span>
+<span class="c1">#</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">QREM.functions_qrem</span> <span class="kn">import</span> <span class="n">povmtools</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">qiskit.result</span> <span class="kn">import</span> <span class="n">Result</span>
+<span class="kn">from</span> <span class="nn">QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities</span> <span class="kn">import</span> <span class="n">get_frequencies_array_from_results</span>
+
+
+<div class="viewcode-block" id="QDTErrorMitigator"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator">[docs]</a><span class="k">class</span> <span class="nc">QDTErrorMitigator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This class is used to mitigate errors in qiskit jobs_list using data from QDT.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Description:</span>
+<span class="sd">            Constructor of the class. If povm is None, then it should be prepared before use (using prepare_mitigator)!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">povm</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transition_matrix</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">correction_matrix</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distances_from_closest_probability_vector</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qiskit_register_convention</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># if povm is not None:</span>
+        <span class="c1">#     self.prepare_mitigator(povm)</span>
+
+<div class="viewcode-block" id="QDTErrorMitigator.prepare_mitigator"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator.prepare_mitigator">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_mitigator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">povm</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Description:</span>
+<span class="sd">            This method_name is main method_name of the class. It is used to prepare the mitigation matrix from POVM. Other</span>
+<span class="sd">            methods allow to calculate errors.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            :param povm: POVM describing the detector used in measurements of which statistics are meant to be</span>
+<span class="sd">             corrected.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            -</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">povm</span> <span class="o">=</span> <span class="n">povm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__construct_transition_matrix</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__construct_correction_matrix</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">__construct_transition_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Description:</span>
+<span class="sd">            Given classical description of the detector (i_index.e., matrix representation of POVM&#39;s elements), get the</span>
+<span class="sd">            classical part of the noise from diagonal part of every effect. The classical part of the noise is</span>
+<span class="sd">            represented by left-stochastic matrix. ASSUMING that ideal measurement is the von Neumann measurement in</span>
+<span class="sd">            computational basis.</span>
+<span class="sd">            See Ref. [1] for details. In Ref. [1] this matrix is denoted as \Lambda.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            -</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            arrray_to_print matrix representing classical part of the noise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">number_of_povm_outcomes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">povm</span><span class="p">)</span>
+        <span class="n">dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">povm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">transition_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">number_of_povm_outcomes</span><span class="p">,</span> <span class="n">number_of_povm_outcomes</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_povm_outcomes</span><span class="p">):</span>
+            <span class="n">current_povm_effect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">povm</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+            <span class="c1"># Get diagonal part of the effect. Here we remove eventual 0 imaginary part to avoid format conflicts</span>
+            <span class="c1"># (diagonal elements of Hermitian matrices are real).</span>
+            <span class="n">vec_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">current_povm_effect</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimension</span><span class="p">)])</span>
+
+            <span class="c1"># Add vector to transition matrix.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transition_matrix</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">vec_p</span><span class="p">[:]</span>
+
+    <span class="k">def</span> <span class="nf">__construct_correction_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Description:</span>
+<span class="sd">            Given classical description of the detector (i_index.e., matrix representation of POVM&#39;s elements), get the</span>
+<span class="sd">            correction matrix based on classical part of the noise. ASSUMING that ideal measurement is the von Neumann</span>
+<span class="sd">            measurement in computational basis. See Ref. [1] for details. In Ref. [1] this matrix is denoted as</span>
+<span class="sd">            \Lambda^{-1}.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            -</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :correction_matrix: numpy array representing correction matrix. It is the inverse of transition_matrix</span>
+<span class="sd">            returned by function construct_transition_matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">correction_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transition_matrix</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Noise matrix is not invertible. Returning identity. Got:&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transition_matrix</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">correction_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transition_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+<div class="viewcode-block" id="QDTErrorMitigator.apply_correction_to_statistics"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator.apply_correction_to_statistics">[docs]</a>    <span class="k">def</span> <span class="nf">apply_correction_to_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statistics_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Description:</span>
+<span class="sd">            Given correction matrix and vector of relative frequencies, correct the statistics via multiplication by</span>
+<span class="sd">            correction_matrix.</span>
+
+<span class="sd">            In case of obtaining quasiprobability vector after such correction, it is possible to find closest physical</span>
+<span class="sd">            one (in Euclidean norm). Total Variation distance between quasi probability vector and closest physical one</span>
+<span class="sd">            is the upper bound for the correction error resulting from this unphysicality. See Ref. [1] for details. In</span>
+<span class="sd">            Ref.[1], such distance is denoted as \alpha.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            :param statistics_array: Statistics for which correction should be performed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Corrected statistics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">number_of_povm_outcomes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">correction_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">number_of_qubits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">number_of_povm_outcomes</span><span class="p">))</span>
+
+        <span class="n">corrected_frequencies</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distances_from_closest_probability_vector</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">statistics</span> <span class="ow">in</span> <span class="n">statistics_array</span><span class="p">:</span>
+            <span class="c1"># make sure statistics have proper format</span>
+            <span class="n">statistics</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">statistics</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">number_of_povm_outcomes</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Check if given statistics are normalized.</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">statistics</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">norm</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">9</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: Frequencies are not normalized. We normalize them. They looked like this:&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">statistics</span><span class="p">)</span>
+                <span class="n">statistics</span> <span class="o">=</span> <span class="n">statistics</span> <span class="o">/</span> <span class="n">norm</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qiskit_register_convention</span><span class="p">:</span>
+                <span class="c1"># reverse statistics for time of correction</span>
+                <span class="n">statistics</span> <span class="o">=</span> <span class="n">povmtools</span><span class="o">.</span><span class="n">reorder_probabilities</span><span class="p">(</span><span class="n">statistics</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_qubits</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="c1"># make sure statistics have proper format</span>
+                <span class="n">statistics</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">statistics</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">number_of_povm_outcomes</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># corrected statistics by multiplication via correction matrix</span>
+            <span class="n">corrected_statistics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">correction_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">statistics</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qiskit_register_convention</span><span class="p">:</span>
+                <span class="c1"># go back to standard convention</span>
+                <span class="n">corrected_statistics</span> <span class="o">=</span> <span class="n">povmtools</span><span class="o">.</span><span class="n">reorder_probabilities</span><span class="p">(</span><span class="n">corrected_statistics</span><span class="p">,</span>
+                                                                       <span class="nb">range</span><span class="p">(</span><span class="n">number_of_qubits</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="c1"># make sure statistics have proper format</span>
+                <span class="n">corrected_statistics</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">corrected_statistics</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">number_of_povm_outcomes</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">povmtools</span><span class="o">.</span><span class="n">is_valid_probability_vector</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">corrected_statistics</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])):</span>
+                <span class="n">corrected_frequencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">corrected_statistics</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distances_from_closest_probability_vector</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">closest_physical_statistics</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="n">povmtools</span><span class="o">.</span><span class="n">find_closest_prob_vector</span><span class="p">(</span><span class="n">corrected_statistics</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">number_of_povm_outcomes</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">corrected_frequencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">closest_physical_statistics</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">distances_from_closest_probability_vector</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">povmtools</span><span class="o">.</span><span class="n">calculate_total_variation_distance</span><span class="p">(</span><span class="n">corrected_statistics</span><span class="p">,</span> <span class="n">closest_physical_statistics</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">corrected_frequencies</span></div>
+
+<div class="viewcode-block" id="QDTErrorMitigator.apply_correction_to_qiskit_job"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator.apply_correction_to_qiskit_job">[docs]</a>    <span class="k">def</span> <span class="nf">apply_correction_to_qiskit_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">Result</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Description:</span>
+<span class="sd">            Given correction matrix and vector of relative frequencies, correct the statistics via multiplication by</span>
+<span class="sd">            correction_matrix.</span>
+
+<span class="sd">            In case of obtaining quasiprobability vector after such correction, it is possible to find closest physical</span>
+<span class="sd">            one (in Euclidean norm). Total Variation distance between quasi probability vector and closest physical one</span>
+<span class="sd">            is the upper bound for the correction error resulting from this unphysicality. See Ref. [1] for details. In</span>
+<span class="sd">            Ref.[1], such distance is denoted as \alpha.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            :param results: Qiskit job results for which statistics should be corrected.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Corrected statistics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Create new object to avoid conflicts</span>
+        <span class="n">statistics_array</span> <span class="o">=</span> <span class="n">get_frequencies_array_from_results</span><span class="p">([</span><span class="n">results</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_correction_to_statistics</span><span class="p">(</span><span class="n">statistics_array</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

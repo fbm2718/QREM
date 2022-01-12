@@ -1,0 +1,175 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QREM.PyMaLi.countTensor &#8212; QREM 0.56 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for QREM.PyMaLi.countTensor</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="count_tensor"><a class="viewcode-back" href="../../../QREM.PyMaLi.html#QREM.PyMaLi.countTensor.count_tensor">[docs]</a><span class="k">def</span> <span class="nf">count_tensor</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">tensor</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="c1"># ASSIGNING TERMINATION CONDITION AT THE BEGINNING</span>
+    <span class="c1"># Check if single vector was passed</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># Insert it&#39;s elements into target if so and return</span>
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">vectors</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">tensor</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tensor</span>
+
+    <span class="c1"># If there are more than one vectors For each vector take first vector out of the list</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">vectors</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># For each element in this vector</span>
+    <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">vec</span><span class="p">:</span>
+        <span class="c1"># IMPORTANT</span>
+        <span class="c1"># Copy before each recurrence call</span>
+        <span class="n">vs</span> <span class="o">=</span> <span class="n">vectors</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># Add this vectors i_index-th element list</span>
+        <span class="n">tensor</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="c1"># RECURRENCE CALL</span>
+        <span class="c1"># Call this method on reduced data set</span>
+        <span class="n">count_tensor</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">tensor</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c1"># Multiply each obtained element by element from vector vec</span>
+        <span class="c1"># Side note: I believe this could be performed in a more tricky way by putting el inside newly created list</span>
+        <span class="c1"># I will provide test it in another method.</span>
+        <span class="c1"># CAUTION -- following method is also use recurrence</span>
+        <span class="n">multiply_each_element</span><span class="p">(</span><span class="n">tensor</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">el</span><span class="p">)</span>
+
+    <span class="c1"># Return the tensor</span>
+    <span class="k">return</span> <span class="n">tensor</span></div>
+
+
+<div class="viewcode-block" id="multiply_each_element"><a class="viewcode-back" href="../../../QREM.PyMaLi.html#QREM.PyMaLi.countTensor.multiply_each_element">[docs]</a><span class="k">def</span> <span class="nf">multiply_each_element</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="c1"># ASSIGNING TERMINATION CONDITION AT THE BEGINNING</span>
+    <span class="c1"># IF tensor is empty just return (I believe this should not happen)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Check if first element is a list. If not, then just multiply elements</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tensor</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tensor</span><span class="p">)):</span>
+            <span class="n">tensor</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">multiplier</span><span class="p">,</span> <span class="n">tensor</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Otherwise call multiplying function for each element (list) of tensor</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">tensor</span><span class="p">:</span>
+        <span class="n">multiply_each_element</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="count_tensor_smartly"><a class="viewcode-back" href="../../../QREM.PyMaLi.html#QREM.PyMaLi.countTensor.count_tensor_smartly">[docs]</a><span class="k">def</span> <span class="nf">count_tensor_smartly</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">tensor</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+    <span class="c1"># ASSIGNING TERMINATION CONDITION AT THE BEGINNING</span>
+    <span class="c1"># Check if single vector was passed</span>
+    <span class="c1"># CAUTION: Note how tensor is initiated. That&#39;s the whole trick of the method.</span>
+    <span class="c1"># Compare with multiply each element approach in CountTensor</span>
+
+    <span class="n">resultant_tensor</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">multiplier</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Insert it&#39;s elements into target if so and return</span>
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">vectors</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">resultant_tensor</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">multiplier</span><span class="p">,</span> <span class="n">el</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">resultant_tensor</span>
+
+    <span class="c1"># If we&#39;re not multiplying information about multiplier should be deleted</span>
+    <span class="n">tensor</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="c1"># If there are more than one vectors For each vector take first vector out of the list</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">vectors</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># For each element in this vector</span>
+    <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">vec</span><span class="p">:</span>
+        <span class="c1"># IMPORTANT</span>
+        <span class="c1"># Copy before each recurrence call</span>
+        <span class="n">vs</span> <span class="o">=</span> <span class="n">vectors</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># Add this vectors i_index-th element list</span>
+        <span class="n">resultant_tensor</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">el</span><span class="p">])</span>
+        <span class="c1"># RECURRENCE CALL</span>
+        <span class="c1"># Call this method on reduced data set</span>
+        <span class="n">count_tensor_smartly</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">resultant_tensor</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Return the tensor</span>
+    <span class="k">return</span> <span class="n">tensor</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">QREM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

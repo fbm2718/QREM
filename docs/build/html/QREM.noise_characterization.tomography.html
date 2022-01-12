@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QREM.noise_characterization.tomography package &mdash; QREM 0.56 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> QREM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">QREM.noise_characterization.tomography package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_characterization.tomography.CircuitsCreatorDDOT">QREM.noise_characterization.tomography.CircuitsCreatorDDOT module</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_characterization.tomography.DDTMarginalsAnalyzer">QREM.noise_characterization.tomography.DDTMarginalsAnalyzer module</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_characterization.tomography.LabelsBaseDDOT">QREM.noise_characterization.tomography.LabelsBaseDDOT module</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_characterization.tomography.LabelsCreatorDDOT">QREM.noise_characterization.tomography.LabelsCreatorDDOT module</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_characterization.tomography.QuantumDetectorTomography">QREM.noise_characterization.tomography.QuantumDetectorTomography module</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_characterization.tomography">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QREM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>QREM.noise_characterization.tomography package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/QREM.noise_characterization.tomography.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qrem-noise-characterization-tomography-package">
+<h1>QREM.noise_characterization.tomography package<a class="headerlink" href="#qrem-noise-characterization-tomography-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-QREM.noise_characterization.tomography.CircuitsCreatorDDOT">
+<span id="qrem-noise-characterization-tomography-circuitscreatorddot-module"></span><h2>QREM.noise_characterization.tomography.CircuitsCreatorDDOT module<a class="headerlink" href="#module-QREM.noise_characterization.tomography.CircuitsCreatorDDOT" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+“Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography”,
+Quantum 4, 257 (2020)</p>
+<p>[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
+“Modeling and mitigation of cross-talk effects in readout noise
+with applications to the Quantum Approximate Optimization Algorithm”,
+Quantum 5, 464 (2021).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.CircuitsCreatorDDOT.CircuitsCreatorDDOT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.noise_characterization.tomography.CircuitsCreatorDDOT.</span></span><span class="sig-name descname"><span class="pre">CircuitsCreatorDDOT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SDK_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circuits_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_repetitions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantum_register_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classical_register_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_barriers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/CircuitsCreatorDDOT.html#CircuitsCreatorDDOT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.CircuitsCreatorDDOT.CircuitsCreatorDDOT" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This is general class for creating quantum circuits implementing Diagonal Detector Overlapping
+Tomography circuits (DDOT).</p>
+<p>NOTE: please note that this class’ is used only to create QuantumCircuit objects that can be passed
+to execution on some backend. It is assumed that specific labels describing circuits (see below)
+already have been generated.</p>
+<p>MAIN PARAMETERS:
+:param SDK_name:
+possible values:
+1. ‘qiskit’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qubit_indices</strong> – one always needs to provide list of qubit indices on which experiments
+should be performed (this does not need to be the whole device)</p></li>
+<li><p><strong>circuits_labels</strong> – main argument to the class, this is list of symbolic circuits description</p></li>
+</ul>
+</dd>
+</dl>
+<p>Two formats are accepted:
+1. List[List[int]] - integer indicates gate to be implemented on</p>
+<blockquote>
+<div><p>corresponding qubit.
+For example: circuit_labels = [[0,1,0],</p>
+<blockquote>
+<div><p>[0,0,1]]</p>
+</div></blockquote>
+<p>will implement circuits:
+gate “identity” on qubit_indices[0],
+gate “X” on qubit_indices[1],
+gate “identity” on qubit_indices[2]</p>
+<p>gate “identity” on qubit_indices[0],
+gate “identity” on qubit_indices[1],
+gate “X” on qubit_indices[2]</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><dl class="simple">
+<dt>Dict[str,int] - dictionary where each KEY is string of integers describing</dt><dd><p>a circuit (in manner analogous to described above),
+and VALUE is the number of times that this circuit should be implemented</p>
+</dd>
+</dl>
+</li>
+</ol>
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.CircuitsCreatorDDOT.CircuitsCreatorDDOT.circuits_labels_dictionary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">circuits_labels_dictionary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.noise_characterization.tomography.CircuitsCreatorDDOT.CircuitsCreatorDDOT.circuits_labels_dictionary" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.CircuitsCreatorDDOT.CircuitsCreatorDDOT.get_circuits">
+<span class="sig-name descname"><span class="pre">get_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_measurements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/CircuitsCreatorDDOT.html#CircuitsCreatorDDOT.get_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.CircuitsCreatorDDOT.CircuitsCreatorDDOT.get_circuits" title="Permalink to this definition"></a></dt>
+<dd><p>Returns quantum circuits as a list.</p>
+<p>Circuits are later identified by names for which we use the following convention:</p>
+<p>circuit_name = “experiment name” + “-” + “circuit label”+
+“no”+ “integer identifier for multiple implementations of the same circuit”</p>
+<p>for example the circuit can have name:
+“DDOT-010-no3”</p>
+<p>which means that this experiment is Diagonal Detector Overlapping Tomography (DDOT),
+the circuit implements state “010” (i.e., gates iden, X, iden on qubits 0,1,2), and
+in the whole circuits sets this is the 4th (we start counting from 0) circuit that implements
+that particular state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>add_measurements</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-QREM.noise_characterization.tomography.DDTMarginalsAnalyzer">
+<span id="qrem-noise-characterization-tomography-ddtmarginalsanalyzer-module"></span><h2>QREM.noise_characterization.tomography.DDTMarginalsAnalyzer module<a class="headerlink" href="#module-QREM.noise_characterization.tomography.DDTMarginalsAnalyzer" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+“Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography”,
+Quantum 4, 257 (2020)</p>
+<p>[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
+“Modeling and mitigation of cross-talk effects in readout noise
+with applications to the Quantum Approximate Optimization Algorithm”,
+Quantum 5, 464 (2021).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.</span></span><span class="sig-name descname"><span class="pre">DDTMarginalsAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dictionary_ddot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bitstrings_right_to_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginals_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_matrices_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/DDTMarginalsAnalyzer.html#DDTMarginalsAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase" title="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase</span></code></a></p>
+<p>Class that handles results of Diagonal Detector Tomography.
+Main functionalities allow to calculate noise matrices on subsets_list of qubits.
+This includes averaged noise matrices, i_index.e., averaged over states off all other qubits,
+as well as state-dependent, i_index.e., conditioned on the particular
+input classical state of some other qubits.</p>
+<p>In this class, and all its children, we use the following convention
+for storing marginal noise matrices:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>noise_matrices_dictionary</strong> – nested dictionary with following structure:</p>
+</dd>
+</dl>
+<p>noise_matrices_dictionary[qubits_subset_string][‘averaged’]
+= average noise matrix on qubits subset
+and
+noise_matrices_dictionary[qubits_subset_string][other_qubits_subset_string][input_state_bitstring]
+= noise matrix on qubits subset depending on input state of other qubits.</p>
+<p>where:
+- qubits_subset_string - is string labeling qubits subset (e.g., ‘q1q2q15…’)
+- other_qubits_subset_string - string labeling other subset
+- input_state_bitstring - bitstring labeling</p>
+<blockquote>
+<div><p>input state of qubits in other_qubits_subset_string</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.average_noise_matrices_over_some_qubits">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">average_noise_matrices_over_some_qubits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrices_cluster</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_neighbors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubits_to_be_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/DDTMarginalsAnalyzer.html#DDTMarginalsAnalyzer.average_noise_matrices_over_some_qubits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.average_noise_matrices_over_some_qubits" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Given dictionary of noise matrices, average them over some qubits.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matrices_cluster</strong> – dictionary for which KEY is classical INPUT state of neighbors,
+and VALUE is potentially_stochastic_matrix noise matrix</p></li>
+<li><p><strong>all_neighbors</strong> – list of neighbors of given cluster</p></li>
+<li><p><strong>qubits_to_be_left</strong> – qubits which we are interested in and we do not average over them</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dictionary of noise matrices
+depending on the state of neighbors MINUS qubits_to_be_averaged_over</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.compute_subset_noise_matrices_averaged">
+<span class="sig-name descname"><span class="pre">compute_subset_noise_matrices_averaged</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subsets_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/DDTMarginalsAnalyzer.html#DDTMarginalsAnalyzer.compute_subset_noise_matrices_averaged"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.compute_subset_noise_matrices_averaged" title="Permalink to this definition"></a></dt>
+<dd><p>Description:
+computes averaged (over all other qubits) noise matrices on subsets_list of qubits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subsets_list</strong> – subsets_list of qubit indices</p></li>
+<li><p><strong>show_progress_bar</strong> – whether to show animated progress bar. requires tqdm package</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.get_noise_matrix_dependent">
+<span class="sig-name descname"><span class="pre">get_noise_matrix_dependent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits_of_interest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbors_of_interest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/DDTMarginalsAnalyzer.html#DDTMarginalsAnalyzer.get_noise_matrix_dependent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.get_noise_matrix_dependent" title="Permalink to this definition"></a></dt>
+<dd><p>Description:
+like self._compute_noise_matrix_dependent
+but checks whether matrices were already calculated to prevent multiple computations of the
+same matrices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qubits_of_interest</strong> – labels of qubits in marginal  we are interested in</p></li>
+<li><p><strong>neighbors_of_interest</strong> – labels of qubits that affect noise matrix on qubits_of_interest</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return conditional_noise_matrices_dictionary</dt>
+<dd class="field-even"><p></p></dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.get_noise_matrix_from_counts_dict">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_noise_matrix_from_counts_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.10)"><span class="pre">collections.defaultdict</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/DDTMarginalsAnalyzer.html#DDTMarginalsAnalyzer.get_noise_matrix_from_counts_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.get_noise_matrix_from_counts_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Return noise matrix from counts dictionary.
+Assuming that the results are given only for qubits of interest.
+:param results_dictionary: dictionary with experiments of the form:</p>
+<p>results_dictionary[input_state_bitstring] = probability_distribution</p>
+<p>where:
+- input_state_bitstring is bitstring denoting classical input state
+- probability_distribution - estimated vector of probabilities for that input state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>noise_matrix: the array representing noise on qubits</p>
+</dd>
+</dl>
+<p>on which the experiments were performed</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.noise_matrices_dictionary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">noise_matrices_dictionary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.noise_characterization.tomography.DDTMarginalsAnalyzer.DDTMarginalsAnalyzer.noise_matrices_dictionary" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-QREM.noise_characterization.tomography.LabelsBaseDDOT">
+<span id="qrem-noise-characterization-tomography-labelsbaseddot-module"></span><h2>QREM.noise_characterization.tomography.LabelsBaseDDOT module<a class="headerlink" href="#module-QREM.noise_characterization.tomography.LabelsBaseDDOT" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+“Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography”,
+Quantum 4, 257 (2020)</p>
+<p>[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
+“Modeling and mitigation of cross-talk effects in readout noise 
+with applications to the Quantum Approximate Optimization Algorithm”,
+Quantum 5, 464 (2021).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.noise_characterization.tomography.LabelsBaseDDOT.</span></span><span class="sig-name descname"><span class="pre">LabelsBaseDDOT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximal_circuits_amount</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress_bars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsBaseDDOT.html#LabelsBaseDDOT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.add_circuits">
+<span class="sig-name descname"><span class="pre">add_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsBaseDDOT.html#LabelsBaseDDOT.add_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.add_circuits" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.add_random_circuits">
+<span class="sig-name descname"><span class="pre">add_random_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_circuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsBaseDDOT.html#LabelsBaseDDOT.add_random_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.add_random_circuits" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.circuits_list">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">circuits_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.circuits_list" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.get_qubits_key">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_qubits_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsBaseDDOT.html#LabelsBaseDDOT.get_qubits_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.get_qubits_key" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.get_random_circuit">
+<span class="sig-name descname"><span class="pre">get_random_circuit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsBaseDDOT.html#LabelsBaseDDOT.get_random_circuit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.get_random_circuit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.get_random_circuit_with_fixed_state_of_some_qubits">
+<span class="sig-name descname"><span class="pre">get_random_circuit_with_fixed_state_of_some_qubits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fixed_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsBaseDDOT.html#LabelsBaseDDOT.get_random_circuit_with_fixed_state_of_some_qubits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.get_random_circuit_with_fixed_state_of_some_qubits" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fixed_states</strong> – dictionary where each KEY is index of qubit,
+and VALUE denotes qubit’s state (0 or 1)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.get_random_circuits">
+<span class="sig-name descname"><span class="pre">get_random_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_circuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsBaseDDOT.html#LabelsBaseDDOT.get_random_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.get_random_circuits" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.subsets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subsets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT.subsets" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-QREM.noise_characterization.tomography.LabelsCreatorDDOT">
+<span id="qrem-noise-characterization-tomography-labelscreatorddot-module"></span><h2>QREM.noise_characterization.tomography.LabelsCreatorDDOT module<a class="headerlink" href="#module-QREM.noise_characterization.tomography.LabelsCreatorDDOT" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+“Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography”,
+Quantum 4, 257 (2020)</p>
+<p>[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
+“Modeling and mitigation of cross-talk effects in readout noise
+with applications to the Quantum Approximate Optimization Algorithm”,
+Quantum 5, 464 (2021).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.noise_characterization.tomography.LabelsCreatorDDOT.</span></span><span class="sig-name descname"><span class="pre">LabelsCreatorDDOT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximal_circuits_amount</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsets_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsets_locality</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress_bars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsCreatorDDOT.html#LabelsCreatorDDOT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT" title="QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT"><code class="xref py py-class docutils literal notranslate"><span class="pre">QREM.noise_characterization.tomography.LabelsBaseDDOT.LabelsBaseDDOT</span></code></a></p>
+<p>Class for creating symbolic description of Diagonal Detector Overlapping Tomography (DDOT)
+circuits.</p>
+<p>Description of a single circuit is simply a bitstring denoting classical input state.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.add_dictionary_subsets_symbols_counting_template">
+<span class="sig-name descname"><span class="pre">add_dictionary_subsets_symbols_counting_template</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsCreatorDDOT.html#LabelsCreatorDDOT.add_dictionary_subsets_symbols_counting_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.add_dictionary_subsets_symbols_counting_template" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.calculate_properties_of_circuits">
+<span class="sig-name descname"><span class="pre">calculate_properties_of_circuits</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsCreatorDDOT.html#LabelsCreatorDDOT.calculate_properties_of_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.calculate_properties_of_circuits" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.circuits_list">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">circuits_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.circuits_list" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.circuits_properties_dictionary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">circuits_properties_dictionary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.circuits_properties_dictionary" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.compute_perfect_collection">
+<span class="sig-name descname"><span class="pre">compute_perfect_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bruteforce_randomized'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsCreatorDDOT.html#LabelsCreatorDDOT.compute_perfect_collection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.compute_perfect_collection" title="Permalink to this definition"></a></dt>
+<dd><p>Find perfect collection of overlapping circuits.
+“Perfect” means that for each subset of qubits self._subsets_list[i],</p>
+<blockquote>
+<div><p>each symbol out of self._number_of_symbols^self._subsets_list[i],
+appears in the collection at least once.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>method_name</strong> – </p>
+</dd>
+</dl>
+<p>possible values:</p>
+<ol class="arabic simple">
+<li><p>‘bruteforce’ - see self._compute_perfect_collection_bruteforce</p></li>
+<li><p>‘bruteforce_randomized’ - see self._compute_perfect_collection_bruteforce_randomized</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>method_kwargs</strong> – kwargs for chosen method, see corresponding methods’ descriptions</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.dictionary_symbols_counting">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dictionary_symbols_counting</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.dictionary_symbols_counting" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.get_absent_symbols_amount">
+<span class="sig-name descname"><span class="pre">get_absent_symbols_amount</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsCreatorDDOT.html#LabelsCreatorDDOT.get_absent_symbols_amount"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.get_absent_symbols_amount" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.reset_everything">
+<span class="sig-name descname"><span class="pre">reset_everything</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsCreatorDDOT.html#LabelsCreatorDDOT.reset_everything"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.reset_everything" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.update_dictionary_subsets_symbols_counting">
+<span class="sig-name descname"><span class="pre">update_dictionary_subsets_symbols_counting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuits_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count_added_subcircuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/LabelsCreatorDDOT.html#LabelsCreatorDDOT.update_dictionary_subsets_symbols_counting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.update_dictionary_subsets_symbols_counting" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-QREM.noise_characterization.tomography.QuantumDetectorTomography">
+<span id="qrem-noise-characterization-tomography-quantumdetectortomography-module"></span><h2>QREM.noise_characterization.tomography.QuantumDetectorTomography module<a class="headerlink" href="#module-QREM.noise_characterization.tomography.QuantumDetectorTomography" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+“Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography”,
+Quantum 4, 257 (2020)</p>
+<p>[1] Z. Hradil, J. Řeháček, J. Fiurášek, and M. Ježek, “3 maximum-likelihood methods in quantum mechanics,” in Quantum
+State Estimation, edited by M. Paris and J. Řeháček (Springer Berlin Heidelberg, Berlin, Heidelberg, 2004) pp. 59–112.
+[2] J. Fiurášek, Physical Review arrray_to_print 64, 024102 (2001), arXiv:quant-ph/0101027 [quant-ph].</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.QuantumDetectorTomography.QDTCalibrationSetup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.noise_characterization.tomography.QuantumDetectorTomography.</span></span><span class="sig-name descname"><span class="pre">QDTCalibrationSetup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">probe_kets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.array</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/QuantumDetectorTomography.html#QDTCalibrationSetup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.QuantumDetectorTomography.QDTCalibrationSetup" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class contains information required by DetectorTomographyFitter object to properly calculate
+maximum-likelihood POVM. This class shouldn’t have any accessible methods and should only store and transfer
+data to the DetectorTomographyFitter class instances.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.QuantumDetectorTomography.QDTCalibrationSetup.from_qiskit_results">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_qiskit_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">qiskit.result.result.Result</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probe_kets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.array</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/QuantumDetectorTomography.html#QDTCalibrationSetup.from_qiskit_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.QuantumDetectorTomography.QDTCalibrationSetup.from_qiskit_results" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>This method_name generates Calibration setup objects directly from qiskit job results and probe kets used
+to generate circuits for these jobs_list. This method_name should be interpreted as sort of additional constructor
+for qiskit users.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>results_list</strong> – List of qiskit jobs_list results. In case of single job result it should still be potentially_stochastic_matrix list.</p></li>
+<li><p><strong>probe_kets</strong> – Prove kets (in form of list of np.arrays) used to generate calibration circuits.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Instance of QDT calibration setup from given job.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.QuantumDetectorTomography.QDTFitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.noise_characterization.tomography.QuantumDetectorTomography.</span></span><span class="sig-name descname"><span class="pre">QDTFitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_convergence_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/QuantumDetectorTomography.html#QDTFitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.QuantumDetectorTomography.QDTFitter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class is meant to resemble qiskit’s state tomography and process tomography fitters and to calculate the
+maximum likelihood povm estimator describing potentially_stochastic_matrix detector basing on QDT job results and used probe states.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.QuantumDetectorTomography.QDTFitter.get_maximum_likelihood_povm_estimator">
+<span class="sig-name descname"><span class="pre">get_maximum_likelihood_povm_estimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibration_setup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#QREM.noise_characterization.tomography.QuantumDetectorTomography.QDTCalibrationSetup" title="QREM.noise_characterization.tomography.QuantumDetectorTomography.QDTCalibrationSetup"><span class="pre">QREM.noise_characterization.tomography.QuantumDetectorTomography.QDTCalibrationSetup</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/QuantumDetectorTomography.html#QDTFitter.get_maximum_likelihood_povm_estimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.QuantumDetectorTomography.QDTFitter.get_maximum_likelihood_povm_estimator" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Description:</dt><dd><p>Given results of Quantum Detector Tomography experiments and list of probe states, return the Maximum
+Likelihood estimation of POVM describing potentially_stochastic_matrix detector. Uses recursive method_name from [1]. See also [2].</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param calibration_setup</dt>
+<dd class="field-odd"><p>QDTCalibrationSetup object that consists data upon which maximum likelihood POVM</p>
+</dd>
+</dl>
+<p>estimator should be calculated.</p>
+</dd>
+<dt>Returns</dt><dd><p>Maximum likelihood estimator of POVM describing potentially_stochastic_matrix detector.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.QuantumDetectorTomography.gtc_matrix_product_counting_function">
+<span class="sig-prename descclassname"><span class="pre">QREM.noise_characterization.tomography.QuantumDetectorTomography.</span></span><span class="sig-name descname"><span class="pre">gtc_matrix_product_counting_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/QuantumDetectorTomography.html#gtc_matrix_product_counting_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.QuantumDetectorTomography.gtc_matrix_product_counting_function" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.QuantumDetectorTomography.gtc_tensor_counting_function">
+<span class="sig-prename descclassname"><span class="pre">QREM.noise_characterization.tomography.QuantumDetectorTomography.</span></span><span class="sig-name descname"><span class="pre">gtc_tensor_counting_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/QuantumDetectorTomography.html#gtc_tensor_counting_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.QuantumDetectorTomography.gtc_tensor_counting_function" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.noise_characterization.tomography.QuantumDetectorTomography.join_povms">
+<span class="sig-prename descclassname"><span class="pre">QREM.noise_characterization.tomography.QuantumDetectorTomography.</span></span><span class="sig-name descname"><span class="pre">join_povms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">povms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_indices_lists</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_outcomes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/noise_characterization/tomography/QuantumDetectorTomography.html#join_povms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_characterization.tomography.QuantumDetectorTomography.join_povms" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>Generates potentially_stochastic_matrix POVM from given list of POVMs and qubit indices.</p>
+</dd>
+<dt>Parameter:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param povms</dt>
+<dd class="field-odd"><p>List of POVMs corresponding to qubits indices.</p>
+</dd>
+<dt class="field-even">param qubit_indices_lists</dt>
+<dd class="field-even"><p>Indices of qubits for which POVMs were calculated.</p>
+</dd>
+<dt class="field-odd">param sort_outcomes</dt>
+<dd class="field-odd"><p>indicates whether to sort effects of POVM in such that they correspond
+to standard classical register – WORKS ONLY FOR d-outcome measurements!</p>
+</dd>
+</dl>
+</dd>
+<dt>Return:</dt><dd><p>POVM describing whole detector.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-QREM.noise_characterization.tomography">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-QREM.noise_characterization.tomography" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

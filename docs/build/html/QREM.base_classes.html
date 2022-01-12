@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QREM.base_classes package &mdash; QREM 0.56 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> QREM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">QREM.base_classes package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-QREM.base_classes.marginals_analyzer_base">QREM.base_classes.marginals_analyzer_base module</a></li>
+<li><a class="reference internal" href="#module-QREM.base_classes.marginals_analyzer_interface">QREM.base_classes.marginals_analyzer_interface module</a></li>
+<li><a class="reference internal" href="#module-QREM.base_classes">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QREM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>QREM.base_classes package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/QREM.base_classes.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qrem-base-classes-package">
+<h1>QREM.base_classes package<a class="headerlink" href="#qrem-base-classes-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-QREM.base_classes.marginals_analyzer_base">
+<span id="qrem-base-classes-marginals-analyzer-base-module"></span><h2>QREM.base_classes.marginals_analyzer_base module<a class="headerlink" href="#module-QREM.base_classes.marginals_analyzer_base" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+“Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography”,
+Quantum 4, 257 (2020)</p>
+<p>[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
+“Modeling and mitigation of cross-talk effects in readout noise
+with applications to the Quantum Approximate Optimization Algorithm”,
+Quantum 5, 464 (2021).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.base_classes.marginals_analyzer_base.</span></span><span class="sig-name descname"><span class="pre">MarginalsAnalyzerBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bitstrings_right_to_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginals_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_base.html#MarginalsAnalyzerBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface" title="QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface</span></code></a></p>
+<p>This is base class for all the classes that will operate on marginal probability distributions.
+Methods of this class allow to calculate marginal distributions from experimental results.</p>
+<p>In this class and its children, we use the following convention for:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Generic experimental results:</p></li>
+</ol>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>results_dictionary</strong> – Nested dictionary with following structure:</p>
+</dd>
+</dl>
+<p>results_dictionary[label_of_experiment][bitstring_outcome] = number_of_occurrences</p>
+<dl>
+<dt>where:</dt><dd><p>-label_of_experiment is arbitrary label for particular experiment,
+-bitstring_outcome is label for measurement outcome,
+-number_of_occurrences is number of times that bitstring_outcome was recorded</p>
+<p>Hence top-level key labels particular experiment
+(one can think about quantum circuit implementation)
+and its value is another dictionary with results of given experiment in the form
+of dictionary of measurement outcomes</p>
+</dd>
+</dl>
+<ol class="arabic" start="2">
+<li><dl>
+<dt>Results represented as marginal probability distributions:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param marginals_dictionary</dt>
+<dd class="field-odd"><p>Nested dictionary with the following structure:</p>
+</dd>
+</dl>
+<p>marginals_dictionary[label_of_experiment][label_of_subset] = marginal_probability_vector</p>
+<dl class="simple">
+<dt>where:</dt><dd><p>-label_of_experiment is the same as in results_dictionary and it labels results from which
+marginal distributions were calculated
+-label_of_subset is potentially_stochastic_matrix label for qubits subset for which marginals_dictionary were calculated.
+We use convention that such label if of the form “q5q8q12…” etc., hence it is bitstring of
+qubits labels starting from “q”.
+-marginal_probability_vector marginal distribution stored as vector</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+</ol>
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.compute_all_marginals">
+<span class="sig-name descname"><span class="pre">compute_all_marginals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subsets_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_base.html#MarginalsAnalyzerBase.compute_all_marginals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.compute_all_marginals" title="Permalink to this definition"></a></dt>
+<dd><p>Implements self.compute_marginals for all experimental keys.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subsets_list</strong> – list of subsets_list of qubits for which marginals_dictionary should be calculated</p></li>
+<li><p><strong>show_progress_bar</strong> – if True, shows progress bar. Requires “tqdm” package</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.compute_marginals">
+<span class="sig-name descname"><span class="pre">compute_marginals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsets_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_base.html#MarginalsAnalyzerBase.compute_marginals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.compute_marginals" title="Permalink to this definition"></a></dt>
+<dd><p>Return dictionary of marginal probability distributions from counts dictionary
+:param experiment_keys: list of keys that label experiments for which marginals_dictionary should be taken
+:param subsets_list: list of subsets_list of qubits for which marginals_dictionary should be calculated</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_averaged_marginal_for_subset">
+<span class="sig-name descname"><span class="pre">get_averaged_marginal_for_subset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_base.html#MarginalsAnalyzerBase.get_averaged_marginal_for_subset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_averaged_marginal_for_subset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_marginal_from_probability_distribution">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_marginal_from_probability_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_probability_distribution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits_of_interest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">register_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_base.html#MarginalsAnalyzerBase.get_marginal_from_probability_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_marginal_from_probability_distribution" title="Permalink to this definition"></a></dt>
+<dd><p>Return marginal distribution from vector of global distribution
+:param global_probability_distribution: distribution on all bits
+:param bits_of_interest: bits we are interested in (so we average over other bits)</p>
+<blockquote>
+<div><p>Assuming that qubits are labeled
+from 0 to log2(len(global_probability_distribution))</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>register_names</strong> – bitstrings register, default is
+‘00…00’, ‘000…01’, ‘000…10’, …, etc.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>marginal_distribution : marginal probability distribution</p>
+</dd>
+</dl>
+<p>NOTE: we identify bits with qubits in the variables bitstring_names</p>
+<p>#TODO FBM: do some speed tests on some details of those solutions</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_marginals">
+<span class="sig-name descname"><span class="pre">get_marginals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsets_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_base.html#MarginalsAnalyzerBase.get_marginals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_marginals" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Like self.compute_marginals but first checks if the marginals_dictionary are already computed</dt><dd><p>and it returns them.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>experiment_key</strong> – key that labels experiment from which marginals_dictionary should be taken</p></li>
+<li><p><strong>subsets_list</strong> – list of subsets_list of qubits for which marginals_dictionary should be calculated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>marginals_dictionary:
+dictionary in which KEY is label for experiment, and VALUE is dictionary with KEYS
+being qubit subset identifiers (in potentially_stochastic_matrix format “q1q5q23” etc.), and VALUES being marginal
+probability vectors (see __init__ description)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_qubit_indices_from_string">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_qubit_indices_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_base.html#MarginalsAnalyzerBase.get_qubit_indices_from_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_qubit_indices_from_string" title="Permalink to this definition"></a></dt>
+<dd><p>Return list of qubit indices from the string of the form “q0q1q22q31”
+:param qubits_string: string which has the form of “q” followed by qubit index
+:param with_q: specify whether returned indices should be in form of string with letter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of qubit indices:</p>
+</dd>
+</dl>
+<p>depending on value of parameter “with_q” the mapping will be one of the following:
+if with_q:</p>
+<blockquote>
+<div><p>‘q1q5q13’ -&gt; [‘q1’,’q5’,’q13’]</p>
+</div></blockquote>
+<dl class="simple">
+<dt>else:</dt><dd><p>‘q1q5q13’ -&gt; [1,5,13]</p>
+</dd>
+</dl>
+<p>NOTE: this function is “dual” to self.get_qubits_key.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_qubits_key">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_qubits_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_base.html#MarginalsAnalyzerBase.get_qubits_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.get_qubits_key" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>from subset of qubit indices get the string that labels this subset</dt><dd><p>using convention ‘q5q6q12…’ etc.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_of_qubits</strong> – labels of qubits</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>string label for qubits</p>
+<p>NOTE: this function is “dual” to self.get_qubit_indices_from_string.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.marginals_dictionary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marginals_dictionary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.marginals_dictionary" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.marginals_dictionary_update">
+<span class="sig-name descname"><span class="pre">marginals_dictionary_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">marginals_dictionary_new</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_base.html#MarginalsAnalyzerBase.marginals_dictionary_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.marginals_dictionary_update" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.normalize_marginals">
+<span class="sig-name descname"><span class="pre">normalize_marginals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiments_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginals_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_base.html#MarginalsAnalyzerBase.normalize_marginals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.normalize_marginals" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Go through marginals_dictionary stored as class’ property</dt><dd><p>and normalize marginal distributions</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>experiments_keys</strong> – labels for experiments</p></li>
+<li><p><strong>marginals_keys</strong> – labels for qubit subsets_list</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.results_dictionary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">results_dictionary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.results_dictionary" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.results_dictionary_update">
+<span class="sig-name descname"><span class="pre">results_dictionary_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dictionary_new</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_base.html#MarginalsAnalyzerBase.results_dictionary_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase.results_dictionary_update" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-QREM.base_classes.marginals_analyzer_interface">
+<span id="qrem-base-classes-marginals-analyzer-interface-module"></span><h2>QREM.base_classes.marginals_analyzer_interface module<a class="headerlink" href="#module-QREM.base_classes.marginals_analyzer_interface" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+“Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography”,
+Quantum 4, 257 (2020)</p>
+<p>[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
+“Modeling and mitigation of cross-talk effects in readout noise
+with applications to the Quantum Approximate Optimization Algorithm”,
+Quantum 5, 464 (2021).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.base_classes.marginals_analyzer_interface.</span></span><span class="sig-name descname"><span class="pre">MarginalsAnalyzerInterface</span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_interface.html#MarginalsAnalyzerInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<p>This is interface for classes that will analyze marginal probability distributions.
+It requires those child classes to have basic functionalities that should be included.
+for analyzing marginals_dictionary.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface.compute_marginals">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_marginals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_interface.html#MarginalsAnalyzerInterface.compute_marginals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface.compute_marginals" title="Permalink to this definition"></a></dt>
+<dd><p>Computes marginals_dictionary for input subsets_list of qubits</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface.marginals_dictionary">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marginals_dictionary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface.marginals_dictionary" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface.marginals_dictionary_update">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marginals_dictionary_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">marginals_dictionary_new</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_interface.html#MarginalsAnalyzerInterface.marginals_dictionary_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface.marginals_dictionary_update" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface.results_dictionary">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">results_dictionary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface.results_dictionary" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface.results_dictionary_update">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">results_dictionary_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dictionary_new</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/QREM/base_classes/marginals_analyzer_interface.html#MarginalsAnalyzerInterface.results_dictionary_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.base_classes.marginals_analyzer_interface.MarginalsAnalyzerInterface.results_dictionary_update" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-QREM.base_classes">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-QREM.base_classes" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

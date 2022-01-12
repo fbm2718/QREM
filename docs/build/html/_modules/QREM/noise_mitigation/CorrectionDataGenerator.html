@@ -1,0 +1,448 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QREM.noise_mitigation.CorrectionDataGenerator &#8212; QREM 0.56 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for QREM.noise_mitigation.CorrectionDataGenerator</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki</span>
+<span class="sd">@contact: filip.b.maciejewski@gmail.com</span>
+
+<span class="sd">REFERENCES:</span>
+<span class="sd">[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="sd">&quot;Mitigation of readout noise in near-term quantum devices</span>
+<span class="sd">by classical post-processing based on detector tomography&quot;,</span>
+<span class="sd">Quantum 4, 257 (2020)</span>
+
+<span class="sd">[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="sd">&quot;Modeling and mitigation of cross-talk effects in readout noise</span>
+<span class="sd">with applications to the Quantum Approximate Optimization Algorithm&quot;,</span>
+<span class="sd">Quantum 5, 464 (2021).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">QREM.noise_characterization.modeling.NoiseModelGenerator</span> <span class="k">import</span> <span class="n">NoiseModelGenerator</span>
+<span class="kn">from</span> <span class="nn">QREM.noise_characterization.modeling.GlobalNoiseMatrixCreator</span> <span class="k">import</span> <span class="n">GlobalNoiseMatrixCreator</span>
+<span class="kn">from</span> <span class="nn">QREM.functions_qrem</span> <span class="k">import</span> <span class="n">povmtools</span><span class="p">,</span> <span class="n">ancillary_functions</span> <span class="k">as</span> <span class="n">anf</span>
+
+
+<div class="viewcode-block" id="CorrectionDataGenerator"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.CorrectionDataGenerator.CorrectionDataGenerator">[docs]</a><span class="k">class</span> <span class="nc">CorrectionDataGenerator</span><span class="p">(</span><span class="n">NoiseModelGenerator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main class used to calculate data needed for noise-mitigation on marginals_dictionary, based on provided</span>
+<span class="sd">        noise model.</span>
+
+<span class="sd">        NOTE: Currently it handles properly only two-qubit marginals_dictionary (e.g., experiments involving</span>
+<span class="sd">              estimation of 2-local Hamiltonians)</span>
+
+<span class="sd">        The correction data consists of the following:</span>
+<span class="sd">        - :param: &#39;correction_indices&#39; - for each marginal of interest (e.g., &#39;q0q1&#39;), specify label for</span>
+<span class="sd">                                 marginal that needs to be corrected and then coarse-grained in order</span>
+<span class="sd">                                 to perform noise-mitigation. For example, if q0 is strongly correlated</span>
+<span class="sd">                                 with q5 (i.e., they are in the same cluster), it is advisable to first</span>
+<span class="sd">                                 perform noise mitigation on marginal &#39;q0q1q5&#39;, and then coarse-grain</span>
+<span class="sd">                                 it to obtain &#39;q0q1&#39;.</span>
+
+<span class="sd">                                 The format we use here is dictionary where KEY is label for marginal</span>
+<span class="sd">                                 of interest, and VALUE is label for marginal that needs to be</span>
+<span class="sd">                                 calculated first.</span>
+<span class="sd">                                 So the entry for example above would look like:</span>
+<span class="sd">                                 correction_indices[&#39;q0q1&#39;] = &#39;q0q1q5&#39;</span>
+
+
+<span class="sd">        - :param: &#39;noise_matrices&#39; - the noise matrices representing effective noise matrix acting on marginals_dictionary</span>
+<span class="sd">                            specified by values of correction_indices dictionary</span>
+
+<span class="sd">                            This is dictionary where KEY is subset label and VALUE is noise matrix</span>
+
+
+<span class="sd">        - :param: &#39;correction_matrices&#39; - inverses of noise_matrices, convention used is the same</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO FBM: generalize for more than two-qubit subsets_list</span>
+    <span class="c1"># TODO FBM: add mitigation errors</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">results_dictionary_ddt</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+                 <span class="n">bitstrings_right_to_left</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                 <span class="n">number_of_qubits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">marginals_dictionary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">clusters_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">neighborhoods</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">noise_matrices_dictionary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
+                     <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]]]</span> <span class="o">=</span> <span class="kc">None</span>
+                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">results_dictionary_ddt</span><span class="p">,</span>
+                         <span class="n">bitstrings_right_to_left</span><span class="p">,</span>
+                         <span class="n">number_of_qubits</span><span class="p">,</span>
+                         <span class="n">marginals_dictionary</span><span class="p">,</span>
+                         <span class="n">noise_matrices_dictionary</span><span class="p">,</span>
+                         <span class="n">clusters_list</span><span class="p">,</span>
+                         <span class="n">neighborhoods</span>
+                         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_number_of_qubits</span> <span class="o">=</span> <span class="n">number_of_qubits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qubit_indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_qubits</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">clusters_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">clusters_lists_dictionary</span><span class="p">,</span> <span class="n">clusters_labels_dictionary</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">clusters_lists_dictionary</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qi</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qubit_indices</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">cluster</span><span class="p">:</span>
+                    <span class="n">clusters_lists_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qi</span><span class="p">]</span> <span class="o">=</span> <span class="n">cluster</span>
+
+            <span class="n">clusters_labels_dictionary</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qi</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">clusters_lists_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qi</span><span class="p">])</span> <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_qubit_indices</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_correction_matrices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mitigation_errors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_correction_indices</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_lists_dictionary</span> <span class="o">=</span> <span class="n">clusters_lists_dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_labels_dictionary</span> <span class="o">=</span> <span class="n">clusters_labels_dictionary</span>
+
+    <span class="k">def</span> <span class="nf">_set_clusters_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function that updates class&#39; properties needed (later) to calculate correction data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">clusters_lists_dictionary</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qi</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qubit_indices</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">cluster</span><span class="p">:</span>
+                <span class="n">clusters_lists_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qi</span><span class="p">]</span> <span class="o">=</span> <span class="n">cluster</span>
+        <span class="n">clusters_labels_dictionary</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qi</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">clusters_lists_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qi</span><span class="p">])</span> <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qubit_indices</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_lists_dictionary</span> <span class="o">=</span> <span class="n">clusters_lists_dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_labels_dictionary</span> <span class="o">=</span> <span class="n">clusters_labels_dictionary</span>
+
+    <span class="k">def</span> <span class="nf">_construct_local_full_noise_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                          <span class="n">qubit_i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                                          <span class="n">qubit_j</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                                          <span class="n">intersection_i</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                          <span class="n">intersection_j</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+                                          <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is function to obtain local noise model for two clusters to which both qubits belong.</span>
+<span class="sd">        It is slightly tedious, the main issue here is to properly sort qubits and format input data</span>
+<span class="sd">        for GlobalNoiseMatrixCreator (different class)</span>
+
+<span class="sd">        :param qubit_i: qubit that belongs to cluster i</span>
+<span class="sd">        :param qubit_j: as above</span>
+<span class="sd">        :param intersection_i: qubits that are neighbors of cluster i and belong to cluster j</span>
+<span class="sd">        :param intersection_j: as above</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># get needed information from class&#39; properties</span>
+        <span class="n">cluster_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_lists_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qubit_i</span><span class="p">]</span>
+        <span class="n">cluster_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_lists_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qubit_j</span><span class="p">]</span>
+
+        <span class="n">string_cluster_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_labels_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qubit_i</span><span class="p">]</span>
+        <span class="n">string_cluster_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_labels_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qubit_j</span><span class="p">]</span>
+
+        <span class="n">neighbors_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighborhoods</span><span class="p">[</span><span class="n">string_cluster_i</span><span class="p">]</span>
+        <span class="n">neighbors_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_neighborhoods</span><span class="p">[</span><span class="n">string_cluster_j</span><span class="p">]</span>
+
+        <span class="c1"># if not provided, calculate it</span>
+        <span class="k">if</span> <span class="n">intersection_i</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">intersection_i</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">lists_intersection</span><span class="p">(</span><span class="n">neighbors_i</span><span class="p">,</span> <span class="n">cluster_j</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">intersection_j</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">intersection_j</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">lists_intersection</span><span class="p">(</span><span class="n">neighbors_j</span><span class="p">,</span> <span class="n">cluster_i</span><span class="p">)</span>
+
+        <span class="c1"># Take cluster noise matrices depending on neighbors states</span>
+        <span class="n">matrices_cluster_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_noise_matrix_dependent</span><span class="p">(</span><span class="n">cluster_i</span><span class="p">,</span>
+                                                             <span class="n">neighbors_i</span><span class="p">)</span>
+        <span class="n">matrices_cluster_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_noise_matrix_dependent</span><span class="p">(</span><span class="n">cluster_j</span><span class="p">,</span>
+                                                             <span class="n">neighbors_j</span><span class="p">)</span>
+
+        <span class="c1"># average over neighbours of first cluster</span>
+        <span class="c1"># that do not include the members of second cluster</span>
+        <span class="n">averaged_matrices_cluster_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_noise_matrices_over_some_qubits</span><span class="p">(</span>
+            <span class="n">matrices_cluster_i</span><span class="p">,</span>
+            <span class="n">neighbors_i</span><span class="p">,</span>
+            <span class="n">intersection_i</span>
+        <span class="p">)</span>
+        <span class="c1"># and vice versa</span>
+        <span class="n">averaged_matrices_cluster_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_noise_matrices_over_some_qubits</span><span class="p">(</span>
+            <span class="n">matrices_cluster_j</span><span class="p">,</span>
+            <span class="n">neighbors_j</span><span class="p">,</span>
+            <span class="n">intersection_j</span><span class="p">)</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Here we will need to properly relabel qubits because noise matrix creator requires </span>
+<span class="sd">        numbering them from 0 to number of qubits.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Label qubits from 0</span>
+        <span class="n">enumerated_map_reversed</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">get_reversed_enumerated_from_indices</span><span class="p">(</span>
+            <span class="n">cluster_i</span> <span class="o">+</span> <span class="n">cluster_j</span><span class="p">)</span>
+
+        <span class="n">qubit_indices_enumerated</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cluster_now</span> <span class="ow">in</span> <span class="p">[</span><span class="n">cluster_i</span><span class="p">,</span> <span class="n">cluster_j</span><span class="p">]:</span>
+            <span class="n">qubit_indices_enumerated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">enumerated_map_reversed</span><span class="p">[</span><span class="n">ci</span><span class="p">]</span> <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="n">cluster_now</span><span class="p">])</span>
+
+        <span class="n">cluster_key_for_construction_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span>
+            <span class="n">qubit_indices_enumerated</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">cluster_key_for_construction_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span>
+            <span class="n">qubit_indices_enumerated</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># this is format of noise matrices dictionary accepted by GlobalNoiseMatrixCreator</span>
+        <span class="n">properly_formatted_lambdas</span> <span class="o">=</span> <span class="p">{</span><span class="n">cluster_key_for_construction_i</span><span class="p">:</span> <span class="n">averaged_matrices_cluster_i</span><span class="p">,</span>
+                                      <span class="n">cluster_key_for_construction_j</span><span class="p">:</span> <span class="n">averaged_matrices_cluster_j</span>
+                                      <span class="p">}</span>
+
+        <span class="c1"># this is format for neighbors dictionary accepted by GlobalNoiseMatrixCreator</span>
+        <span class="n">neighbors_for_construction</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">cluster_key_for_construction_i</span><span class="p">:</span> <span class="p">[</span><span class="n">enumerated_map_reversed</span><span class="p">[</span><span class="n">ci</span><span class="p">]</span> <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span>
+                                             <span class="n">intersection_i</span><span class="p">],</span>
+            <span class="n">cluster_key_for_construction_j</span><span class="p">:</span> <span class="p">[</span><span class="n">enumerated_map_reversed</span><span class="p">[</span><span class="n">cj</span><span class="p">]</span> <span class="k">for</span> <span class="n">cj</span> <span class="ow">in</span>
+                                             <span class="n">intersection_j</span><span class="p">]}</span>
+
+        <span class="c1"># get instance of GlobalNoiseMatrixCreator</span>
+        <span class="n">big_lambda_creator_now</span> <span class="o">=</span> <span class="n">GlobalNoiseMatrixCreator</span><span class="p">(</span>
+            <span class="n">properly_formatted_lambdas</span><span class="p">,</span>
+            <span class="n">qubit_indices_enumerated</span><span class="p">,</span>
+            <span class="n">neighbors_for_construction</span><span class="p">)</span>
+
+        <span class="c1"># get noise matrix</span>
+        <span class="n">local_noise_matrix</span> <span class="o">=</span> \
+            <span class="n">big_lambda_creator_now</span><span class="o">.</span><span class="n">compute_global_noise_matrix</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">local_noise_matrix</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_sort_qubits_matrix</span><span class="p">(</span>
+            <span class="n">local_noise_matrix</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">cluster_i</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+            <span class="n">cluster_j</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param local_noise_matrix: noise matrix acting on cluster_i and cluster_j</span>
+<span class="sd">        :param cluster_i: list of qubits&#39; indices</span>
+<span class="sd">        :param cluster_j: list of qubits&#39; indices</span>
+<span class="sd">        :return: permuted local_noise_matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">all_qubits_list</span> <span class="o">=</span> <span class="n">cluster_i</span> <span class="o">+</span> <span class="n">cluster_j</span>
+
+        <span class="c1"># This is our target</span>
+        <span class="n">sorted_qubits_dictionary</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">enumerated_dictionary</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">all_qubits_list</span><span class="p">))</span>
+        <span class="c1"># This is what we have</span>
+        <span class="n">qubits_dictionary</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">enumerated_dictionary</span><span class="p">(</span><span class="n">all_qubits_list</span><span class="p">)</span>
+
+        <span class="c1"># While what we have is not equal to target we sort qubits.</span>
+        <span class="c1"># The following loop performs series of SWAPs to properly order qubits.</span>
+        <span class="k">while</span> <span class="n">qubits_dictionary</span> <span class="o">!=</span> <span class="n">sorted_qubits_dictionary</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">index_qubit_here</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_qubits_list</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">all_qubits_list</span><span class="p">[</span><span class="n">index_qubit_here</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">all_qubits_list</span><span class="p">[</span><span class="n">index_qubit_here</span><span class="p">]:</span>
+                    <span class="c1"># if two qubits are not sorted in ascending order, we permute matrix</span>
+                    <span class="c1"># this corresponds to exchanging place of two qubits in the Hilbert space</span>
+                    <span class="n">local_noise_matrix</span> <span class="o">=</span> <span class="n">povmtools</span><span class="o">.</span><span class="n">permute_matrix</span><span class="p">(</span><span class="n">local_noise_matrix</span><span class="p">,</span>
+                                                                  <span class="nb">len</span><span class="p">(</span><span class="n">all_qubits_list</span><span class="p">),</span>
+                                                                  <span class="p">[</span><span class="n">index_qubit_here</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                                                                   <span class="n">index_qubit_here</span> <span class="o">+</span> <span class="mi">2</span><span class="p">])</span>
+                    <span class="c1"># update indices to keep track of already made swaps</span>
+                    <span class="n">all_qubits_list</span><span class="p">[</span><span class="n">index_qubit_here</span><span class="p">],</span> <span class="n">all_qubits_list</span><span class="p">[</span>
+                        <span class="n">index_qubit_here</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_qubits_list</span><span class="p">[</span><span class="n">index_qubit_here</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">all_qubits_list</span><span class="p">[</span>
+                        <span class="n">index_qubit_here</span><span class="p">]</span>
+            <span class="c1"># update whole dictionary</span>
+            <span class="n">qubits_dictionary</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">enumerated_dictionary</span><span class="p">(</span><span class="n">all_qubits_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">local_noise_matrix</span>
+
+    <span class="k">def</span> <span class="nf">_compute_pair_correction_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                      <span class="n">pair</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For given pair of qubits, get correction data required</span>
+<span class="sd">        to correct corresponding two-qubit marginal.</span>
+<span class="sd">        NOTE: see class&#39; description</span>
+
+<span class="sd">        :param pair: list of qubit indices</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">qubit_i</span><span class="p">,</span> <span class="n">qubit_j</span> <span class="o">=</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">cluster_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_lists_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qubit_i</span><span class="p">]</span>
+        <span class="n">cluster_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_lists_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qubit_j</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">cluster_i</span> <span class="o">==</span> <span class="n">cluster_j</span><span class="p">:</span>
+            <span class="c1"># Check if qubits are in the same cluster. If yes, we just take average</span>
+            <span class="c1"># noise matrix on that cluster.</span>
+            <span class="n">averaged_matrix_clusters_i_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_noise_matrix_averaged</span><span class="p">(</span>
+                <span class="nb">sorted</span><span class="p">(</span><span class="n">anf</span><span class="o">.</span><span class="n">lists_sum</span><span class="p">(</span><span class="n">cluster_i</span><span class="p">,</span> <span class="n">cluster_j</span><span class="p">)))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">string_cluster_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_labels_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qubit_i</span><span class="p">]</span>
+            <span class="n">string_cluster_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters_labels_dictionary</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qubit_j</span><span class="p">]</span>
+            <span class="c1"># If qubits are in different clusters, we have two options to consider below...</span>
+            <span class="n">intersection_i</span><span class="p">,</span> <span class="n">intersection_j</span> <span class="o">=</span> \
+                <span class="n">anf</span><span class="o">.</span><span class="n">lists_intersection</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_neighborhoods</span><span class="p">[</span><span class="n">string_cluster_i</span><span class="p">],</span>
+                    <span class="n">cluster_j</span><span class="p">),</span> \
+                <span class="n">anf</span><span class="o">.</span><span class="n">lists_intersection</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_neighborhoods</span><span class="p">[</span><span class="n">string_cluster_j</span><span class="p">],</span>
+                    <span class="n">cluster_i</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersection_i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersection_j</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Check if clusters contain each others neighbors.</span>
+                <span class="c1"># If not, the noise matrix is simply potentially_stochastic_matrix</span>
+                <span class="c1"># tensor product of cluster matrices</span>
+                <span class="n">averaged_matrix_cluster_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_noise_matrix_averaged</span><span class="p">(</span><span class="n">cluster_i</span><span class="p">)</span>
+                <span class="n">averaged_matrix_cluster_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_noise_matrix_averaged</span><span class="p">(</span><span class="n">cluster_j</span><span class="p">)</span>
+
+                <span class="n">averaged_matrix_clusters_i_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">kron</span><span class="p">(</span><span class="n">averaged_matrix_cluster_i</span><span class="p">,</span>
+                                                       <span class="n">averaged_matrix_cluster_j</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Check if clusters are each others neighbors.</span>
+                <span class="c1"># If yes, the noise matrix needs to be constructed using</span>
+                <span class="c1"># cluster-neighborhoods noise model with treating</span>
+                <span class="c1"># some members of clusters as neighbours</span>
+                <span class="n">averaged_matrix_clusters_i_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_local_full_noise_model</span><span class="p">(</span>
+                    <span class="n">qubit_i</span><span class="o">=</span><span class="n">qubit_i</span><span class="p">,</span>
+                    <span class="n">qubit_j</span><span class="o">=</span><span class="n">qubit_j</span><span class="p">,</span>
+                    <span class="n">intersection_i</span><span class="o">=</span><span class="n">intersection_i</span><span class="p">,</span>
+                    <span class="n">intersection_j</span><span class="o">=</span><span class="n">intersection_j</span><span class="p">)</span>
+
+        <span class="n">local_noise_matrix</span> <span class="o">=</span> <span class="n">averaged_matrix_clusters_i_j</span>
+        <span class="c1"># check whether qubits are properly sorted</span>
+        <span class="k">if</span> <span class="n">cluster_i</span> <span class="o">!=</span> <span class="n">cluster_j</span> <span class="ow">and</span> <span class="n">cluster_i</span> <span class="o">+</span> <span class="n">cluster_j</span> <span class="o">!=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cluster_i</span> <span class="o">+</span> <span class="n">cluster_j</span><span class="p">):</span>
+            <span class="c1"># if qubits are not sorted, noise matrix needs to be permuted</span>
+            <span class="n">local_noise_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_qubits_matrix</span><span class="p">(</span>
+                <span class="n">local_noise_matrix</span><span class="o">=</span><span class="n">averaged_matrix_clusters_i_j</span><span class="p">,</span>
+                <span class="n">cluster_i</span><span class="o">=</span><span class="n">cluster_i</span><span class="p">,</span>
+                <span class="n">cluster_j</span><span class="o">=</span><span class="n">cluster_j</span><span class="p">)</span>
+
+        <span class="n">whole_marginal</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">anf</span><span class="o">.</span><span class="n">lists_sum</span><span class="p">(</span><span class="n">cluster_i</span><span class="p">,</span> <span class="n">cluster_j</span><span class="p">))</span>
+        <span class="n">correction_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">local_noise_matrix</span><span class="p">)</span>
+
+        <span class="n">string_marginal</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">q_index</span> <span class="k">for</span> <span class="n">q_index</span> <span class="ow">in</span> <span class="n">whole_marginal</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_correction_indices</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qubit_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">string_marginal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_correction_indices</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qubit_j</span><span class="p">]</span> <span class="o">=</span> <span class="n">string_marginal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_correction_indices</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">qubit_i</span><span class="p">,</span> <span class="n">qubit_j</span><span class="p">)]</span> <span class="o">=</span> <span class="n">string_marginal</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices</span><span class="p">[</span><span class="n">string_marginal</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_noise_matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_correction_matrices</span><span class="p">[</span><span class="n">string_marginal</span><span class="p">]</span> <span class="o">=</span> <span class="n">correction_matrix</span>
+
+<div class="viewcode-block" id="CorrectionDataGenerator.get_pairs_correction_data"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.CorrectionDataGenerator.CorrectionDataGenerator.get_pairs_correction_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_pairs_correction_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                  <span class="n">pairs_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
+                                  <span class="n">show_progress_bar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For pairs of qubits in the list, get correction data required</span>
+<span class="sd">        to correct corresponding two-qubit marginals_dictionary.</span>
+<span class="sd">        NOTE: see class&#39; description for details</span>
+
+<span class="sd">        :param pairs_list:</span>
+<span class="sd">        :param show_progress_bar:</span>
+<span class="sd">        :return: correction_data_dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO FBM: possibly change resetting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_clusters_dictionary</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_correction_matrices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mitigation_errors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_correction_indices</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">range_pairs</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pairs_list</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">show_progress_bar</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+            <span class="n">range_pairs</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">range_pairs</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">pair_index</span> <span class="ow">in</span> <span class="n">range_pairs</span><span class="p">:</span>
+            <span class="n">pair</span> <span class="o">=</span> <span class="n">pairs_list</span><span class="p">[</span><span class="n">pair_index</span><span class="p">]</span>
+            <span class="n">pair_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pair_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correction_indices</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_compute_pair_correction_data</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;correction_matrices&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correction_matrices</span><span class="p">,</span>
+                <span class="s1">&#39;noise_matrices&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices</span><span class="p">,</span>
+                <span class="s1">&#39;correction_indices&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correction_indices</span><span class="p">}</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">QREM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

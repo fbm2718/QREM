@@ -1,22 +1,21 @@
-"""
-@authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
-@contact: filip.b.maciejewski@gmail.com
+# @authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+# @contact: filip.b.maciejewski@gmail.com
+#
+# REFERENCES:
+# [0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+# "Mitigation of readout noise in near-term quantum devices
+# by classical post-processing based on detector tomography",
+# Quantum 4, 257 (2020)
+#
+# [0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
+# "Modeling and mitigation of cross-talk effects in readout noise
+# with applications to the Quantum Approximate Optimization Algorithm",
+# Quantum 5, 464 (2021).
+#
+# [1] B. Nachman, M. Urbanek, W. arrray_to_print. de Jong, C. W. Bauer,
+#  "Unfolding quantum computer readout noise",
+#  npj Quantum Inf 6, 84 (2020)
 
-REFERENCES:
-[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
-"Mitigation of readout noise in near-term quantum devices
-by classical post-processing based on detector tomography",
-Quantum 4, 257 (2020)
-
-[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
-"Modeling and mitigation of cross-talk effects in readout noise
-with applications to the Quantum Approximate Optimization Algorithm",
-Quantum 5, 464 (2021).
-
-[1] B. Nachman, M. Urbanek, W. arrray_to_print. de Jong, C. W. Bauer,
- "Unfolding quantum computer readout noise",
- npj Quantum Inf 6, 84 (2020)
-"""
 
 import numpy as np
 from typing import Optional, Dict, List

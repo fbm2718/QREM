@@ -1,0 +1,346 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities &#8212; QREM 0.56 documentation</title>
+    <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki</span>
+<span class="sd">@contact: filip.b.maciejewski@gmail.com</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">qiskit.result</span> <span class="k">import</span> <span class="n">Result</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">QREM.functions_qrem.povmtools</span> <span class="k">import</span> <span class="n">reorder_probabilities</span>
+<span class="kn">from</span> <span class="nn">QREM.functions_qrem</span> <span class="k">import</span> <span class="n">povmtools</span><span class="p">,</span> <span class="n">ancillary_functions</span> <span class="k">as</span> <span class="n">anf</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">qiskit.providers.ibmq.job.ibmqjob</span> <span class="k">import</span> <span class="n">JobStatus</span>
+<span class="kn">import</span> <span class="nn">qiskit</span>
+
+<span class="kn">from</span> <span class="nn">qiskit</span> <span class="k">import</span> <span class="n">Aer</span><span class="p">,</span> <span class="n">IBMQ</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+
+
+<div class="viewcode-block" id="get_frequencies_array_from_results"><a class="viewcode-back" href="../../../../../QREM.functions_qrem.functions_SDKs.qiskit.html#QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities.get_frequencies_array_from_results">[docs]</a><span class="k">def</span> <span class="nf">get_frequencies_array_from_results</span><span class="p">(</span><span class="n">results_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Result</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Description:</span>
+<span class="sd">        Creates an array of frequencies from given qiskit job results. This method_name is is working with</span>
+<span class="sd">        qiskit 0.16. The shape of the array is</span>
+<span class="sd">            c x 2 ** q,</span>
+<span class="sd">        where c denotes circuits number and q denotes number of qubits.</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        :param results_list: List of qiskit jobs_list results.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray with shape=0 if there were no circuits in the job, or with shape c x 2 ** q</span>
+<span class="sd">        containing frequencies data for each possible state.</span>
+<span class="sd">    Notes:</span>
+<span class="sd">        Possible states are numbered increasingly from |00000 ... 0&gt;, |10000 ... 0&gt; up to |1111 ... 1&gt;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">all_circuits_number</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">results</span><span class="p">)</span> <span class="k">for</span> <span class="n">results</span> <span class="ow">in</span> <span class="n">results_list</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">all_circuits_number</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># The length of potentially_stochastic_matrix state describes how many qubits were used during experiment.</span>
+    <span class="n">states_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">results_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_counts</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+
+    <span class="n">possible_states</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{0:b}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">states_len</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">states_len</span><span class="p">)]</span>
+    <span class="n">frequencies_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">all_circuits_number</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_states</span><span class="p">)))</span>
+
+    <span class="c1"># TODO TR: This has to be rewritten as it&#39;s too nested.</span>
+    <span class="k">for</span> <span class="n">results</span> <span class="ow">in</span> <span class="n">results_list</span><span class="p">:</span>
+        <span class="n">number_of_circuits_in_results</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">results</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_circuits_in_results</span><span class="p">):</span>
+            <span class="n">counts</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get_counts</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">shots_number</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">shots</span>
+
+            <span class="c1"># TODO FBM: added here accounting for reversed register in qiskit</span>
+            <span class="n">normal_order</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">possible_states</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">possible_states</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="ow">in</span> <span class="n">counts</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">normal_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">possible_states</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span> <span class="o">/</span> <span class="n">shots_number</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">normal_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="c1"># frequencies = reorder_probabilities(normal_order, range(states_len))</span>
+            <span class="n">frequencies</span> <span class="o">=</span> <span class="n">reorder_probabilities</span><span class="p">(</span><span class="n">normal_order</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">states_len</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="n">frequencies_array</span><span class="p">[</span><span class="n">i</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">frequencies</span><span class="p">[:]</span>
+
+    <span class="k">return</span> <span class="n">frequencies_array</span></div>
+
+
+<div class="viewcode-block" id="add_gate_to_circuit"><a class="viewcode-back" href="../../../../../QREM.functions_qrem.functions_SDKs.qiskit.html#QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities.add_gate_to_circuit">[docs]</a><span class="k">def</span> <span class="nf">add_gate_to_circuit</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span>
+                        <span class="n">qreg</span><span class="p">,</span>
+                        <span class="n">q_index</span><span class="p">,</span>
+                        <span class="n">unitary</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">QREM</span>
+
+    <span class="c1"># TODO: Check whether this is needed - at some point I remember there were troubles with parametrizing those two unitaries</span>
+    <span class="k">if</span> <span class="n">unitary</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">unitary</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">unitary</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">unitary</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">circuit</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="n">qreg</span><span class="p">[</span><span class="n">q_index</span><span class="p">])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># get angles for single-qubit state change unitary</span>
+        <span class="n">current_angles</span> <span class="o">=</span> <span class="n">QREM</span><span class="o">.</span><span class="n">povmtools</span><span class="o">.</span><span class="n">get_su2_parametrizing_angles</span><span class="p">(</span><span class="n">unitary</span><span class="p">)</span>
+
+        <span class="c1"># implement unitary</span>
+        <span class="n">circuit</span><span class="o">.</span><span class="n">u3</span><span class="p">(</span><span class="n">current_angles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                   <span class="n">current_angles</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                   <span class="n">current_angles</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                   <span class="n">qreg</span><span class="p">[</span><span class="n">q_index</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">circuit</span><span class="p">,</span> <span class="n">qreg</span></div>
+
+
+<div class="viewcode-block" id="get_frequencies_from_counts"><a class="viewcode-back" href="../../../../../QREM.functions_qrem.functions_SDKs.qiskit.html#QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities.get_frequencies_from_counts">[docs]</a><span class="k">def</span> <span class="nf">get_frequencies_from_counts</span><span class="p">(</span><span class="n">counts_dict</span><span class="p">,</span>
+                                <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">possible_states</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">shots_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">reorder_bits</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">counts_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]))</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">crs</span>
+
+    <span class="k">if</span> <span class="n">possible_states</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">possible_states</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{0:b}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">)]</span>
+
+    <span class="n">normal_order</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">possible_states</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="ow">in</span> <span class="n">counts_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">counts_now</span> <span class="o">=</span> <span class="n">counts_dict</span><span class="p">[</span><span class="n">possible_states</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
+            <span class="n">normal_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">counts_now</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">normal_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">reorder_bits</span><span class="p">:</span>
+        <span class="n">frequencies</span> <span class="o">=</span> <span class="n">reorder_probabilities</span><span class="p">(</span><span class="n">normal_order</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">crs</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">frequencies</span> <span class="o">=</span> <span class="n">normal_order</span>
+
+    <span class="k">if</span> <span class="n">shots_number</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">frequencies</span> <span class="o">=</span> <span class="n">frequencies</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">frequencies</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">frequencies</span> <span class="o">=</span> <span class="n">frequencies</span> <span class="o">/</span> <span class="n">shots_number</span>
+
+    <span class="k">return</span> <span class="n">frequencies</span></div>
+
+
+<div class="viewcode-block" id="download_multiple_jobs"><a class="viewcode-back" href="../../../../../QREM.functions_qrem.functions_SDKs.qiskit.html#QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities.download_multiple_jobs">[docs]</a><span class="k">def</span> <span class="nf">download_multiple_jobs</span><span class="p">(</span><span class="n">backend_name</span><span class="p">,</span>
+                           <span class="n">job_IDs_list</span><span class="p">):</span>
+    <span class="n">IBMQ</span><span class="o">.</span><span class="n">load_account</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">backend_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;qasm_simulator&#39;</span><span class="p">,</span> <span class="s1">&#39;statevector_simulator&#39;</span><span class="p">,</span> <span class="s1">&#39;unitary_simulator&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Local simulators do not store jobs online.&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">provider</span> <span class="o">=</span> <span class="n">IBMQ</span><span class="o">.</span><span class="n">get_provider</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;open&#39;</span><span class="p">)</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">provider</span><span class="o">.</span><span class="n">get_backend</span><span class="p">(</span><span class="n">backend_name</span><span class="p">)</span>
+
+    <span class="n">all_jobs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">job_ID</span> <span class="ow">in</span> <span class="n">job_IDs_list</span><span class="p">:</span>
+        <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;Getting job with ID:&#39;</span><span class="p">,</span> <span class="n">job_ID</span><span class="p">)</span>
+        <span class="n">job</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">retrieve_job</span><span class="p">(</span><span class="n">job_ID</span><span class="p">)</span>
+        <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;Got it!&#39;</span><span class="p">)</span>
+        <span class="n">all_jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">all_jobs</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="add_counts_dicts"><a class="viewcode-back" href="../../../../../QREM.functions_qrem.functions_SDKs.qiskit.html#QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities.add_counts_dicts">[docs]</a><span class="k">def</span> <span class="nf">add_counts_dicts</span><span class="p">(</span><span class="n">all_counts</span><span class="p">,</span> <span class="n">modulo</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
+    <span class="n">frequencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dimension</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">modulo</span><span class="p">)]</span>
+    <span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+    <span class="k">for</span> <span class="n">counts_index</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_counts</span><span class="p">))):</span>
+        <span class="n">true_index</span> <span class="o">=</span> <span class="n">counts_index</span> <span class="o">%</span> <span class="n">modulo</span>
+
+        <span class="n">freqs_now</span> <span class="o">=</span> <span class="n">povmtools</span><span class="o">.</span><span class="n">counts_dict_to_frequencies_vector</span><span class="p">(</span><span class="n">all_counts</span><span class="p">[</span><span class="n">counts_index</span><span class="p">],</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">frequencies</span><span class="p">[</span><span class="n">true_index</span><span class="p">][:]</span> <span class="o">+=</span> <span class="n">freqs_now</span><span class="p">[:]</span>
+
+        <span class="c1"># print(freqs_now)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">modulo</span><span class="p">):</span>
+        <span class="n">frequencies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">frequencies</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">frequencies</span></div>
+
+
+<div class="viewcode-block" id="run_batches"><a class="viewcode-back" href="../../../../../QREM.functions_qrem.functions_SDKs.qiskit.html#QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities.run_batches">[docs]</a><span class="k">def</span> <span class="nf">run_batches</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span>
+                <span class="n">backend_name</span><span class="p">,</span>
+                <span class="n">shots</span><span class="o">=</span><span class="mi">8192</span><span class="p">,</span>
+                <span class="n">saving_IDs_dictionary</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;saving&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                                       <span class="s1">&#39;directory&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                                       <span class="s1">&#39;file_name&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                                       <span class="s1">&#39;dictionary_to_save&#39;</span><span class="p">:</span> <span class="p">{}}):</span>
+    <span class="c1"># IBMQ.load_account()</span>
+    <span class="c1"># IBMQ.load_account()</span>
+    <span class="c1"># raise KeyError</span>
+    <span class="n">saving</span> <span class="o">=</span> <span class="n">saving_IDs_dictionary</span><span class="p">[</span><span class="s1">&#39;saving&#39;</span><span class="p">]</span>
+
+    <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Sending jobs_list to execution on: &#39;</span><span class="p">,</span> <span class="n">backend_name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;Number of shots: &#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">shots</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; .&#39;</span><span class="p">)</span>
+    <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;Target number of jobs_list: &#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">batches</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; .&#39;</span><span class="p">)</span>
+
+    <span class="n">iterations_done</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">wait_time_in_minutes</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="n">jobs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">iterations_done</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">batches</span><span class="p">):</span>
+        <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;job number:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">iterations_done</span><span class="p">))</span>
+        <span class="n">circuits</span> <span class="o">=</span> <span class="n">batches</span><span class="p">[</span><span class="n">iterations_done</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">backend_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;qasm_simulator&#39;</span><span class="p">,</span> <span class="s1">&#39;statevector_simulator&#39;</span><span class="p">,</span> <span class="s1">&#39;unitary_simulator&#39;</span><span class="p">]:</span>
+            <span class="n">backend</span> <span class="o">=</span> <span class="n">Aer</span><span class="o">.</span><span class="n">get_backend</span><span class="p">(</span><span class="n">backend_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">IBMQ</span><span class="o">.</span><span class="n">load_account</span><span class="p">()</span>
+            <span class="n">provider</span> <span class="o">=</span> <span class="n">IBMQ</span><span class="o">.</span><span class="n">get_provider</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;open&#39;</span><span class="p">)</span>
+            <span class="n">backend</span> <span class="o">=</span> <span class="n">provider</span><span class="o">.</span><span class="n">get_backend</span><span class="p">(</span><span class="n">backend_name</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">qobj_id</span> <span class="o">=</span> <span class="s1">&#39;first_circuit-&#39;</span> <span class="o">+</span> <span class="n">circuits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;-last_circuit-&#39;</span> <span class="o">+</span> <span class="n">circuits</span><span class="p">[</span>
+                <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;-date-&#39;</span> <span class="o">+</span> <span class="n">anf</span><span class="o">.</span><span class="n">get_date_string</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+            <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s2">&quot;Sending quantum program to: &quot;</span><span class="p">,</span> <span class="n">backend_name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="n">qiskit</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">circuits</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="n">shots</span><span class="p">,</span> <span class="n">max_credits</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">qobj_id</span><span class="o">=</span><span class="n">qobj_id</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">saving</span> <span class="ow">and</span> <span class="n">backend_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;qasm_simulator&#39;</span><span class="p">,</span>
+                                               <span class="s1">&#39;statevector_simulator&#39;</span><span class="p">,</span>
+                                               <span class="s1">&#39;unitary_simulator&#39;</span><span class="p">]:</span>
+                <span class="n">job_ID</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">job_id</span><span class="p">()</span>
+                <span class="n">dict_to_save</span> <span class="o">=</span> <span class="n">saving_IDs_dictionary</span><span class="p">[</span><span class="s1">&#39;dictionary_to_save&#39;</span><span class="p">]</span>
+                <span class="n">dict_to_save</span><span class="p">[</span><span class="s1">&#39;job_ID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job_ID</span>
+                <span class="n">anf</span><span class="o">.</span><span class="n">save_results_pickle</span><span class="p">(</span><span class="n">dictionary_to_save</span><span class="o">=</span><span class="n">dict_to_save</span><span class="p">,</span>
+                                        <span class="n">directory</span><span class="o">=</span><span class="n">saving_IDs_dictionary</span><span class="p">[</span><span class="s1">&#39;directory&#39;</span><span class="p">],</span>
+                                        <span class="n">custom_name</span><span class="o">=</span><span class="n">saving_IDs_dictionary</span><span class="p">[</span>
+                                                        <span class="s1">&#39;file_name&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_job</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">iterations_done</span><span class="p">)</span>
+
+            <span class="n">jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">()</span> <span class="o">==</span> <span class="n">JobStatus</span><span class="o">.</span><span class="n">INITIALIZING</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">())</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s2">&quot;Program sent for execution to: &quot;</span><span class="p">,</span> <span class="n">backend_name</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;There was an error in the circuit!. Error = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ex</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Waiting </span><span class="si">{wait_time_in_minutes}</span><span class="s1"> minute(s) before next try.&#39;</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">wait_time_in_minutes</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="n">iterations_done</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">jobs</span></div>
+
+
+<div class="viewcode-block" id="get_counts_from_jobs"><a class="viewcode-back" href="../../../../../QREM.functions_qrem.functions_SDKs.qiskit.html#QREM.functions_qrem.functions_SDKs.qiskit.qiskit_utilities.get_counts_from_jobs">[docs]</a><span class="k">def</span> <span class="nf">get_counts_from_jobs</span><span class="p">(</span><span class="n">jobs_list</span><span class="p">,</span>
+                         <span class="n">return_job_headers</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+    <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;Getting counts...&#39;</span><span class="p">)</span>
+
+    <span class="n">counts_dictionary</span><span class="p">,</span> <span class="n">job_headers</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">job_index</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jobs_list</span><span class="p">))):</span>
+        <span class="n">job_now</span> <span class="o">=</span> <span class="n">jobs_list</span><span class="p">[</span><span class="n">job_index</span><span class="p">]</span>
+        <span class="n">job_header_now</span> <span class="o">=</span> <span class="n">job_now</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">qobj_id</span>
+        <span class="n">job_headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">job_header_now</span><span class="p">)</span>
+
+        <span class="n">results_object_now</span> <span class="o">=</span> <span class="n">job_now</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="n">results_list_now</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results_object_now</span><span class="o">.</span><span class="n">results</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">exp_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results_list_now</span><span class="p">)):</span>
+            <span class="n">circuit_name_now</span> <span class="o">=</span> <span class="n">results_list_now</span><span class="p">[</span><span class="n">exp_index</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">name</span>
+
+            <span class="n">counts_now</span> <span class="o">=</span> <span class="n">results_object_now</span><span class="o">.</span><span class="n">get_counts</span><span class="p">(</span><span class="n">circuit_name_now</span><span class="p">)</span>
+
+
+            <span class="n">counts_dictionary</span><span class="p">[</span><span class="n">circuit_name_now</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts_now</span>
+
+    <span class="k">if</span> <span class="n">return_job_headers</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">counts_dictionary</span><span class="p">,</span> <span class="n">job_headers</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">counts_dictionary</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../../index.html">QREM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

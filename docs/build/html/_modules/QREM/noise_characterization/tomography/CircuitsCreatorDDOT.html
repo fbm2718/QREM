@@ -1,0 +1,317 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QREM.noise_characterization.tomography.CircuitsCreatorDDOT &#8212; QREM 0.56 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for QREM.noise_characterization.tomography.CircuitsCreatorDDOT</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki</span>
+<span class="sd">@contact: filip.b.maciejewski@gmail.com</span>
+
+<span class="sd">REFERENCES:</span>
+<span class="sd">[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="sd">&quot;Mitigation of readout noise in near-term quantum devices</span>
+<span class="sd">by classical post-processing based on detector tomography&quot;,</span>
+<span class="sd">Quantum 4, 257 (2020)</span>
+
+<span class="sd">[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="sd">&quot;Modeling and mitigation of cross-talk effects in readout noise</span>
+<span class="sd">with applications to the Quantum Approximate Optimization Algorithm&quot;,</span>
+<span class="sd">Quantum 5, 464 (2021).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
+
+
+<span class="n">__valid_SDK_names__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;qiskit&#39;</span><span class="p">]</span>
+<span class="n">__valid_experiments_names__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;DDOT&#39;</span><span class="p">,</span> <span class="s1">&#39;DDT&#39;</span><span class="p">,</span> <span class="s1">&#39;QDOT&#39;</span><span class="p">,</span> <span class="s1">&#39;QDT&#39;</span><span class="p">]</span>
+
+
+
+<div class="viewcode-block" id="CircuitsCreatorDDOT"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.CircuitsCreatorDDOT.CircuitsCreatorDDOT">[docs]</a><span class="k">class</span> <span class="nc">CircuitsCreatorDDOT</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is general class for creating quantum circuits implementing Diagonal Detector Overlapping</span>
+<span class="sd">    Tomography circuits (DDOT).</span>
+
+<span class="sd">    NOTE: please note that this class&#39; is used only to create QuantumCircuit objects that can be passed</span>
+<span class="sd">    to execution on some backend. It is assumed that specific labels describing circuits (see below)</span>
+<span class="sd">    already have been generated.</span>
+
+<span class="sd">    MAIN PARAMETERS:</span>
+<span class="sd">    :param SDK_name:</span>
+<span class="sd">    possible values:</span>
+<span class="sd">    1. &#39;qiskit&#39;</span>
+
+<span class="sd">    :param qubit_indices: one always needs to provide list of qubit indices on which experiments</span>
+<span class="sd">                          should be performed (this does not need to be the whole device)</span>
+
+<span class="sd">    :param circuits_labels: main argument to the class, this is list of symbolic circuits description</span>
+
+<span class="sd">    Two formats are accepted:</span>
+<span class="sd">    1. List[List[int]] - integer indicates gate to be implemented on</span>
+<span class="sd">                         corresponding qubit.</span>
+<span class="sd">                         For example: circuit_labels = [[0,1,0],</span>
+<span class="sd">                                                        [0,0,1]]</span>
+
+<span class="sd">                         will implement circuits:</span>
+<span class="sd">                         gate &quot;identity&quot; on qubit_indices[0],</span>
+<span class="sd">                         gate &quot;X&quot; on qubit_indices[1],</span>
+<span class="sd">                         gate &quot;identity&quot; on qubit_indices[2]</span>
+
+<span class="sd">                         gate &quot;identity&quot; on qubit_indices[0],</span>
+<span class="sd">                         gate &quot;identity&quot; on qubit_indices[1],</span>
+<span class="sd">                         gate &quot;X&quot; on qubit_indices[2]</span>
+
+<span class="sd">    2. Dict[str,int] - dictionary where each KEY is string of integers describing</span>
+<span class="sd">                      a circuit (in manner analogous to described above),</span>
+<span class="sd">                      and VALUE is the number of times that this circuit should be implemented</span>
+
+
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">SDK_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">qubit_indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                 <span class="n">circuits_labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]],</span>
+                 <span class="n">number_of_repetitions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">quantum_register_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">classical_register_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">add_barriers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param SDK_name: see class&#39; description</span>
+<span class="sd">        :param qubit_indices: see class&#39; description</span>
+<span class="sd">        :param circuits_labels: see class&#39; description</span>
+<span class="sd">        :param number_of_repetitions: each circuit in circuit_labels will be implemented</span>
+<span class="sd">                                      this number of times</span>
+<span class="sd">                                      NOTE: if there are doubles in the list, they will be counted as</span>
+<span class="sd">                                        multiple circuits.</span>
+<span class="sd">                                        For example: circuit_labels = [ [0,1,0], [0,1,0] ]</span>
+<span class="sd">                                        with number_of_repetitions = 3</span>
+<span class="sd">                                        will implement 6 circuits [0,1,0].</span>
+<span class="sd">        :param quantum_register_size:</span>
+<span class="sd">        :param classical_register_size:</span>
+<span class="sd">        :param add_barriers:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">SDK_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">__valid_SDK_names__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Backend: &#39;</span> <span class="o">+</span> <span class="n">SDK_name</span> <span class="o">+</span> <span class="s1">&#39; is not supported yet.&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_SDK_name</span> <span class="o">=</span> <span class="n">SDK_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_experiment_name</span> <span class="o">=</span> <span class="s2">&quot;DDOT&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qubit_indices</span> <span class="o">=</span> <span class="n">qubit_indices</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">circuits_labels</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">circuits_labels_strings_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols_list</span><span class="p">])</span> <span class="k">for</span>
+                                            <span class="n">symbols_list</span>
+                                            <span class="ow">in</span>
+                                            <span class="n">circuits_labels</span><span class="p">]</span>
+            <span class="n">circuits_labels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">Counter</span><span class="p">(</span><span class="n">circuits_labels_strings_list</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+                                       <span class="n">Counter</span><span class="p">(</span><span class="n">circuits_labels_strings_list</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+            <span class="k">if</span> <span class="n">number_of_repetitions</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">circuits_labels</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">circuits_labels</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">*=</span> <span class="n">number_of_repetitions</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuit_labels</span> <span class="o">=</span> <span class="n">circuits_labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_quantum_register_size</span> <span class="o">=</span> <span class="n">quantum_register_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classical_register_size</span> <span class="o">=</span> <span class="n">classical_register_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_barriers</span> <span class="o">=</span> <span class="n">add_barriers</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">circuits_labels_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuit_labels</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_add_measurements_qiskit</span><span class="p">(</span>
+            <span class="n">circuit_object</span><span class="p">,</span>
+            <span class="n">qreg</span><span class="p">,</span>
+            <span class="n">creg</span><span class="p">,</span>
+            <span class="n">qubit_indices</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">qubit_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">qubit_indices</span><span class="p">)):</span>
+            <span class="n">circuit_object</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">qreg</span><span class="p">[</span><span class="n">qubit_indices</span><span class="p">[</span><span class="n">qubit_index</span><span class="p">]],</span> <span class="n">creg</span><span class="p">[</span><span class="n">qubit_index</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">circuit_object</span>
+
+
+<div class="viewcode-block" id="CircuitsCreatorDDOT.get_circuits"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.CircuitsCreatorDDOT.CircuitsCreatorDDOT.get_circuits">[docs]</a>    <span class="k">def</span> <span class="nf">get_circuits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                     <span class="n">add_measurements</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Returns quantum circuits as a list.</span>
+
+<span class="sd">        Circuits are later identified by names for which we use the following convention:</span>
+
+<span class="sd">        circuit_name = &quot;experiment name&quot; + &quot;-&quot; + &quot;circuit label&quot;+</span>
+<span class="sd">        &quot;no&quot;+ &quot;integer identifier for multiple implementations of the same circuit&quot;</span>
+
+<span class="sd">        for example the circuit can have name:</span>
+<span class="sd">        &quot;DDOT-010-no3&quot;</span>
+
+<span class="sd">        which means that this experiment is Diagonal Detector Overlapping Tomography (DDOT),</span>
+<span class="sd">        the circuit implements state &quot;010&quot; (i.e., gates iden, X, iden on qubits 0,1,2), and</span>
+<span class="sd">        in the whole circuits sets this is the 4th (we start counting from 0) circuit that implements</span>
+<span class="sd">        that particular state.</span>
+
+<span class="sd">        :param add_measurements:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SDK_name</span> <span class="o">==</span> <span class="s1">&#39;qiskit&#39;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">qiskit</span> <span class="k">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">QuantumRegister</span><span class="p">,</span> <span class="n">ClassicalRegister</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;SDK :&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SDK_name</span> <span class="o">+</span> <span class="s2">&quot; not supported yet.&quot;</span><span class="p">)</span>
+
+
+        <span class="n">qubit_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qubit_indices</span>
+
+        <span class="n">quantum_register_size</span><span class="p">,</span> <span class="n">classical_register_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quantum_register_size</span><span class="p">,</span> \
+                                                         <span class="bp">self</span><span class="o">.</span><span class="n">_classical_register_size</span>
+
+        <span class="n">circuits_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuit_labels</span>
+
+        <span class="n">qubit_indices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">qubit_indices</span><span class="p">)</span>  <span class="c1"># Sort to ensure, that results can easily be interpreted.</span>
+
+        <span class="k">if</span> <span class="n">quantum_register_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">quantum_register_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">qubit_indices</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">classical_register_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">classical_register_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">qubit_indices</span><span class="p">)</span>
+
+        <span class="n">all_circuits</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">unique_circuit_labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">circuits_labels</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="c1"># outer loop is for copies of DDOT experiment</span>
+        <span class="c1"># for repetition_index in range(number_of_repetitions):</span>
+        <span class="c1"># inner loop goes through all circuits in QDT experiments and prepares them</span>
+        <span class="k">for</span> <span class="n">circuit_label_string</span> <span class="ow">in</span> <span class="n">unique_circuit_labels</span><span class="p">:</span>
+            <span class="c1"># this loop goes over multiple instances of the same experiments (if they exist)</span>
+            <span class="n">circuit_label_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">circuit_label_string</span><span class="p">)</span>
+            <span class="c1"># print(circuit_label_list)</span>
+            <span class="c1"># raise KeyError</span>
+            <span class="k">for</span> <span class="n">multiple_circuits_counter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">circuits_labels</span><span class="p">[</span><span class="n">circuit_label_string</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SDK_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;qiskit&#39;</span><span class="p">,</span> <span class="s1">&#39;Qiskit&#39;</span><span class="p">]:</span>
+                    <span class="c1"># create registers</span>
+                    <span class="n">qreg</span><span class="p">,</span> <span class="n">creg</span> <span class="o">=</span> <span class="n">QuantumRegister</span><span class="p">(</span><span class="n">quantum_register_size</span><span class="p">),</span> \
+                                 <span class="n">ClassicalRegister</span><span class="p">(</span><span class="n">classical_register_size</span><span class="p">)</span>
+
+                    <span class="c1"># create quantum circuit with nice name</span>
+                    <span class="n">circuit_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_experiment_name</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> \
+                                   <span class="o">+</span> <span class="n">circuit_label_string</span> <span class="o">+</span> <span class="s1">&#39;no</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">multiple_circuits_counter</span>
+
+                    <span class="n">circuit_object</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="n">qreg</span><span class="p">,</span>
+                                                    <span class="n">creg</span><span class="p">,</span>
+                                                    <span class="n">name</span><span class="o">=</span><span class="n">circuit_name</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">qubit_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">circuit_label_list</span><span class="p">)):</span>
+                        <span class="n">qubit_now</span> <span class="o">=</span> <span class="n">qubit_indices</span><span class="p">[</span><span class="n">qubit_index</span><span class="p">]</span>
+                        <span class="n">label_now</span> <span class="o">=</span> <span class="n">circuit_label_list</span><span class="p">[</span><span class="n">qubit_now</span><span class="p">]</span>
+
+                        <span class="k">if</span> <span class="n">label_now</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span> <span class="ow">or</span> <span class="n">label_now</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">circuit_object</span><span class="o">.</span><span class="n">id</span><span class="p">(</span><span class="n">qubit_now</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="n">label_now</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span> <span class="ow">or</span> <span class="n">label_now</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">circuit_object</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="n">qubit_now</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Wrong circuit label: &#39;</span><span class="p">,</span> <span class="n">circuit_label_list</span><span class="p">)</span>
+
+                    <span class="c1"># get barrier to prevent compiler from making changes</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_barriers</span><span class="p">:</span>
+                        <span class="n">circuit_object</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="n">add_measurements</span><span class="p">:</span>
+                        <span class="n">circuit_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_measurements_qiskit</span><span class="p">(</span><span class="n">circuit_object</span><span class="p">,</span>
+                                                                       <span class="n">qreg</span><span class="p">,</span>
+                                                                       <span class="n">creg</span><span class="p">,</span>
+                                                                       <span class="n">qubit_indices</span><span class="p">)</span>
+
+                    <span class="n">all_circuits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">circuit_object</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">all_circuits</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">QREM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

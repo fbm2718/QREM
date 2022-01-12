@@ -1,0 +1,447 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QREM.noise_mitigation.MarginalsCorrector &#8212; QREM 0.56 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for QREM.noise_mitigation.MarginalsCorrector</h1><div class="highlight"><pre>
+<span></span><span class="c1"># @authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki</span>
+<span class="c1"># @contact: filip.b.maciejewski@gmail.com</span>
+<span class="c1">#</span>
+<span class="c1"># REFERENCES:</span>
+<span class="c1"># [0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="c1"># &quot;Mitigation of readout noise in near-term quantum devices</span>
+<span class="c1"># by classical post-processing based on detector tomography&quot;,</span>
+<span class="c1"># Quantum 4, 257 (2020)</span>
+<span class="c1">#</span>
+<span class="c1"># [0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="c1"># &quot;Modeling and mitigation of cross-talk effects in readout noise</span>
+<span class="c1"># with applications to the Quantum Approximate Optimization Algorithm&quot;,</span>
+<span class="c1"># Quantum 5, 464 (2021).</span>
+<span class="c1">#</span>
+<span class="c1"># [1] B. Nachman, M. Urbanek, W. arrray_to_print. de Jong, C. W. Bauer,</span>
+<span class="c1">#  &quot;Unfolding quantum computer readout noise&quot;,</span>
+<span class="c1">#  npj Quantum Inf 6, 84 (2020)</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">QREM.base_classes.marginals_analyzer_base</span> <span class="k">import</span> <span class="n">MarginalsAnalyzerBase</span>
+<span class="kn">from</span> <span class="nn">QREM.functions_qrem</span> <span class="k">import</span> <span class="n">povmtools</span> <span class="k">as</span> <span class="n">pt</span><span class="p">,</span> <span class="n">ancillary_functions</span> <span class="k">as</span> <span class="n">anf</span>
+
+
+<div class="viewcode-block" id="MarginalsCorrector"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector">[docs]</a><span class="k">class</span> <span class="nc">MarginalsCorrector</span><span class="p">(</span><span class="n">MarginalsAnalyzerBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the main class that uses correction data to reduce noise on the level of marginals_dictionary.</span>
+<span class="sd">    Main functionalities are to correct marginal distributions of some experiments.</span>
+
+<span class="sd">    NOTE: please see parent class MarginalsAnalyzerBase for conventions of experimental results storage</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">experimental_results_dictionary</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+                 <span class="n">bitstrings_right_to_left</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                 <span class="n">correction_data_dictionary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                 <span class="n">marginals_dictionary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
+                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param experimental_results_dictionary: dictionary of results of experiments we wish to correct</span>
+<span class="sd">        (see class&#39; description for conventions)</span>
+
+<span class="sd">        :param bitstrings_right_to_left: specify whether bitstrings</span>
+<span class="sd">                                    should be read from right to left (when interpreting qubit labels)</span>
+<span class="sd">        :param correction_data_dictionary: dictionary that contains information needed for noise</span>
+<span class="sd">                                           mitigation on marginal probability distributions.</span>
+
+
+<span class="sd">        :param marginals_dictionary: in case we pre-computed some marginal distributions</span>
+<span class="sd">                                     (see class&#39; description for conventions)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">experimental_results_dictionary</span><span class="p">,</span>
+                         <span class="n">bitstrings_right_to_left</span><span class="p">,</span>
+                         <span class="n">marginals_dictionary</span>
+                         <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices</span> <span class="o">=</span> <span class="n">correction_data_dictionary</span><span class="p">[</span><span class="s1">&#39;noise_matrices&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s1">&#39;correction_matrices&#39;</span> <span class="ow">in</span> <span class="n">correction_data_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_correction_matrices</span> <span class="o">=</span> <span class="n">correction_data_dictionary</span><span class="p">[</span><span class="s1">&#39;correction_matrices&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;No correction matrices provided!&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_correction_indices</span> <span class="o">=</span> <span class="n">correction_data_dictionary</span><span class="p">[</span><span class="s1">&#39;correction_indices&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_corrected_marginals</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">correction_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_correction_indices</span>
+
+    <span class="nd">@correction_indices</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">correction_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">correction_indices</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_correction_indices</span> <span class="o">=</span> <span class="n">correction_indices</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">corrected_marginals</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corrected_marginals</span>
+
+<div class="viewcode-block" id="MarginalsCorrector.get_specific_marginals_from_marginals_dictionary"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.get_specific_marginals_from_marginals_dictionary">[docs]</a>    <span class="k">def</span> <span class="nf">get_specific_marginals_from_marginals_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                         <span class="n">keys_of_interest</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                                                         <span class="n">corrected</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> \
+            <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;From dictionary of marginals_dictionary take only those which are in &quot;marginals_labels_hamiltonian&quot;.</span>
+<span class="sd">        Furthermore, for all keys, calculate also two-qubit and single-qubit marginals_dictionary for qubits</span>
+<span class="sd">        inside those marginals_dictionary.</span>
+
+<span class="sd">        :param keys_of_interest: list of strings representing qubit indices, e.g., &#39;q1q3q15&#39;</span>
+
+<span class="sd">        :return: marginals_of_interest : dictionary with marginal distributions for marginals_labels_hamiltonian</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">corrected</span><span class="p">:</span>
+            <span class="n">marginals_dictionary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corrected_marginals</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">marginals_dictionary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span>
+
+        <span class="n">marginals_of_interest</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">marginals_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">distribution_now</span> <span class="o">=</span> <span class="n">marginals_dictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys_of_interest</span><span class="p">:</span>
+                <span class="n">marginals_of_interest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">distribution_now</span>
+
+            <span class="n">qubits_here</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_qubit_indices_from_string</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">enumerated_qubits</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">qubits_here</span><span class="p">))</span>
+            <span class="n">rev_map</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">kkk</span><span class="p">,</span> <span class="n">vvv</span> <span class="ow">in</span> <span class="n">enumerated_qubits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">rev_map</span><span class="p">[</span><span class="n">vvv</span><span class="p">]</span> <span class="o">=</span> <span class="n">kkk</span>
+
+            <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">qubits_here</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">keys_of_interest</span><span class="p">:</span>
+                    <span class="n">marginals_of_interest</span><span class="p">[</span><span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">qi</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="bp">self</span><span class="o">.</span><span class="n">get_marginal_from_probability_distribution</span><span class="p">(</span>
+                            <span class="n">distribution_now</span><span class="p">,</span> <span class="p">[</span><span class="n">rev_map</span><span class="p">[</span><span class="n">qi</span><span class="p">]])</span>
+
+            <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">qubits_here</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">qj</span> <span class="ow">in</span> <span class="n">qubits_here</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">qi</span><span class="p">,</span> <span class="n">qj</span><span class="p">)</span> <span class="ow">in</span> <span class="n">keys_of_interest</span><span class="p">:</span>
+                        <span class="n">marginals_of_interest</span><span class="p">[</span>
+                            <span class="s1">&#39;q</span><span class="si">%s</span><span class="s1">q</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">qi</span><span class="p">,</span> <span class="n">qj</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_marginal_from_probability_distribution</span><span class="p">(</span>
+                            <span class="n">distribution_now</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">rev_map</span><span class="p">[</span><span class="n">qi</span><span class="p">],</span> <span class="n">rev_map</span><span class="p">[</span><span class="n">qj</span><span class="p">]]))</span>
+
+        <span class="k">return</span> <span class="n">marginals_of_interest</span></div>
+
+<div class="viewcode-block" id="MarginalsCorrector.correct_distribution_T_matrix"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_distribution_T_matrix">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">correct_distribution_T_matrix</span><span class="p">(</span><span class="n">distribution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                      <span class="n">correction_matrix</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                      <span class="n">ensure_physicality</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Correct probability distribution using multiplication via inverse of noise matrix.</span>
+<span class="sd">        See Refs. [0], [0.5].</span>
+
+<span class="sd">        :param distribution: noisy distribution</span>
+<span class="sd">        :param correction_matrix: correction matrix (inverse of noise matrix)</span>
+<span class="sd">        :param ensure_physicality: if True, then after correcting marginal distribution it ensures that</span>
+<span class="sd">                                    resulting vector has elements from [0,1]</span>
+
+<span class="sd">        :return: array representing corrected distribution</span>
+
+<span class="sd">        #TODO FBM: add option to return mitigation errors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Consistent formatting</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">distribution</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">distribution</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Wrong distribution format&quot;</span><span class="p">)</span>
+
+        <span class="n">distribution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">distribution</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># correct distribution using inverse of noise matrix</span>
+        <span class="n">quasi_distribution</span> <span class="o">=</span> <span class="n">correction_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">distribution</span><span class="p">)</span>
+
+        <span class="c1"># do we want to ensure resulting distribution is physical?</span>
+        <span class="k">if</span> <span class="n">ensure_physicality</span><span class="p">:</span>
+            <span class="c1"># if yes, check if it is physical</span>
+            <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">is_valid_probability_vector</span><span class="p">(</span><span class="n">quasi_distribution</span><span class="p">):</span>
+                <span class="c1"># if it is physical, no further action is required</span>
+                <span class="k">return</span> <span class="n">quasi_distribution</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># if it is not physical, find closest physical one</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pt</span><span class="o">.</span><span class="n">find_closest_prob_vector</span><span class="p">(</span><span class="n">quasi_distribution</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if we don&#39;t care about physicality, we don&#39;t do anything and just return vector</span>
+            <span class="k">return</span> <span class="n">quasi_distribution</span></div>
+
+<div class="viewcode-block" id="MarginalsCorrector.correct_distribution_IBU"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_distribution_IBU">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">correct_distribution_IBU</span><span class="p">(</span><span class="n">estimated_distribution</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                 <span class="n">noise_matrix</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                                 <span class="n">iterations_number</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                                 <span class="n">prior</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Correct probability distribution using Iterative Bayesian Unfolding (IBU)</span>
+<span class="sd">        See Ref. [1]</span>
+
+<span class="sd">        :param estimated_distribution: noisy distribution (to be corrected)</span>
+<span class="sd">        :param noise_matrix: noise matrix</span>
+<span class="sd">        :param iterations_number: number of iterations in unfolding</span>
+<span class="sd">        :param prior: ansatz for ideal distribution, default is uniform</span>
+
+<span class="sd">        :return: array representing corrected distribution</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Consistent formatting</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimated_distribution</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">estimated_distribution</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimated_distribution</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">estimated_distribution</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Wrong distribution format&quot;</span><span class="p">)</span>
+
+        <span class="c1"># default iterations number</span>
+        <span class="k">if</span> <span class="n">iterations_number</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">iterations_number</span> <span class="o">=</span> <span class="mi">25</span>
+
+        <span class="c1"># If no prior is provided, we take uniform distribution</span>
+        <span class="k">if</span> <span class="n">prior</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">prior</span> <span class="o">==</span> <span class="s1">&#39;uniform&#39;</span><span class="p">:</span>
+            <span class="n">prior</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">d</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">d</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="c1"># initialize distribution for recursive loop</span>
+        <span class="n">distribution_previous</span> <span class="o">=</span> <span class="n">prior</span>
+        <span class="c1"># go over iterations</span>
+        <span class="k">for</span> <span class="n">iteration_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations_number</span><span class="p">):</span>
+            <span class="n">distribution_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">d</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+            <span class="c1"># go over measurement outcomes</span>
+            <span class="k">for</span> <span class="n">outcome_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+                <span class="c1"># calculating IBU estimate</span>
+                <span class="n">distribution_new</span><span class="p">[</span><span class="n">outcome_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">noise_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">outcome_index</span><span class="p">]</span> <span class="o">*</span> <span class="n">distribution_previous</span><span class="p">[</span><span class="n">outcome_index</span><span class="p">]</span> <span class="o">*</span>
+                     <span class="n">estimated_distribution</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">noise_matrix</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">distribution_previous</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">)])</span>
+                     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span>
+                     <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">)])</span>
+            <span class="c1"># update distribution for recursion</span>
+            <span class="n">distribution_previous</span> <span class="o">=</span> <span class="n">distribution_new</span>
+
+        <span class="k">return</span> <span class="n">distribution_previous</span></div>
+
+    <span class="c1"># @staticmethod</span>
+<div class="viewcode-block" id="MarginalsCorrector.correct_distribution_hybrid_T_IBU"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_distribution_hybrid_T_IBU">[docs]</a>    <span class="k">def</span> <span class="nf">correct_distribution_hybrid_T_IBU</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                          <span class="n">estimated_distribution</span><span class="p">,</span>
+                                          <span class="n">noise_matrix</span><span class="p">,</span>
+                                          <span class="n">correction_matrix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                          <span class="n">unphysicality_threshold</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                                          <span class="n">iterations_number</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                          <span class="n">prior</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Correct distribution using method_name that is hybrid of T_matrix correction (see Refs. [0,0.5])</span>
+<span class="sd">        and Iterative Bayesian Unfolding (IBU) (see Ref. [1]).</span>
+
+<span class="sd">        Algorithm goes like this:</span>
+<span class="sd">        - Correct distribution using inverse of noise matrix.</span>
+<span class="sd">        - If distribution is physical (i_index.e., elements are from (0,1)), return it.</span>
+<span class="sd">        - Otherwise, perform IBU.</span>
+<span class="sd">        - [Optional] if parameter &quot;unphysicality_threshold&quot; is provided,</span>
+<span class="sd">           then it projects the result of &quot;T_matrix&quot; correction onto probability simplex</span>
+<span class="sd">           and if Total Variation Distance between this projected vector</span>
+<span class="sd">           and original unphysical one is belowthis cluster_threshold, then it returns the projection.</span>
+<span class="sd">           Otherwise, it performs IBU.</span>
+
+<span class="sd">        :param estimated_distribution: noisy distribution (to be corrected)</span>
+<span class="sd">        :param noise_matrix: noise matrix</span>
+<span class="sd">        :param correction_matrix: correction matrix (inverse of noise matrix)</span>
+<span class="sd">                                 if not provided, it is calculated from noise_matrix</span>
+<span class="sd">        :param unphysicality_threshold: cluster_threshold to decide whether unphysical &quot;T_matrix&quot;</span>
+<span class="sd">                                        correction is acceptable. See description of the function</span>
+<span class="sd">        :param iterations_number: number of iterations in IBU</span>
+<span class="sd">        :param prior: ansatz for ideal distribution in IBU, default is uniform</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimated_distribution</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">estimated_distribution</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimated_distribution</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">estimated_distribution</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Wrong distribution format&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">correction_matrix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">correction_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">noise_matrix</span><span class="p">)</span>
+
+        <span class="n">distribution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">estimated_distribution</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">quasi_distribution</span> <span class="o">=</span> <span class="n">correction_matrix</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">distribution</span><span class="p">)</span>
+
+        <span class="n">is_physical</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">is_valid_probability_vector</span><span class="p">(</span><span class="n">quasi_distribution</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_physical</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">quasi_distribution</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">unphysicality_threshold</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_distribution_IBU</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span>
+                                                     <span class="n">noise_matrix</span><span class="p">,</span>
+                                                     <span class="n">iterations_number</span><span class="p">,</span>
+                                                     <span class="n">prior</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">closest_physical</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">find_closest_prob_vector</span><span class="p">(</span><span class="n">quasi_distribution</span><span class="p">)</span>
+                <span class="n">distance_now</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">quasi_distribution</span> <span class="o">-</span> <span class="n">closest_physical</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">distance_now</span> <span class="o">&lt;=</span> <span class="n">unphysicality_threshold</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">closest_physical</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_distribution_IBU</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span>
+                                                         <span class="n">noise_matrix</span><span class="p">,</span>
+                                                         <span class="n">iterations_number</span><span class="p">,</span>
+                                                         <span class="n">prior</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MarginalsCorrector.correct_marginals"><a class="viewcode-back" href="../../../QREM.noise_mitigation.html#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_marginals">[docs]</a>    <span class="k">def</span> <span class="nf">correct_marginals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                          <span class="n">marginals_dictionary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">method</span><span class="o">=</span><span class="s1">&#39;T_matrix&#39;</span><span class="p">,</span>
+                          <span class="n">method_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+
+        <span class="sd">&quot;&quot;&quot;Return dictionary of corrected marignal distributions</span>
+<span class="sd">        :param marginals_dictionary: dictionary of (noisy) marginal distributions</span>
+<span class="sd">        :param method: method_name to be used for correction of marginal probability distributions</span>
+
+<span class="sd">        possible values:</span>
+<span class="sd">        - &#39;T_matrix&#39; - uses inverse of noise matrix as correction (see Refs. [0,0.5])</span>
+<span class="sd">        - &#39;IBU&#39; - uses Iterative Bayesian Unfolding (see Ref. [1])</span>
+<span class="sd">        - &#39;hybrid_T_IBU&#39; - uses hybrid method_name between &#39;T_matrix&#39; and &#39;IBU&#39;,</span>
+<span class="sd">                          see description of self.correct_distribution_hybrid_T_IBU</span>
+
+<span class="sd">        :param method_kwargs:  keyword arguments passed to function using chosen method_name.</span>
+<span class="sd">                               See description of specific functions.</span>
+
+<span class="sd">        :return: corrected_marginals : dictionary of corrected marginal distributions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO FBM: make it consistent with conventions used in parent class</span>
+        <span class="k">if</span> <span class="n">marginals_dictionary</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">marginals_dictionary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_marginals_dictionary</span>
+
+        <span class="n">corrected_marginals</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">marginals_dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+            <span class="n">noisy_marginal_now</span> <span class="o">=</span> <span class="n">marginals_dictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;T_matrix&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">method_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">method_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ensure_physicality&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+                <span class="n">corrected_marginal_now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_distribution_T_matrix</span><span class="p">(</span><span class="n">noisy_marginal_now</span><span class="p">,</span>
+                                                                            <span class="bp">self</span><span class="o">.</span><span class="n">_correction_matrices</span><span class="p">[</span>
+                                                                                <span class="n">key</span><span class="p">],</span>
+                                                                            <span class="o">**</span><span class="n">method_kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;IBU&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">method_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">method_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;iterations_number&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                                     <span class="s1">&#39;prior&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+
+                <span class="n">corrected_marginal_now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_distribution_IBU</span><span class="p">(</span><span class="n">noisy_marginal_now</span><span class="p">,</span>
+                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices</span><span class="p">[</span>
+                                                                           <span class="n">key</span><span class="p">],</span>
+                                                                       <span class="o">**</span><span class="n">method_kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;hybrid_T_IBU&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">method_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">method_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;unphysicality_threshold&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+                                     <span class="s1">&#39;iterations_number&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                                     <span class="s1">&#39;prior&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+
+                <span class="n">corrected_marginal_now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_distribution_hybrid_T_IBU</span><span class="p">(</span><span class="n">noisy_marginal_now</span><span class="p">,</span>
+                                                                                <span class="bp">self</span><span class="o">.</span><span class="n">_noise_matrices</span><span class="p">[</span>
+                                                                                    <span class="n">key</span><span class="p">],</span>
+                                                                                <span class="bp">self</span><span class="o">.</span><span class="n">_correction_matrices</span><span class="p">[</span>
+                                                                                    <span class="n">key</span><span class="p">],</span>
+                                                                                <span class="o">**</span><span class="n">method_kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Wrong method_name name&#39;</span><span class="p">)</span>
+
+            <span class="n">corrected_marginals</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">corrected_marginal_now</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_corrected_marginals</span> <span class="o">=</span> <span class="n">corrected_marginals</span>
+        <span class="k">return</span> <span class="n">corrected_marginals</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">QREM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

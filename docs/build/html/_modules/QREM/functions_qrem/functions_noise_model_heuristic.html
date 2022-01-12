@@ -1,0 +1,840 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QREM.functions_qrem.functions_noise_model_heuristic &#8212; QREM 0.56 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for QREM.functions_qrem.functions_noise_model_heuristic</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki</span>
+<span class="sd">@contact: filip.b.maciejewski@gmail.com</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">QREM.functions_qrem</span> <span class="k">import</span> <span class="n">functions_data_visualization</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+
+<div class="viewcode-block" id="InfinityException"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.InfinityException">[docs]</a><span class="k">class</span> <span class="nc">InfinityException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for handling infinity&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ClusterSizeError"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.ClusterSizeError">[docs]</a><span class="k">class</span> <span class="nc">ClusterSizeError</span><span class="p">(</span><span class="ne">NameError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for handling too small max cluster size&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1"># cluster size function. Assumes C_max&gt;=3. If not, raises exception.</span>
+<div class="viewcode-block" id="f_clust_sharp"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.f_clust_sharp">[docs]</a><span class="k">def</span> <span class="nf">f_clust_sharp</span><span class="p">(</span><span class="n">C_size</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">):</span>
+    <span class="c1"># if(C_max&lt;3):</span>
+    <span class="c1">#    raise ClusterSizeError</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">C_size</span> <span class="o">&gt;</span> <span class="n">C_maxsize</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InfinityException</span>
+    <span class="k">return</span> <span class="n">val</span></div>
+
+
+<span class="c1"># cluster size function. Assumes C_max&gt;=3. If not, raises exception.</span>
+<div class="viewcode-block" id="f_clust"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.f_clust">[docs]</a><span class="k">def</span> <span class="nf">f_clust</span><span class="p">(</span><span class="n">C_size</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">):</span>
+    <span class="c1"># if(C_max&lt;3):</span>
+    <span class="c1">#    raise ClusterSizeError</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">C_size</span> <span class="o">&gt;</span> <span class="n">C_maxsize</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InfinityException</span>
+    <span class="k">elif</span> <span class="n">C_size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">C_size</span> <span class="o">/</span> <span class="n">C_maxsize</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">val</span></div>
+
+
+<span class="c1"># average inter-cluster attractivness function S_{i_index,j}</span>
+<div class="viewcode-block" id="get_S_ij_av"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.get_S_ij_av">[docs]</a><span class="k">def</span> <span class="nf">get_S_ij_av</span><span class="p">(</span><span class="n">C_i</span><span class="p">,</span> <span class="n">C_j</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">):</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">C_i</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">C_j</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">val</span> <span class="o">+</span> <span class="p">(</span><span class="n">correlations_table</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span>
+                    <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">C_i</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">C_j</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">val</span></div>
+
+
+<span class="c1"># intra-cluster attractivness function S_{i_index}</span>
+<div class="viewcode-block" id="get_S_i"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.get_S_i">[docs]</a><span class="k">def</span> <span class="nf">get_S_i</span><span class="p">(</span><span class="n">C_i</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">C_i</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">C_i</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">C_i</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="n">l</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">val</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C_i</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C_i</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">val</span></div>
+
+
+<span class="c1"># intra-cluster cumulative attractivness function Sc_{i_index}</span>
+<div class="viewcode-block" id="get_Sc_i"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.get_Sc_i">[docs]</a><span class="k">def</span> <span class="nf">get_Sc_i</span><span class="p">(</span><span class="n">C_i</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">C_i</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">C_i</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">C_i</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="n">l</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">val</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">val</span></div>
+
+
+<div class="viewcode-block" id="cost_function_simple_cummulative"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.cost_function_simple_cummulative">[docs]</a><span class="k">def</span> <span class="nf">cost_function_simple_cummulative</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">):</span>
+    <span class="n">no_of_clusters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">C_i</span> <span class="ow">in</span> <span class="n">partition</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">val</span> <span class="o">-</span> <span class="n">f_clust_sharp</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C_i</span><span class="p">),</span> <span class="n">C_maxsize</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">InfinityException</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InfinityException</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">no_of_clusters</span><span class="p">):</span>
+        <span class="n">C_i</span> <span class="o">=</span> <span class="n">partition</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">S_i</span> <span class="o">=</span> <span class="n">get_Sc_i</span><span class="p">(</span><span class="n">C_i</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">)</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">val</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">S_i</span>
+    <span class="k">return</span> <span class="n">val</span></div>
+
+
+<span class="c1"># returns the value of cost function (simpler method_name; no badness) and S table - potentially_stochastic_matrix symmetric matrix which is defined by S_ij=S_ij_av (off-diagonal) and S_ii=S_i (diagonal). Raises error if minus infinity.</span>
+<div class="viewcode-block" id="cost_function_simple"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.cost_function_simple">[docs]</a><span class="k">def</span> <span class="nf">cost_function_simple</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">):</span>
+    <span class="n">no_of_clusters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">no_of_clusters</span><span class="p">,</span> <span class="n">no_of_clusters</span><span class="p">))</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">C_i</span> <span class="ow">in</span> <span class="n">partition</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">val</span> <span class="o">-</span> <span class="n">f_clust</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C_i</span><span class="p">),</span> <span class="n">C_maxsize</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InfinityException</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">no_of_clusters</span><span class="p">):</span>
+        <span class="n">C_i</span> <span class="o">=</span> <span class="n">partition</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">S_i</span> <span class="o">=</span> <span class="n">get_S_i</span><span class="p">(</span><span class="n">C_i</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">)</span>
+        <span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">S_i</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">val</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">S_i</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">no_of_clusters</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">no_of_clusters</span><span class="p">):</span>
+            <span class="n">C_i</span> <span class="o">=</span> <span class="n">partition</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">C_j</span> <span class="o">=</span> <span class="n">partition</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">S_ij</span> <span class="o">=</span> <span class="n">get_S_ij_av</span><span class="p">(</span><span class="n">C_i</span><span class="p">,</span> <span class="n">C_j</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">)</span>
+            <span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">S_ij</span>
+            <span class="n">S</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">S_ij</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">val</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">S_ij</span>
+    <span class="k">return</span> <span class="n">val</span><span class="p">,</span> <span class="n">S</span></div>
+
+
+<div class="viewcode-block" id="evaluate_move_operation_naive_cummulative"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_move_operation_naive_cummulative">[docs]</a><span class="k">def</span> <span class="nf">evaluate_move_operation_naive_cummulative</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">,</span>
+                                              <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">):</span>
+    <span class="n">partition_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+    <span class="n">val1</span> <span class="o">=</span> <span class="n">cost_function_simple_cummulative</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+    <span class="n">make_move_operation</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">)</span>
+    <span class="c1"># print(S_1)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">val2</span> <span class="o">=</span> <span class="n">cost_function_simple_cummulative</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">InfinityException</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">val2</span> <span class="o">-</span> <span class="n">val1</span>
+    <span class="k">return</span> <span class="n">diff</span><span class="p">,</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="evaluate_move_operation_naive"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_move_operation_naive">[docs]</a><span class="k">def</span> <span class="nf">evaluate_move_operation_naive</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span>
+                                  <span class="n">C_maxsize</span><span class="p">,</span> <span class="n">S</span><span class="p">):</span>
+    <span class="n">partition_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+    <span class="n">val1</span><span class="p">,</span> <span class="n">S_1</span> <span class="o">=</span> <span class="n">cost_function_simple</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+    <span class="c1"># print(S_1)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;deletion&quot;</span><span class="p">)</span>
+        <span class="n">S_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">S_1</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">S_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">S_1</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">make_move_operation</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">)</span>
+    <span class="c1"># print(S_1)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">val2</span><span class="p">,</span> <span class="n">S_2</span> <span class="o">=</span> <span class="n">cost_function_simple</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">InfinityException</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">val2</span> <span class="o">-</span> <span class="n">val1</span>
+    <span class="n">dS</span> <span class="o">=</span> <span class="n">S_2</span> <span class="o">-</span> <span class="n">S_1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">S_2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">diff</span><span class="p">,</span> <span class="n">dS</span><span class="p">,</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="evaluate_swap_operation_naive_cummulative"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_swap_operation_naive_cummulative">[docs]</a><span class="k">def</span> <span class="nf">evaluate_swap_operation_naive_cummulative</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_l</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">,</span>
+                                              <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">):</span>
+    <span class="n">partition_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+    <span class="n">val1</span> <span class="o">=</span> <span class="n">cost_function_simple_cummulative</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+    <span class="n">make_swap_operation</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_l</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">)</span>
+    <span class="n">val2</span> <span class="o">=</span> <span class="n">cost_function_simple_cummulative</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">val2</span> <span class="o">-</span> <span class="n">val1</span>
+    <span class="k">return</span> <span class="n">diff</span></div>
+
+
+<div class="viewcode-block" id="evaluate_swap_operation_naive"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_swap_operation_naive">[docs]</a><span class="k">def</span> <span class="nf">evaluate_swap_operation_naive</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_l</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">,</span>
+                                  <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">,</span> <span class="n">S</span><span class="p">):</span>
+    <span class="n">partition_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+    <span class="n">val1</span><span class="p">,</span> <span class="n">S_1</span> <span class="o">=</span> <span class="n">cost_function_simple</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+    <span class="n">make_swap_operation</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_l</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">)</span>
+    <span class="n">val2</span><span class="p">,</span> <span class="n">S_2</span> <span class="o">=</span> <span class="n">cost_function_simple</span><span class="p">(</span><span class="n">partition_copy</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">val2</span> <span class="o">-</span> <span class="n">val1</span>
+    <span class="n">dS</span> <span class="o">=</span> <span class="n">S_2</span> <span class="o">-</span> <span class="n">S_1</span>
+    <span class="k">return</span> <span class="n">diff</span><span class="p">,</span> <span class="n">dS</span></div>
+
+
+<span class="c1"># returns the change of cost function cost_function_simple after potentially_stochastic_matrix move operation (qubit k from C_i to C_j) on clusters.</span>
+<div class="viewcode-block" id="evaluate_move_operation"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_move_operation">[docs]</a><span class="k">def</span> <span class="nf">evaluate_move_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span>
+                            <span class="n">C_maxsize</span><span class="p">,</span> <span class="n">S</span><span class="p">):</span>
+    <span class="n">no_of_clusters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+    <span class="n">dS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">no_of_clusters</span><span class="p">,</span> <span class="n">no_of_clusters</span><span class="p">))</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">C_i</span> <span class="o">=</span> <span class="n">partition</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">]</span>
+    <span class="n">C_j</span> <span class="o">=</span> <span class="n">partition</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">]</span>
+    <span class="n">c_i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">C_i</span><span class="p">)</span>
+    <span class="n">c_j</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">C_j</span><span class="p">)</span>
+
+    <span class="c1"># intra attraction part</span>
+    <span class="n">dS_intra</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">c_i</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">index_q</span> <span class="ow">in</span> <span class="n">C_i</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index_q</span> <span class="o">==</span> <span class="n">index_k</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_k</span><span class="p">][</span><span class="n">index_q</span><span class="p">]</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_q</span><span class="p">][</span><span class="n">index_k</span><span class="p">]</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="o">-</span><span class="n">psum</span> <span class="o">/</span> <span class="p">((</span><span class="n">c_i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">c_i</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">+</span> <span class="p">(</span><span class="n">c_i</span> <span class="o">*</span> <span class="p">(</span><span class="n">c_i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">c_i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">c_i</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">S</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="o">-</span><span class="n">S</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">]</span>
+
+    <span class="n">dS</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum</span>
+    <span class="n">dS_intra</span> <span class="o">=</span> <span class="n">dS_intra</span> <span class="o">+</span> <span class="n">psum</span>
+
+    <span class="n">psum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">sum_k_q_C_j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">index_q</span> <span class="ow">in</span> <span class="n">C_j</span><span class="p">:</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_k</span><span class="p">][</span><span class="n">index_q</span><span class="p">]</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_q</span><span class="p">][</span><span class="n">index_k</span><span class="p">]</span>
+    <span class="n">sum_k_q_C_j</span> <span class="o">=</span> <span class="n">psum</span>
+    <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">/</span> <span class="p">((</span><span class="n">c_j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">c_j</span><span class="p">)</span>
+    <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">+</span> <span class="p">(</span><span class="n">c_j</span> <span class="o">*</span> <span class="p">(</span><span class="n">c_j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">c_j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">c_j</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">S</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">]</span>
+    <span class="n">dS</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum</span>
+    <span class="n">dS_intra</span> <span class="o">=</span> <span class="n">dS_intra</span> <span class="o">+</span> <span class="n">psum</span>
+
+    <span class="c1"># inter attraction part</span>
+    <span class="n">dS_inter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">index_C_m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">partition</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">index_C_m</span> <span class="ow">in</span> <span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="n">C_m</span> <span class="o">=</span> <span class="n">partition</span><span class="p">[</span><span class="n">index_C_m</span><span class="p">]</span>
+        <span class="n">c_m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">C_m</span><span class="p">)</span>
+
+        <span class="n">psum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">index_q</span> <span class="ow">in</span> <span class="n">C_m</span><span class="p">:</span>
+            <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_k</span><span class="p">][</span><span class="n">index_q</span><span class="p">]</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_q</span><span class="p">][</span><span class="n">index_k</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">c_i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">psum1</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">c_m</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">c_i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">psum</span> <span class="o">+</span> <span class="p">(</span><span class="n">c_i</span> <span class="o">*</span> <span class="n">c_m</span> <span class="o">/</span> <span class="p">((</span><span class="n">c_i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">c_m</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> \
+                    <span class="n">S</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_m</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">psum1</span> <span class="o">=</span> <span class="o">-</span><span class="n">S</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_m</span><span class="p">]</span>
+        <span class="n">dS</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_m</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum1</span>
+        <span class="n">dS</span><span class="p">[</span><span class="n">index_C_m</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum1</span>
+        <span class="n">psum2</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">c_m</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">c_j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">psum</span> <span class="o">+</span> <span class="p">(</span><span class="n">c_j</span> <span class="o">*</span> <span class="n">c_m</span> <span class="o">/</span> <span class="p">((</span><span class="n">c_j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">c_m</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">S</span><span class="p">[</span>
+            <span class="n">index_C_j</span><span class="p">,</span> <span class="n">index_C_m</span><span class="p">]</span>
+        <span class="n">dS</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">,</span> <span class="n">index_C_m</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum2</span>
+        <span class="n">dS</span><span class="p">[</span><span class="n">index_C_m</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum2</span>
+        <span class="n">dS_inter</span> <span class="o">=</span> <span class="n">dS_inter</span> <span class="o">+</span> <span class="n">psum1</span> <span class="o">+</span> <span class="n">psum2</span>
+
+    <span class="n">psum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">c_i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">index_q</span> <span class="ow">in</span> <span class="n">C_i</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index_q</span> <span class="o">==</span> <span class="n">index_k</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_k</span><span class="p">][</span><span class="n">index_q</span><span class="p">]</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_q</span><span class="p">][</span><span class="n">index_k</span><span class="p">]</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">c_i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">c_j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span> <span class="o">*</span> <span class="p">(</span><span class="n">psum</span> <span class="o">-</span> <span class="n">sum_k_q_C_j</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="n">c_i</span> <span class="o">*</span> <span class="n">c_j</span> <span class="o">/</span> <span class="p">((</span><span class="n">c_i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">c_j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">S</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="o">-</span><span class="n">S</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">]</span>
+
+    <span class="n">dS</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum</span>
+    <span class="n">dS</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum</span>
+    <span class="n">dS_inter</span> <span class="o">=</span> <span class="n">dS_inter</span> <span class="o">+</span> <span class="n">psum</span>
+
+    <span class="c1"># cluster function part</span>
+    <span class="n">dS_clust</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dS_clust</span> <span class="o">=</span> <span class="n">f_clust</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C_i</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span> <span class="o">+</span> <span class="n">f_clust</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C_j</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span> <span class="o">-</span> <span class="n">f_clust</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">C_i</span><span class="p">),</span> <span class="n">C_maxsize</span><span class="p">)</span> <span class="o">-</span> <span class="n">f_clust</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C_j</span><span class="p">),</span> <span class="n">C_maxsize</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">InfinityException</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">diff</span><span class="p">,</span> <span class="n">dS</span><span class="p">,</span> <span class="kc">False</span>
+
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">dS_intra</span> <span class="o">-</span> <span class="n">dS_inter</span><span class="p">)</span> <span class="o">-</span> <span class="n">dS_clust</span>
+
+    <span class="k">return</span> <span class="n">diff</span><span class="p">,</span> <span class="n">dS</span><span class="p">,</span> <span class="kc">True</span></div>
+
+
+<span class="c1"># returns the change of cost function cost_function_simple after potentially_stochastic_matrix swap operation (qubit k from C_i wilh qubit l_index from C_j) on clusters.</span>
+<span class="c1"># TODO: values do not match the naive method_name - find an error!</span>
+<div class="viewcode-block" id="evaluate_swap_operation"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_swap_operation">[docs]</a><span class="k">def</span> <span class="nf">evaluate_swap_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_l</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span>
+                            <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">,</span> <span class="n">S</span><span class="p">):</span>
+    <span class="c1"># cluster function part - contrubutes zero</span>
+    <span class="c1"># intra attraction part</span>
+    <span class="n">no_of_clusters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+    <span class="n">dS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">no_of_clusters</span><span class="p">,</span> <span class="n">no_of_clusters</span><span class="p">))</span>
+    <span class="n">dS_intra</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">C_i</span> <span class="o">=</span> <span class="n">partition</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">]</span>
+    <span class="n">C_j</span> <span class="o">=</span> <span class="n">partition</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">]</span>
+    <span class="n">c_i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">C_i</span><span class="p">)</span>
+    <span class="n">c_j</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">C_j</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">c_i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">index_q</span> <span class="ow">in</span> <span class="n">C_i</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index_q</span> <span class="o">==</span> <span class="n">index_k</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_q</span><span class="p">][</span><span class="n">index_l</span><span class="p">]</span> <span class="o">-</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_q</span><span class="p">][</span><span class="n">index_k</span><span class="p">]</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">c_i</span> <span class="o">*</span> <span class="p">(</span><span class="n">c_i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">dS</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum</span>
+        <span class="n">dS_intra</span> <span class="o">=</span> <span class="n">dS_intra</span> <span class="o">+</span> <span class="n">psum</span>
+
+    <span class="k">if</span> <span class="n">c_j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">index_q</span> <span class="ow">in</span> <span class="n">C_j</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index_q</span> <span class="o">==</span> <span class="n">index_l</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_q</span><span class="p">][</span><span class="n">index_k</span><span class="p">]</span> <span class="o">-</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_q</span><span class="p">][</span><span class="n">index_l</span><span class="p">]</span>
+        <span class="n">dS</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">][</span><span class="n">index_C_j</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">c_j</span> <span class="o">*</span> <span class="p">(</span><span class="n">c_j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">dS_intra</span> <span class="o">=</span> <span class="n">dS_intra</span> <span class="o">+</span> <span class="n">psum</span>
+
+    <span class="c1"># inter attraction part</span>
+    <span class="n">dS_inter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">index_C_m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">partition</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">index_C_m</span> <span class="ow">in</span> <span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="n">C_m</span> <span class="o">=</span> <span class="n">partition</span><span class="p">[</span><span class="n">index_C_m</span><span class="p">]</span>
+        <span class="n">c_m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">C_m</span><span class="p">)</span>
+
+        <span class="n">psum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">index_q</span> <span class="ow">in</span> <span class="n">C_m</span><span class="p">:</span>
+            <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_l</span><span class="p">][</span><span class="n">index_q</span><span class="p">]</span> <span class="o">-</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_k</span><span class="p">][</span><span class="n">index_q</span><span class="p">]</span>
+        <span class="n">psum1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">c_m</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">c_i</span><span class="p">)</span> <span class="o">*</span> <span class="n">psum</span>
+        <span class="n">psum2</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">c_m</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">c_j</span><span class="p">)</span> <span class="o">*</span> <span class="n">psum</span>
+        <span class="n">dS</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_m</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum1</span>
+        <span class="n">dS</span><span class="p">[</span><span class="n">index_C_m</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum1</span>
+        <span class="n">dS</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">,</span> <span class="n">index_C_m</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum2</span>
+        <span class="n">dS</span><span class="p">[</span><span class="n">index_C_m</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum2</span>
+        <span class="n">dS_inter</span> <span class="o">=</span> <span class="n">dS_inter</span> <span class="o">+</span> <span class="n">psum1</span> <span class="o">+</span> <span class="n">psum2</span>
+
+    <span class="n">psum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">index_q</span> <span class="ow">in</span> <span class="n">C_j</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">index_q</span> <span class="o">==</span> <span class="n">index_l</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">+</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_l</span><span class="p">][</span><span class="n">index_q</span><span class="p">]</span> <span class="o">-</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_k</span><span class="p">][</span><span class="n">index_q</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">index_q</span> <span class="ow">in</span> <span class="n">C_i</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">index_q</span> <span class="o">==</span> <span class="n">index_k</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">-</span> <span class="p">(</span><span class="n">correlations_table</span><span class="p">[</span><span class="n">index_l</span><span class="p">][</span><span class="n">index_q</span><span class="p">]</span> <span class="o">-</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">index_k</span><span class="p">][</span><span class="n">index_q</span><span class="p">])</span>
+    <span class="n">psum</span> <span class="o">=</span> <span class="n">psum</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">c_i</span> <span class="o">*</span> <span class="n">c_j</span><span class="p">))</span>
+    <span class="n">dS</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum</span>
+    <span class="n">dS</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">psum</span>
+    <span class="n">dS_inter</span> <span class="o">=</span> <span class="n">dS_inter</span> <span class="o">+</span> <span class="n">psum</span>
+
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">dS_intra</span> <span class="o">-</span> <span class="n">dS_inter</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">diff</span><span class="p">,</span> <span class="n">dS</span></div>
+
+
+<div class="viewcode-block" id="get_initial_partition"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.get_initial_partition">[docs]</a><span class="k">def</span> <span class="nf">get_initial_partition</span><span class="p">(</span><span class="n">correlations_table</span><span class="p">):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">correlations_table</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">CL</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">val1</span> <span class="o">=</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+            <span class="n">val2</span> <span class="o">=</span> <span class="n">correlations_table</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">val1</span> <span class="o">&gt;</span> <span class="n">val2</span><span class="p">):</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">val1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">val2</span>
+            <span class="n">CL</span><span class="o">.</span><span class="n">update</span><span class="p">({(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span> <span class="n">val</span><span class="p">})</span>
+    <span class="c1"># print(CL)</span>
+    <span class="n">partition</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">qubits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">qubits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">pair</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">CL</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">key</span><span class="p">:</span> <span class="n">CL</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># print(i_index,j)</span>
+        <span class="n">partition</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">CL</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="c1"># print(keys)</span>
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="c1"># print(str(pair)+&quot;keys:&quot;+str(i_index)+str(j))</span>
+            <span class="k">if</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="ow">or</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]:</span>
+                <span class="c1"># print(&quot;popping&quot;+str(pair))</span>
+                <span class="n">CL</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">pair</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">qubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">qubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">qubits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">partition</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="k">return</span> <span class="n">partition</span></div>
+
+
+<div class="viewcode-block" id="return_cluster_index"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.return_cluster_index">[docs]</a><span class="k">def</span> <span class="nf">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">target_qubit</span><span class="p">):</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="n">partition</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">cluster</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">qubit</span> <span class="o">==</span> <span class="n">target_qubit</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">index</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">index</span></div>
+
+
+<div class="viewcode-block" id="make_move_operation"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.make_move_operation">[docs]</a><span class="k">def</span> <span class="nf">make_move_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">):</span>
+    <span class="c1"># partition[index_C_i].remove(index_k)</span>
+    <span class="n">partition</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index_k</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">partition</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">partition</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index_C_i</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">partition</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">index_k</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="make_swap_operation"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.make_swap_operation">[docs]</a><span class="k">def</span> <span class="nf">make_swap_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_l</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">):</span>
+    <span class="n">partition</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">index_k</span><span class="p">)</span>
+    <span class="n">partition</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index_l</span><span class="p">)</span>
+    <span class="n">partition</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">index_l</span><span class="p">)</span>
+    <span class="n">partition</span><span class="p">[</span><span class="n">index_C_j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index_k</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="partition_algorithm_v1"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.partition_algorithm_v1">[docs]</a><span class="k">def</span> <span class="nf">partition_algorithm_v1</span><span class="p">(</span><span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">,</span> <span class="n">N_alg</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">C_maxsize</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: max cluster size has to be at least 3!. Algorithm terminated.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">initial_partition</span> <span class="o">=</span> <span class="n">get_initial_partition</span><span class="p">(</span><span class="n">correlations_table</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">initial_partition</span><span class="p">)</span>
+    <span class="n">functions_data_visualization</span><span class="o">.</span><span class="n">print_partition</span><span class="p">(</span><span class="n">initial_partition</span><span class="p">)</span>
+    <span class="n">init_cf</span><span class="p">,</span> <span class="n">init_S</span> <span class="o">=</span> <span class="n">cost_function_simple</span><span class="p">(</span><span class="n">initial_partition</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;initial value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_cf</span><span class="p">))</span>
+    <span class="n">no_of_qubits</span> <span class="o">=</span> <span class="n">correlations_table</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># results=dict()</span>
+    <span class="n">global_best_parition</span> <span class="o">=</span> <span class="n">initial_partition</span>
+    <span class="n">global_best_value</span> <span class="o">=</span> <span class="n">init_cf</span>
+    <span class="k">for</span> <span class="n">attempt_no</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_alg</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;attempt: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">attempt_no</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">partition</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">initial_partition</span><span class="p">)</span>
+        <span class="n">best_cf</span> <span class="o">=</span> <span class="n">init_cf</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">curr_cf</span> <span class="o">=</span> <span class="n">init_cf</span>
+        <span class="n">curr_S</span> <span class="o">=</span> <span class="n">init_S</span>
+        <span class="n">epoch_no</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">curr_cf</span> <span class="o">&gt;</span> <span class="n">best_cf</span><span class="p">:</span>
+            <span class="n">epoch_no</span> <span class="o">=</span> <span class="n">epoch_no</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">best_cf</span> <span class="o">=</span> <span class="n">curr_cf</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting epoch: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch_no</span><span class="p">))</span>
+            <span class="n">pairs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">no_of_qubits</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">no_of_qubits</span><span class="p">):</span>
+                    <span class="n">pairs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">val_of_ops</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="n">pair</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+                <span class="n">pairs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pair: &quot;</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
+                <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">index_C_i</span> <span class="o">==</span> <span class="n">index_C_j</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WRONG PAIR - SKIP&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">index_k</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">val1</span><span class="p">,</span> <span class="n">dS1</span><span class="p">,</span> <span class="n">not_neg_infty</span> <span class="o">=</span> <span class="n">evaluate_move_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span>
+                                                                   <span class="n">index_C_j</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span>
+                                                                   <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">,</span> <span class="n">curr_S</span><span class="p">)</span>
+                <span class="n">val1_true</span><span class="p">,</span> <span class="n">dS1_true</span><span class="p">,</span> <span class="n">not_neg_infty_true</span> <span class="o">=</span> <span class="n">evaluate_move_operation_naive</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span>
+                                                                                        <span class="n">index_k</span><span class="p">,</span>
+                                                                                        <span class="n">index_C_i</span><span class="p">,</span>
+                                                                                        <span class="n">index_C_j</span><span class="p">,</span>
+                                                                                        <span class="n">correlations_table</span><span class="p">,</span>
+                                                                                        <span class="n">alpha</span><span class="p">,</span>
+                                                                                        <span class="n">C_maxsize</span><span class="p">,</span>
+                                                                                        <span class="n">curr_S</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;checking move &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_C_i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_k</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">index_C_j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, result: &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, size_leq_C_max: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">not_neg_infty</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, true_res:&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val1_true</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">val1</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">not_neg_infty</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;update&quot;</span><span class="p">)</span>
+                    <span class="n">val_of_ops</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;move_ij&#39;</span><span class="p">:</span> <span class="n">val1</span><span class="p">})</span>
+                <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">index_k</span> <span class="o">=</span> <span class="n">j</span>
+                <span class="n">val2</span><span class="p">,</span> <span class="n">dS2</span><span class="p">,</span> <span class="n">not_neg_infty</span> <span class="o">=</span> <span class="n">evaluate_move_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span>
+                                                                   <span class="n">index_C_j</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span>
+                                                                   <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">,</span> <span class="n">curr_S</span><span class="p">)</span>
+                <span class="n">val2_true</span><span class="p">,</span> <span class="n">dS2_true</span><span class="p">,</span> <span class="n">not_neg_infty_true</span> <span class="o">=</span> <span class="n">evaluate_move_operation_naive</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span>
+                                                                                        <span class="n">index_k</span><span class="p">,</span>
+                                                                                        <span class="n">index_C_i</span><span class="p">,</span>
+                                                                                        <span class="n">index_C_j</span><span class="p">,</span>
+                                                                                        <span class="n">correlations_table</span><span class="p">,</span>
+                                                                                        <span class="n">alpha</span><span class="p">,</span>
+                                                                                        <span class="n">C_maxsize</span><span class="p">,</span>
+                                                                                        <span class="n">curr_S</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;checking move &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_C_i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_k</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">index_C_j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, result: &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, size_leq_C_max: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">not_neg_infty</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, true_res:&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val2_true</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">val2</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">not_neg_infty</span><span class="p">:</span>
+                    <span class="n">val_of_ops</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;move_ji&#39;</span><span class="p">:</span> <span class="n">val2</span><span class="p">})</span>
+                <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                <span class="n">index_k</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">index_l</span> <span class="o">=</span> <span class="n">j</span>
+                <span class="n">val3</span><span class="p">,</span> <span class="n">dS3</span> <span class="o">=</span> <span class="n">evaluate_swap_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_l</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">,</span>
+                                                    <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">,</span> <span class="n">curr_S</span><span class="p">)</span>
+                <span class="n">val3_true</span><span class="p">,</span> <span class="n">dS3_true</span> <span class="o">=</span> <span class="n">evaluate_swap_operation_naive</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_l</span><span class="p">,</span>
+                                                                    <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">,</span>
+                                                                    <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span>
+                                                                    <span class="n">C_maxsize</span><span class="p">,</span> <span class="n">curr_S</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;checking swap &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_C_i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&lt;-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_k</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&amp;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">index_l</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_C_j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, result: &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">val3</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, size_leq_C_max: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">not_neg_infty</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, true_res:&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val3_true</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">val3</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">val_of_ops</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;swap&#39;</span><span class="p">:</span> <span class="n">val3</span><span class="p">})</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_of_ops</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ACCEPT:&quot;</span><span class="p">)</span>
+                    <span class="n">op</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">val_of_ops</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">key</span><span class="p">:</span> <span class="n">val_of_ops</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;move_ij&#39;</span><span class="p">):</span>
+                        <span class="n">dS</span> <span class="o">=</span> <span class="n">dS1</span>
+                        <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                        <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                        <span class="n">index_k</span> <span class="o">=</span> <span class="n">i</span>
+                        <span class="n">c_i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">partition</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">])</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MOVE_ij&quot;</span><span class="p">)</span>
+                        <span class="n">make_move_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+                        <span class="n">curr_cf</span> <span class="o">=</span> <span class="n">curr_cf</span> <span class="o">+</span> <span class="n">val_of_ops</span><span class="p">[</span><span class="n">op</span><span class="p">]</span>
+                        <span class="n">curr_S</span> <span class="o">=</span> <span class="n">curr_S</span> <span class="o">+</span> <span class="n">dS</span>
+                        <span class="k">if</span> <span class="n">c_i</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">curr_S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">curr_S</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                            <span class="n">curr_S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">curr_S</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;move_ji&#39;</span><span class="p">):</span>
+                        <span class="n">dS</span> <span class="o">=</span> <span class="n">dS2</span>
+                        <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                        <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                        <span class="n">index_k</span> <span class="o">=</span> <span class="n">j</span>
+                        <span class="n">c_i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">partition</span><span class="p">[</span><span class="n">index_C_i</span><span class="p">])</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MOVE_ji&quot;</span><span class="p">)</span>
+                        <span class="n">make_move_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+                        <span class="n">curr_cf</span> <span class="o">=</span> <span class="n">curr_cf</span> <span class="o">+</span> <span class="n">val_of_ops</span><span class="p">[</span><span class="n">op</span><span class="p">]</span>
+                        <span class="n">curr_S</span> <span class="o">=</span> <span class="n">curr_S</span> <span class="o">+</span> <span class="n">dS</span>
+                        <span class="k">if</span> <span class="n">c_i</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">curr_S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">curr_S</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                            <span class="n">curr_S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">curr_S</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">dS</span> <span class="o">=</span> <span class="n">dS3</span>
+                        <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                        <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                        <span class="n">index_k</span> <span class="o">=</span> <span class="n">i</span>
+                        <span class="n">index_l</span> <span class="o">=</span> <span class="n">j</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SWAP&quot;</span><span class="p">)</span>
+                        <span class="n">make_swap_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_l</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+                        <span class="n">curr_cf</span> <span class="o">=</span> <span class="n">curr_cf</span> <span class="o">+</span> <span class="n">val_of_ops</span><span class="p">[</span><span class="n">op</span><span class="p">]</span>
+                        <span class="n">curr_S</span> <span class="o">=</span> <span class="n">curr_S</span> <span class="o">+</span> <span class="n">dS</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;REJECT ALL&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;convergence to: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_cf</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; after &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch_no</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; epochs&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">best_cf</span> <span class="o">&gt;</span> <span class="n">global_best_value</span><span class="p">):</span>
+            <span class="n">global_best_parition</span> <span class="o">=</span> <span class="n">partition</span>
+            <span class="n">global_best_value</span> <span class="o">=</span> <span class="n">best_cf</span>
+        <span class="c1"># results.update({partition:best_cf})</span>
+    <span class="c1"># best_attempt=op=max(results, key=lambda key: results[key])</span>
+    <span class="k">return</span> <span class="n">global_best_parition</span><span class="p">,</span> <span class="n">global_best_value</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="partition_algorithm_v1_cummulative"><a class="viewcode-back" href="../../../QREM.functions_qrem.html#QREM.functions_qrem.functions_noise_model_heuristic.partition_algorithm_v1_cummulative">[docs]</a><span class="k">def</span> <span class="nf">partition_algorithm_v1_cummulative</span><span class="p">(</span><span class="n">correlations_table</span><span class="p">,</span>
+                                       <span class="n">alpha</span><span class="p">,</span>
+                                       <span class="n">C_maxsize</span><span class="p">,</span>
+                                       <span class="n">N_alg</span><span class="p">,</span>
+                                       <span class="n">printing</span><span class="p">,</span>
+                                       <span class="n">drawing</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">C_maxsize</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: max cluster size has to be at least 2 ! Algorithm terminated.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">initial_partition</span> <span class="o">=</span> <span class="n">get_initial_partition</span><span class="p">(</span><span class="n">correlations_table</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;initial partition:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">initial_partition</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">drawing</span><span class="p">:</span>
+        <span class="n">functions_data_visualization</span><span class="o">.</span><span class="n">print_partition</span><span class="p">(</span><span class="n">initial_partition</span><span class="p">)</span>
+    <span class="n">init_cf</span> <span class="o">=</span> <span class="n">cost_function_simple_cummulative</span><span class="p">(</span><span class="n">initial_partition</span><span class="p">,</span> <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;initial value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">init_cf</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">C_maxsize</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">initial_partition</span><span class="p">,</span> <span class="n">init_cf</span>
+
+    <span class="n">no_of_qubits</span> <span class="o">=</span> <span class="n">correlations_table</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># results=dict()</span>
+    <span class="n">global_best_parition</span> <span class="o">=</span> <span class="n">initial_partition</span>
+    <span class="n">global_best_value</span> <span class="o">=</span> <span class="n">init_cf</span>
+    <span class="k">for</span> <span class="n">attempt_no</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N_alg</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;attempt: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">attempt_no</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">partition</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">initial_partition</span><span class="p">)</span>
+        <span class="n">best_cf</span> <span class="o">=</span> <span class="n">init_cf</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">curr_cf</span> <span class="o">=</span> <span class="n">init_cf</span>
+        <span class="n">epoch_no</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">curr_cf</span> <span class="o">&gt;</span> <span class="n">best_cf</span><span class="p">:</span>
+            <span class="n">epoch_no</span> <span class="o">=</span> <span class="n">epoch_no</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">best_cf</span> <span class="o">=</span> <span class="n">curr_cf</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting epoch: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch_no</span><span class="p">))</span>
+            <span class="n">pairs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">no_of_qubits</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">no_of_qubits</span><span class="p">):</span>
+                    <span class="n">pairs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">val_of_ops</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="n">pair</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+                <span class="n">pairs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pair: &quot;</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
+                <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">index_C_i</span> <span class="o">==</span> <span class="n">index_C_j</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WRONG PAIR - SKIP&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">index_k</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="c1"># val1, dS1, not_neg_infty=evaluate_move_operation(partition, index_k, index_C_i, index_C_j, correlations_table_quantum, alpha, C_maxsize, curr_S)</span>
+                <span class="n">val1</span><span class="p">,</span> <span class="n">not_neg_infty</span> <span class="o">=</span> <span class="n">evaluate_move_operation_naive_cummulative</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span>
+                                                                                <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">,</span>
+                                                                                <span class="n">correlations_table</span><span class="p">,</span>
+                                                                                <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;checking move &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_C_i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_k</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                        <span class="n">index_C_j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, result: &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">val1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, size_leq_C_max: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">not_neg_infty</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">val1</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">not_neg_infty</span><span class="p">:</span>
+                    <span class="n">val_of_ops</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;move_ij&#39;</span><span class="p">:</span> <span class="n">val1</span><span class="p">})</span>
+                <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">index_k</span> <span class="o">=</span> <span class="n">j</span>
+                <span class="c1"># val2, dS2, not_neg_infty=evaluate_move_operation(partition, index_k, index_C_i, index_C_j, correlations_table_quantum, alpha, C_maxsize, curr_S)</span>
+                <span class="n">val2</span><span class="p">,</span> <span class="n">not_neg_infty</span> <span class="o">=</span> <span class="n">evaluate_move_operation_naive_cummulative</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span>
+                                                                                <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">,</span>
+                                                                                <span class="n">correlations_table</span><span class="p">,</span>
+                                                                                <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;checking move &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_C_i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_k</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                        <span class="n">index_C_j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, result: &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">val2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, size_leq_C_max: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">not_neg_infty</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">val2</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">not_neg_infty</span><span class="p">:</span>
+                    <span class="n">val_of_ops</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;move_ji&#39;</span><span class="p">:</span> <span class="n">val2</span><span class="p">})</span>
+                <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                <span class="n">index_k</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">index_l</span> <span class="o">=</span> <span class="n">j</span>
+                <span class="c1"># val3, dS3=evaluate_swap_operation(partition, index_k, index_l, index_C_i, index_C_j, correlations_table_quantum, alpha, C_maxsize, curr_S)</span>
+                <span class="n">val3</span> <span class="o">=</span> <span class="n">evaluate_swap_operation_naive_cummulative</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_l</span><span class="p">,</span>
+                                                                 <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">,</span>
+                                                                 <span class="n">correlations_table</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">C_maxsize</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;checking swap &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_C_i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&lt;-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_k</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&amp;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                        <span class="n">index_l</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_C_j</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, result: &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{:.5f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">val3</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">, size_leq_C_max: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">not_neg_infty</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">val3</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">val_of_ops</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;swap&#39;</span><span class="p">:</span> <span class="n">val3</span><span class="p">})</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_of_ops</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ACCEPT:&quot;</span><span class="p">)</span>
+                    <span class="n">op</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">val_of_ops</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">key</span><span class="p">:</span> <span class="n">val_of_ops</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;move_ij&#39;</span><span class="p">):</span>
+                        <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                        <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                        <span class="n">index_k</span> <span class="o">=</span> <span class="n">i</span>
+                        <span class="n">make_move_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MOVE_ij&quot;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+                        <span class="n">curr_cf</span> <span class="o">=</span> <span class="n">curr_cf</span> <span class="o">+</span> <span class="n">val_of_ops</span><span class="p">[</span><span class="n">op</span><span class="p">]</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;move_ji&#39;</span><span class="p">):</span>
+                        <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                        <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                        <span class="n">index_k</span> <span class="o">=</span> <span class="n">j</span>
+                        <span class="n">make_move_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MOVE_ji&quot;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+                        <span class="n">curr_cf</span> <span class="o">=</span> <span class="n">curr_cf</span> <span class="o">+</span> <span class="n">val_of_ops</span><span class="p">[</span><span class="n">op</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">index_C_i</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                        <span class="n">index_C_j</span> <span class="o">=</span> <span class="n">return_cluster_index</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                        <span class="n">index_k</span> <span class="o">=</span> <span class="n">i</span>
+                        <span class="n">index_l</span> <span class="o">=</span> <span class="n">j</span>
+                        <span class="n">make_swap_operation</span><span class="p">(</span><span class="n">partition</span><span class="p">,</span> <span class="n">index_k</span><span class="p">,</span> <span class="n">index_l</span><span class="p">,</span> <span class="n">index_C_i</span><span class="p">,</span> <span class="n">index_C_j</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SWAP&quot;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+                        <span class="n">curr_cf</span> <span class="o">=</span> <span class="n">curr_cf</span> <span class="o">+</span> <span class="n">val_of_ops</span><span class="p">[</span><span class="n">op</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;REJECT ALL&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">printing</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;convergence to: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_cf</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; after &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch_no</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; epochs&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">best_cf</span> <span class="o">&gt;</span> <span class="n">global_best_value</span><span class="p">):</span>
+            <span class="n">global_best_parition</span> <span class="o">=</span> <span class="n">partition</span>
+            <span class="n">global_best_value</span> <span class="o">=</span> <span class="n">best_cf</span>
+        <span class="c1"># results.update({partition:best_cf})</span>
+    <span class="c1"># best_attempt=op=max(results, key=lambda key: results[key])</span>
+
+    <span class="n">global_best_parition_sorted</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sorted</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span> <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="n">global_best_parition</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">global_best_parition_sorted</span><span class="p">,</span> <span class="n">global_best_value</span></div>
+
+
+<span class="c1"># TESTING</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">printing=False</span>
+<span class="sd">drawing=False</span>
+
+<span class="sd">C=10</span>
+<span class="sd">alpha=1</span>
+<span class="sd">C_maxsize=6</span>
+<span class="sd">N_alg=1000</span>
+<span class="sd">noise=0.3</span>
+
+<span class="sd">correlations_table_quantum=np.full((10, 10), noise)</span>
+
+<span class="sd">for i_index in range(10):</span>
+<span class="sd">    correlations_table_quantum[i_index][i_index]=0</span>
+
+<span class="sd">correlations_table_quantum[0][1]=0.9</span>
+<span class="sd">correlations_table_quantum[1][0]=0.9</span>
+<span class="sd">correlations_table_quantum[0][2]=0.9</span>
+<span class="sd">correlations_table_quantum[2][0]=0.9</span>
+<span class="sd">correlations_table_quantum[1][2]=0.9</span>
+<span class="sd">correlations_table_quantum[2][1]=0.9</span>
+<span class="sd">correlations_table_quantum[3][4]=0.7</span>
+<span class="sd">correlations_table_quantum[4][3]=0.7</span>
+<span class="sd">correlations_table_quantum[3][5]=0.7</span>
+<span class="sd">correlations_table_quantum[5][3]=0.7</span>
+<span class="sd">correlations_table_quantum[4][5]=0.7</span>
+<span class="sd">correlations_table_quantum[5][4]=0.7</span>
+<span class="sd">correlations_table_quantum[6][7]=0.5</span>
+<span class="sd">correlations_table_quantum[7][6]=0.5</span>
+<span class="sd">correlations_table_quantum[8][9]=0.4</span>
+<span class="sd">correlations_table_quantum[9][8]=0.4</span>
+
+<span class="sd">correlations_table_quantum=correlations_table_quantum/C</span>
+
+<span class="sd">if(printing):</span>
+<span class="sd">    print(&quot;correlations table:&quot;)</span>
+<span class="sd">    print(correlations_table_quantum)</span>
+
+<span class="sd">partition, score=partition_algorithm_v1_cummulative(correlations_table_quantum, alpha, C_maxsize, N_alg, printing, drawing)</span>
+
+<span class="sd">print(&quot;final partition:&quot;)</span>
+<span class="sd">print(partition)</span>
+<span class="sd">print(&quot;final value: &quot;+str(score))</span>
+<span class="sd">if(drawing):</span>
+<span class="sd">    functions_data_visualization.print_partition(partition)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">QREM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

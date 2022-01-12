@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QREM.noise_mitigation package &mdash; QREM 0.56 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> QREM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">QREM.noise_mitigation package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_mitigation.CorrectionDataGenerator">QREM.noise_mitigation.CorrectionDataGenerator module</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_mitigation.MarginalsCorrector">QREM.noise_mitigation.MarginalsCorrector module</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_mitigation.QDTErrorMitigator">QREM.noise_mitigation.QDTErrorMitigator module</a></li>
+<li><a class="reference internal" href="#module-QREM.noise_mitigation">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QREM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>QREM.noise_mitigation package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/QREM.noise_mitigation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qrem-noise-mitigation-package">
+<h1>QREM.noise_mitigation package<a class="headerlink" href="#qrem-noise-mitigation-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-QREM.noise_mitigation.CorrectionDataGenerator">
+<span id="qrem-noise-mitigation-correctiondatagenerator-module"></span><h2>QREM.noise_mitigation.CorrectionDataGenerator module<a class="headerlink" href="#module-QREM.noise_mitigation.CorrectionDataGenerator" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>REFERENCES:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+“Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography”,
+Quantum 4, 257 (2020)</p>
+<p>[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
+“Modeling and mitigation of cross-talk effects in readout noise
+with applications to the Quantum Approximate Optimization Algorithm”,
+Quantum 5, 464 (2021).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.CorrectionDataGenerator.CorrectionDataGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.noise_mitigation.CorrectionDataGenerator.</span></span><span class="sig-name descname"><span class="pre">CorrectionDataGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dictionary_ddt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bitstrings_right_to_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginals_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighborhoods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_matrices_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_mitigation/CorrectionDataGenerator.html#CorrectionDataGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.CorrectionDataGenerator.CorrectionDataGenerator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="QREM.noise_characterization.modeling.html#QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator" title="QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">QREM.noise_characterization.modeling.NoiseModelGenerator.NoiseModelGenerator</span></code></a></p>
+<p>Main class used to calculate data needed for noise-mitigation on marginals_dictionary, based on provided
+noise model.</p>
+<dl class="simple">
+<dt>NOTE: Currently it handles properly only two-qubit marginals_dictionary (e.g., experiments involving</dt><dd><p>estimation of 2-local Hamiltonians)</p>
+</dd>
+</dl>
+<p>The correction data consists of the following:
+- :param: ‘correction_indices’ - for each marginal of interest (e.g., ‘q0q1’), specify label for</p>
+<blockquote>
+<div><p>marginal that needs to be corrected and then coarse-grained in order
+to perform noise-mitigation. For example, if q0 is strongly correlated
+with q5 (i.e., they are in the same cluster), it is advisable to first
+perform noise mitigation on marginal ‘q0q1q5’, and then coarse-grain
+it to obtain ‘q0q1’.</p>
+<p>The format we use here is dictionary where KEY is label for marginal
+of interest, and VALUE is label for marginal that needs to be
+calculated first.
+So the entry for example above would look like:
+correction_indices[‘q0q1’] = ‘q0q1q5’</p>
+</div></blockquote>
+<ul>
+<li><dl class="field-list">
+<dt class="field-odd">param</dt>
+<dd class="field-odd"><p>‘noise_matrices’ - the noise matrices representing effective noise matrix acting on marginals_dictionary
+specified by values of correction_indices dictionary</p>
+<p>This is dictionary where KEY is subset label and VALUE is noise matrix</p>
+</dd>
+</dl>
+</li>
+<li><dl class="field-list simple">
+<dt class="field-odd">param</dt>
+<dd class="field-odd"><p>‘correction_matrices’ - inverses of noise_matrices, convention used is the same</p>
+</dd>
+</dl>
+</li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.CorrectionDataGenerator.CorrectionDataGenerator.get_pairs_correction_data">
+<span class="sig-name descname"><span class="pre">get_pairs_correction_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pairs_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_progress_bar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="_modules/QREM/noise_mitigation/CorrectionDataGenerator.html#CorrectionDataGenerator.get_pairs_correction_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.CorrectionDataGenerator.CorrectionDataGenerator.get_pairs_correction_data" title="Permalink to this definition"></a></dt>
+<dd><p>For pairs of qubits in the list, get correction data required
+to correct corresponding two-qubit marginals_dictionary.
+NOTE: see class’ description for details</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pairs_list</strong> – </p></li>
+<li><p><strong>show_progress_bar</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>correction_data_dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-QREM.noise_mitigation.MarginalsCorrector">
+<span id="qrem-noise-mitigation-marginalscorrector-module"></span><h2>QREM.noise_mitigation.MarginalsCorrector module<a class="headerlink" href="#module-QREM.noise_mitigation.MarginalsCorrector" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.noise_mitigation.MarginalsCorrector.</span></span><span class="sig-name descname"><span class="pre">MarginalsCorrector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experimental_results_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bitstrings_right_to_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction_data_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginals_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_mitigation/MarginalsCorrector.html#MarginalsCorrector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="QREM.base_classes.html#QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase" title="QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">QREM.base_classes.marginals_analyzer_base.MarginalsAnalyzerBase</span></code></a></p>
+<p>This is the main class that uses correction data to reduce noise on the level of marginals_dictionary.
+Main functionalities are to correct marginal distributions of some experiments.</p>
+<p>NOTE: please see parent class MarginalsAnalyzerBase for conventions of experimental results storage</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_distribution_IBU">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">correct_distribution_IBU</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimated_distribution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_mitigation/MarginalsCorrector.html#MarginalsCorrector.correct_distribution_IBU"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_distribution_IBU" title="Permalink to this definition"></a></dt>
+<dd><p>Correct probability distribution using Iterative Bayesian Unfolding (IBU)
+See Ref. [1]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>estimated_distribution</strong> – noisy distribution (to be corrected)</p></li>
+<li><p><strong>noise_matrix</strong> – noise matrix</p></li>
+<li><p><strong>iterations_number</strong> – number of iterations in unfolding</p></li>
+<li><p><strong>prior</strong> – ansatz for ideal distribution, default is uniform</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array representing corrected distribution</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_distribution_T_matrix">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">correct_distribution_T_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distribution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensure_physicality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_mitigation/MarginalsCorrector.html#MarginalsCorrector.correct_distribution_T_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_distribution_T_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>Correct probability distribution using multiplication via inverse of noise matrix.
+See Refs. [0], [0.5].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distribution</strong> – noisy distribution</p></li>
+<li><p><strong>correction_matrix</strong> – correction matrix (inverse of noise matrix)</p></li>
+<li><p><strong>ensure_physicality</strong> – if True, then after correcting marginal distribution it ensures that
+resulting vector has elements from [0,1]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array representing corrected distribution</p>
+</dd>
+</dl>
+<p>#TODO FBM: add option to return mitigation errors</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_distribution_hybrid_T_IBU">
+<span class="sig-name descname"><span class="pre">correct_distribution_hybrid_T_IBU</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimated_distribution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unphysicality_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_mitigation/MarginalsCorrector.html#MarginalsCorrector.correct_distribution_hybrid_T_IBU"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_distribution_hybrid_T_IBU" title="Permalink to this definition"></a></dt>
+<dd><p>Correct distribution using method_name that is hybrid of T_matrix correction (see Refs. [0,0.5])
+and Iterative Bayesian Unfolding (IBU) (see Ref. [1]).</p>
+<p>Algorithm goes like this:
+- Correct distribution using inverse of noise matrix.
+- If distribution is physical (i_index.e., elements are from (0,1)), return it.
+- Otherwise, perform IBU.
+- [Optional] if parameter “unphysicality_threshold” is provided,</p>
+<blockquote>
+<div><p>then it projects the result of “T_matrix” correction onto probability simplex
+and if Total Variation Distance between this projected vector
+and original unphysical one is belowthis cluster_threshold, then it returns the projection.
+Otherwise, it performs IBU.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>estimated_distribution</strong> – noisy distribution (to be corrected)</p></li>
+<li><p><strong>noise_matrix</strong> – noise matrix</p></li>
+<li><p><strong>correction_matrix</strong> – correction matrix (inverse of noise matrix)
+if not provided, it is calculated from noise_matrix</p></li>
+<li><p><strong>unphysicality_threshold</strong> – cluster_threshold to decide whether unphysical “T_matrix”
+correction is acceptable. See description of the function</p></li>
+<li><p><strong>iterations_number</strong> – number of iterations in IBU</p></li>
+<li><p><strong>prior</strong> – ansatz for ideal distribution in IBU, default is uniform</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_marginals">
+<span class="sig-name descname"><span class="pre">correct_marginals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">marginals_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'T_matrix'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/noise_mitigation/MarginalsCorrector.html#MarginalsCorrector.correct_marginals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correct_marginals" title="Permalink to this definition"></a></dt>
+<dd><p>Return dictionary of corrected marignal distributions
+:param marginals_dictionary: dictionary of (noisy) marginal distributions
+:param method: method_name to be used for correction of marginal probability distributions</p>
+<p>possible values:
+- ‘T_matrix’ - uses inverse of noise matrix as correction (see Refs. [0,0.5])
+- ‘IBU’ - uses Iterative Bayesian Unfolding (see Ref. [1])
+- ‘hybrid_T_IBU’ - uses hybrid method_name between ‘T_matrix’ and ‘IBU’,</p>
+<blockquote>
+<div><p>see description of self.correct_distribution_hybrid_T_IBU</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>method_kwargs</strong> – keyword arguments passed to function using chosen method_name.
+See description of specific functions.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>corrected_marginals : dictionary of corrected marginal distributions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.corrected_marginals">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corrected_marginals</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.corrected_marginals" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correction_indices">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">correction_indices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.correction_indices" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.get_specific_marginals_from_marginals_dictionary">
+<span class="sig-name descname"><span class="pre">get_specific_marginals_from_marginals_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys_of_interest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/noise_mitigation/MarginalsCorrector.html#MarginalsCorrector.get_specific_marginals_from_marginals_dictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.MarginalsCorrector.MarginalsCorrector.get_specific_marginals_from_marginals_dictionary" title="Permalink to this definition"></a></dt>
+<dd><p>From dictionary of marginals_dictionary take only those which are in “marginals_labels_hamiltonian”.
+Furthermore, for all keys, calculate also two-qubit and single-qubit marginals_dictionary for qubits
+inside those marginals_dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>keys_of_interest</strong> – list of strings representing qubit indices, e.g., ‘q1q3q15’</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>marginals_of_interest : dictionary with marginal distributions for marginals_labels_hamiltonian</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-QREM.noise_mitigation.QDTErrorMitigator">
+<span id="qrem-noise-mitigation-qdterrormitigator-module"></span><h2>QREM.noise_mitigation.QDTErrorMitigator module<a class="headerlink" href="#module-QREM.noise_mitigation.QDTErrorMitigator" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.noise_mitigation.QDTErrorMitigator.</span></span><span class="sig-name descname"><span class="pre">QDTErrorMitigator</span></span><a class="reference internal" href="_modules/QREM/noise_mitigation/QDTErrorMitigator.html#QDTErrorMitigator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class is used to mitigate errors in qiskit jobs_list using data from QDT.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator.apply_correction_to_qiskit_job">
+<span class="sig-name descname"><span class="pre">apply_correction_to_qiskit_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">qiskit.result.result.Result</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/noise_mitigation/QDTErrorMitigator.html#QDTErrorMitigator.apply_correction_to_qiskit_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator.apply_correction_to_qiskit_job" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Description:</dt><dd><p>Given correction matrix and vector of relative frequencies, correct the statistics via multiplication by
+correction_matrix.</p>
+<p>In case of obtaining quasiprobability vector after such correction, it is possible to find closest physical
+one (in Euclidean norm). Total Variation distance between quasi probability vector and closest physical one
+is the upper bound for the correction error resulting from this unphysicality. See Ref. [1] for details. In
+Ref.[1], such distance is denoted as lpha.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param results</dt>
+<dd class="field-odd"><p>Qiskit job results for which statistics should be corrected.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>Corrected statistics.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator.apply_correction_to_statistics">
+<span class="sig-name descname"><span class="pre">apply_correction_to_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statistics_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/noise_mitigation/QDTErrorMitigator.html#QDTErrorMitigator.apply_correction_to_statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator.apply_correction_to_statistics" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Description:</dt><dd><p>Given correction matrix and vector of relative frequencies, correct the statistics via multiplication by
+correction_matrix.</p>
+<p>In case of obtaining quasiprobability vector after such correction, it is possible to find closest physical
+one (in Euclidean norm). Total Variation distance between quasi probability vector and closest physical one
+is the upper bound for the correction error resulting from this unphysicality. See Ref. [1] for details. In
+Ref.[1], such distance is denoted as lpha.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param statistics_array</dt>
+<dd class="field-odd"><p>Statistics for which correction should be performed.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>Corrected statistics.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator.prepare_mitigator">
+<span class="sig-name descname"><span class="pre">prepare_mitigator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">povm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/QREM/noise_mitigation/QDTErrorMitigator.html#QDTErrorMitigator.prepare_mitigator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.noise_mitigation.QDTErrorMitigator.QDTErrorMitigator.prepare_mitigator" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>This method_name is main method_name of the class. It is used to prepare the mitigation matrix from POVM. Other
+methods allow to calculate errors.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param povm</dt>
+<dd class="field-odd"><p>POVM describing the detector used in measurements of which statistics are meant to be
+corrected.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><ul class="simple">
+<li></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-QREM.noise_mitigation">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-QREM.noise_mitigation" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

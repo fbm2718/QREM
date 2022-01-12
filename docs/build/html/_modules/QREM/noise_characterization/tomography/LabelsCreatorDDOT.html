@@ -1,0 +1,506 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QREM.noise_characterization.tomography.LabelsCreatorDDOT &#8212; QREM 0.56 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for QREM.noise_characterization.tomography.LabelsCreatorDDOT</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki</span>
+<span class="sd">@contact: filip.b.maciejewski@gmail.com</span>
+
+<span class="sd">REFERENCES:</span>
+<span class="sd">[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="sd">&quot;Mitigation of readout noise in near-term quantum devices</span>
+<span class="sd">by classical post-processing based on detector tomography&quot;,</span>
+<span class="sd">Quantum 4, 257 (2020)</span>
+
+<span class="sd">[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,</span>
+<span class="sd">&quot;Modeling and mitigation of cross-talk effects in readout noise</span>
+<span class="sd">with applications to the Quantum Approximate Optimization Algorithm&quot;,</span>
+<span class="sd">Quantum 5, 464 (2021).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">QREM.noise_characterization.tomography.LabelsBaseDDOT</span> <span class="k">import</span> <span class="n">LabelsBaseDDOT</span>
+<span class="kn">from</span> <span class="nn">QREM.functions_qrem</span> <span class="k">import</span> <span class="n">ancillary_functions</span> <span class="k">as</span> <span class="n">anf</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="k">import</span> <span class="n">binom</span> <span class="k">as</span> <span class="n">binomial_coefficient</span>
+
+
+<div class="viewcode-block" id="LabelsCreatorDDOT"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT">[docs]</a><span class="k">class</span> <span class="nc">LabelsCreatorDDOT</span><span class="p">(</span><span class="n">LabelsBaseDDOT</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for creating symbolic description of Diagonal Detector Overlapping Tomography (DDOT)</span>
+<span class="sd">    circuits.</span>
+
+<span class="sd">    Description of a single circuit is simply a bitstring denoting classical input state.</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">number_of_qubits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">maximal_circuits_amount</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1500</span><span class="p">,</span>
+                 <span class="n">subsets_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">subsets_locality</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">show_progress_bars</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                 <span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param number_of_qubits:</span>
+<span class="sd">        :param subsets_list: list of subsets of qubits for which marginal tomography</span>
+<span class="sd">                             should be performed</span>
+<span class="sd">                             NOTE: for tomography which is to be performed NOT on ALL subsets</span>
+<span class="sd">                             of given locality, this must be provided</span>
+
+<span class="sd">        :param subsets_locality: locality of ALL considered subsets</span>
+<span class="sd">                                 NOTE: this should be provided only if ALL subsets have the same</span>
+<span class="sd">                                       locality</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">subsets_list</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">subsets_locality</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Please provide subsets list or desired locality&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">subsets_list</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">subsets_locality</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">subsets_list</span> <span class="o">=</span> <span class="n">anf</span><span class="o">.</span><span class="n">get_k_local_subsets</span><span class="p">(</span><span class="n">number_of_qubits</span><span class="o">=</span><span class="n">number_of_qubits</span><span class="p">,</span>
+                                                   <span class="n">locality</span><span class="o">=</span><span class="n">subsets_locality</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">number_of_qubits</span><span class="o">=</span><span class="n">number_of_qubits</span><span class="p">,</span>
+                         <span class="n">subsets</span><span class="o">=</span><span class="n">subsets_list</span><span class="p">,</span>
+                         <span class="n">maximal_circuits_amount</span><span class="o">=</span><span class="n">maximal_circuits_amount</span><span class="p">,</span>
+                         <span class="n">show_progress_bars</span><span class="o">=</span><span class="n">show_progress_bars</span>
+
+                         <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subsets_locality</span> <span class="o">=</span> <span class="n">subsets_locality</span>
+        <span class="k">if</span> <span class="n">subsets_locality</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_elements_in_perfect_collection</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="n">binomial_coefficient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_number_of_qubits</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">_subsets_locality</span><span class="p">)</span> <span class="o">*</span>
+                <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsets_locality</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_elements_in_perfect_collection</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span>
+                <span class="p">[</span><span class="mi">2</span> <span class="o">**</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset_now</span><span class="p">)</span> <span class="k">for</span> <span class="n">subset_now</span> <span class="ow">in</span> <span class="n">subsets_list</span><span class="p">]))</span>
+
+        <span class="n">dictionary_symbols_counting</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">subset_list</span><span class="p">):</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset_list</span><span class="p">),</span>
+                                                       <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="k">for</span>
+            <span class="n">subset_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsets</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dictionary_symbols_counting</span> <span class="o">=</span> <span class="n">dictionary_symbols_counting</span>
+
+        <span class="n">circuits_properties_dictionary</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;number_of_circuits&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;absent_elements_amount&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">,</span>
+                                          <span class="s1">&#39;minimal_amount&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">,</span>
+                                          <span class="s1">&#39;maximal_amount&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">,</span>
+                                          <span class="s1">&#39;median&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">,</span>
+                                          <span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">,</span>
+                                          <span class="s1">&#39;SD&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span> <span class="o">=</span> <span class="n">circuits_properties_dictionary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dictionary_symbols_counting</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dictionary_symbols_counting</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">circuits_properties_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">circuits_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_list</span>
+
+    <span class="nd">@circuits_list</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">circuits_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">circuits_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_everything</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_list</span> <span class="o">=</span> <span class="n">circuits_list</span>
+
+<div class="viewcode-block" id="LabelsCreatorDDOT.add_dictionary_subsets_symbols_counting_template"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.add_dictionary_subsets_symbols_counting_template">[docs]</a>    <span class="k">def</span> <span class="nf">add_dictionary_subsets_symbols_counting_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dictionary_symbols_counting</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">subset_list</span><span class="p">):</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset_list</span><span class="p">),</span>
+                                                       <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="k">for</span>
+            <span class="n">subset_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsets</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dictionary_symbols_counting</span> <span class="o">=</span> <span class="n">dictionary_symbols_counting</span></div>
+
+<div class="viewcode-block" id="LabelsCreatorDDOT.update_dictionary_subsets_symbols_counting"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.update_dictionary_subsets_symbols_counting">[docs]</a>    <span class="k">def</span> <span class="nf">update_dictionary_subsets_symbols_counting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                   <span class="n">circuits_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                                   <span class="n">count_added_subcircuits</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">circuits_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">circuits_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_list</span>
+
+        <span class="n">subsets_range</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subsets</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_show_progress_bars</span><span class="p">:</span>
+            <span class="n">subsets_range</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">subsets_range</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">count_added_subcircuits</span><span class="p">:</span>
+            <span class="n">added_subcircuits_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">added_subcircuits_counter</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">subset_index</span> <span class="ow">in</span> <span class="n">subsets_range</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">circuit</span> <span class="ow">in</span> <span class="n">circuits_list</span><span class="p">:</span>
+
+                <span class="n">qubits_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subsets</span><span class="p">[</span><span class="n">subset_index</span><span class="p">])</span>
+                <span class="n">subset_circuit_identifier</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                    <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">circuit</span><span class="p">[</span><span class="n">qubit_index</span><span class="p">])</span> <span class="k">for</span> <span class="n">qubit_index</span> <span class="ow">in</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_subsets</span><span class="p">[</span><span class="n">subset_index</span><span class="p">]]),</span><span class="mi">2</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">count_added_subcircuits</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dictionary_symbols_counting</span><span class="p">[</span><span class="n">qubits_key</span><span class="p">][</span><span class="n">subset_circuit_identifier</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">added_subcircuits_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dictionary_symbols_counting</span><span class="p">[</span><span class="n">qubits_key</span><span class="p">][</span><span class="n">subset_circuit_identifier</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">count_added_subcircuits</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">added_subcircuits_counter</span></div>
+
+<div class="viewcode-block" id="LabelsCreatorDDOT.get_absent_symbols_amount"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.get_absent_symbols_amount">[docs]</a>    <span class="k">def</span> <span class="nf">get_absent_symbols_amount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">zero_subsets</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsets</span><span class="p">:</span>
+            <span class="n">subset_counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dictionary_symbols_counting</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">subset</span><span class="p">)]</span>
+            <span class="n">zero_subsets</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset_counts</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">subset_counts</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;absent_elements_amount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero_subsets</span>
+        <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;This took:&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">zero_subsets</span></div>
+
+<div class="viewcode-block" id="LabelsCreatorDDOT.calculate_properties_of_circuits"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.calculate_properties_of_circuits">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_properties_of_circuits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">big_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsets</span><span class="p">:</span>
+            <span class="n">big_list</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dictionary_symbols_counting</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">subset</span><span class="p">)])</span>
+
+        <span class="n">minimal_amount</span><span class="p">,</span> <span class="n">maximal_amount</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">big_list</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">big_list</span><span class="p">)</span>
+
+        <span class="n">big_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">big_list</span><span class="p">)</span>
+
+        <span class="n">mean</span><span class="p">,</span> <span class="n">SD</span><span class="p">,</span> <span class="n">median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">big_list</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">big_list</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">big_list</span><span class="p">)</span>
+
+        <span class="n">absent_elements_amount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">big_list</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">big_list</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;number_of_circuits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_circuits_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;absent_elements_amount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">absent_elements_amount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;minimal_amount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">minimal_amount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;maximal_amount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">maximal_amount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;median&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">median</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;SD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SD</span></div>
+
+<div class="viewcode-block" id="LabelsCreatorDDOT.reset_everything"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.reset_everything">[docs]</a>    <span class="k">def</span> <span class="nf">reset_everything</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">circuits_properties_dictionary</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;number_of_circuits&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                          <span class="s1">&#39;absent_elements_amount&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">,</span>
+                                          <span class="s1">&#39;minimal_amount&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">,</span>
+                                          <span class="s1">&#39;maximal_amount&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">,</span>
+                                          <span class="s1">&#39;median&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">,</span>
+                                          <span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">,</span>
+                                          <span class="s1">&#39;SD&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span> <span class="o">=</span> <span class="n">circuits_properties_dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">dictionary_symbols_counting</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_qubits_key</span><span class="p">(</span><span class="n">subset_list</span><span class="p">):</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset_list</span><span class="p">),</span>
+                                                       <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="k">for</span>
+            <span class="n">subset_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsets</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dictionary_symbols_counting</span> <span class="o">=</span> <span class="n">dictionary_symbols_counting</span></div>
+
+    <span class="k">def</span> <span class="nf">_cost_function_circuits_amount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_circuits_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_cost_function_circuits_SD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;SD&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_cost_function_minimal_amount_of_circuits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;minimal_amount&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_cost_function_absent_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;absent_elements_amount&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_cost_function_maximal_spread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;maximal_amount&#39;</span><span class="p">]</span> <span class="o">-</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;minimal_amount&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_compute_perfect_collection_bruteforce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                               <span class="n">circuits_in_batch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                                               <span class="n">print_updates</span><span class="p">:</span> <span class="nb">bool</span>
+                                               <span class="p">):</span>
+
+        <span class="n">runs_number</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">absent_elements_amount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements_in_perfect_collection</span>
+
+        <span class="k">while</span> <span class="n">absent_elements_amount</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">runs_number</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maximal_circuits_amount</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">runs_number</span> <span class="o">%</span> <span class="mi">20</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">print_updates</span><span class="p">:</span>
+                <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;Run number:&#39;</span><span class="p">,</span> <span class="n">runs_number</span><span class="p">)</span>
+                <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;Number of circuits:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_circuits_list</span><span class="p">))</span>
+                <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;Absent elements amount:&#39;</span><span class="p">,</span> <span class="n">absent_elements_amount</span><span class="p">)</span>
+
+            <span class="n">circuits_now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_random_circuits</span><span class="p">(</span><span class="n">circuits_in_batch</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_circuits</span><span class="p">(</span><span class="n">circuits_now</span><span class="p">)</span>
+
+            <span class="n">added_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_dictionary_subsets_symbols_counting</span><span class="p">(</span>
+                <span class="n">circuits_list</span><span class="o">=</span><span class="n">circuits_now</span><span class="p">,</span>
+                <span class="n">count_added_subcircuits</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">absent_elements_amount</span> <span class="o">-=</span> <span class="n">added_elements</span>
+
+            <span class="n">runs_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_get_proper_cost_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                  <span class="n">optimized_quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">optimized_quantity</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;circuits_amount&#39;</span><span class="p">,</span> <span class="s1">&#39;circuits_number&#39;</span><span class="p">,</span> <span class="s1">&#39;amount&#39;</span><span class="p">,</span> <span class="s1">&#39;circuits&#39;</span><span class="p">]:</span>
+            <span class="n">cost_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cost_function_circuits_amount</span>
+        <span class="k">elif</span> <span class="n">optimized_quantity</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">,</span> <span class="s1">&#39;SD&#39;</span><span class="p">,</span> <span class="s1">&#39;standard_deviation&#39;</span><span class="p">]:</span>
+            <span class="n">cost_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cost_function_circuits_SD</span>
+        <span class="k">elif</span> <span class="n">optimized_quantity</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;minimal_amount&#39;</span><span class="p">]:</span>
+            <span class="n">cost_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cost_function_minimal_amount_of_circuits</span>
+        <span class="k">elif</span> <span class="n">optimized_quantity</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;spread&#39;</span><span class="p">,</span> <span class="s1">&#39;maximal_spread&#39;</span><span class="p">]:</span>
+            <span class="n">cost_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cost_function_maximal_spread</span>
+        <span class="k">elif</span> <span class="n">optimized_quantity</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;absent&#39;</span><span class="p">,</span> <span class="s1">&#39;absent_elements&#39;</span><span class="p">]:</span>
+            <span class="n">cost_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cost_function_absent_elements</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Wrong optimized quantity string: &#39;</span> <span class="o">+</span> <span class="n">optimized_quantity</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cost_function</span>
+
+    <span class="k">def</span> <span class="nf">_add_cost_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                            <span class="n">dictionary_cost_functions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+
+        <span class="k">def</span> <span class="nf">cost_functions_added</span><span class="p">():</span>
+            <span class="n">returned_quantity</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">function_label</span><span class="p">,</span> <span class="n">function_weight</span> <span class="ow">in</span> <span class="n">dictionary_cost_functions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">returned_quantity</span> <span class="o">+=</span> <span class="n">function_weight</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_proper_cost_function</span><span class="p">(</span><span class="n">function_label</span><span class="p">)()</span>
+            <span class="k">return</span> <span class="n">returned_quantity</span>
+
+        <span class="k">return</span> <span class="n">cost_functions_added</span>
+
+    <span class="k">def</span> <span class="nf">_compute_perfect_collection_bruteforce_randomized</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                          <span class="n">number_of_iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                                                          <span class="n">circuits_in_batch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                                                          <span class="n">print_updates</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                                                          <span class="n">optimized_quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+                                                              <span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+                                                          <span class="n">additional_circuits</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                                                          <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function implements self._compute_perfect_collection_bruteforce</span>
+<span class="sd">        for number_of_iterations times, then adds additional_circuits number of random circuits,</span>
+<span class="sd">        computes cost function and chooses the family that minimizes cost function.</span>
+
+<span class="sd">        :param number_of_iterations: how many times random perfect family should be generated</span>
+<span class="sd">        :param circuits_in_batch: see self._compute_perfect_collection_bruteforce</span>
+<span class="sd">        :param print_updates: whether to print updates during optimization</span>
+<span class="sd">        :param optimized_quantity: specify what cost function is</span>
+<span class="sd">        Possible string values:</span>
+<span class="sd">        1. &#39;minimal_amount&#39; - maximizes number of least-frequent subset-circuits</span>
+<span class="sd">        2. &#39;spread&#39; - minimizes difference between maximal and minimal number of subset-circuits</span>
+
+<span class="sd">        3. &#39;circuits_amount&#39; - minimizes number of circuits</span>
+<span class="sd">                        (NOTE: it does not make sense to choose this option with additional_circuits&gt;0)</span>
+<span class="sd">        4. &#39;SD&#39; - minimizes standard deviation of occurrences of subset-circuits</span>
+
+<span class="sd">        It is possible to use combined cost functions.</span>
+<span class="sd">        Dictionary must be provided where KEY is label for optimized quantity and VALUE is its weight.</span>
+
+<span class="sd">        For example:</span>
+<span class="sd">        optimized_quantity = {&#39;minimal_amount&#39;: 1.0,</span>
+<span class="sd">                              &#39;spread&#39;:0.5}</span>
+
+<span class="sd">        will give cost function which returns 1.0 * (-number of least frequent circuits)</span>
+<span class="sd">                                          + 0.5 * (difference between most and least fequenet circuits)</span>
+
+
+<span class="sd">        :param additional_circuits: number of circuits which are to be added to the PERFECT collection</span>
+<span class="sd">                                    obtained in optimization loop. Those are &quot;additional&quot; circuits in</span>
+<span class="sd">                                    a sense that they are not needed for collection to be perfect,</span>
+<span class="sd">                                    but instead are used to obtain better values of cost function</span>
+<span class="sd">                                    or just add more experiments reduce statistical noise.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optimized_quantity</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">cost_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_proper_cost_function</span><span class="p">(</span><span class="n">optimized_quantity</span><span class="o">=</span><span class="n">optimized_quantity</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optimized_quantity</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">cost_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_cost_functions</span><span class="p">(</span><span class="n">dictionary_cost_functions</span><span class="o">=</span><span class="n">optimized_quantity</span><span class="p">)</span>
+
+        <span class="n">runs_range</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_iterations</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_show_progress_bars</span><span class="p">:</span>
+            <span class="n">runs_range</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">runs_range</span><span class="p">)</span>
+
+        <span class="c1"># circuit_families = []</span>
+        <span class="c1"># best_family = None</span>
+        <span class="n">global_cost</span><span class="p">,</span> <span class="n">best_family</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">runs_number</span> <span class="ow">in</span> <span class="n">runs_range</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">runs_number</span> <span class="o">%</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">number_of_iterations</span> <span class="o">/</span> <span class="mi">20</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">print_updates</span><span class="p">:</span>
+                <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;Run number:&#39;</span><span class="p">,</span> <span class="n">runs_number</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;Current best value of cost function:&#39;</span><span class="p">,</span> <span class="n">global_cost</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset_everything</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_perfect_collection_bruteforce</span><span class="p">(</span><span class="n">circuits_in_batch</span><span class="o">=</span><span class="n">circuits_in_batch</span><span class="p">,</span>
+                                                        <span class="n">print_updates</span><span class="o">=</span><span class="kc">False</span>
+                                                        <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">additional_circuits</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">current_length</span><span class="p">,</span> <span class="n">maximal_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_list</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maximal_circuits_amount</span>
+                <span class="k">if</span> <span class="n">current_length</span> <span class="o">&lt;</span> <span class="n">maximal_length</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">additional_circuits</span> <span class="o">&gt;</span> <span class="n">maximal_length</span> <span class="o">-</span> <span class="n">current_length</span><span class="p">:</span>
+                        <span class="n">adding_circuits</span> <span class="o">=</span> <span class="n">maximal_length</span> <span class="o">-</span> <span class="n">current_length</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">adding_circuits</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">additional_circuits</span><span class="p">)</span>
+                    <span class="c1"># print(adding_circuits)</span>
+                    <span class="n">new_circuits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_random_circuits</span><span class="p">(</span><span class="n">adding_circuits</span><span class="p">)</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">update_dictionary_subsets_symbols_counting</span><span class="p">(</span><span class="n">new_circuits</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">add_circuits</span><span class="p">(</span><span class="n">new_circuits</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">calculate_properties_of_circuits</span><span class="p">()</span>
+
+            <span class="n">cost_now</span> <span class="o">=</span> <span class="n">cost_function</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">cost_now</span> <span class="o">&lt;</span> <span class="n">global_cost</span><span class="p">:</span>
+                <span class="n">best_family</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_circuits_list</span><span class="p">)</span>
+                <span class="n">global_cost</span> <span class="o">=</span> <span class="n">cost_now</span>
+
+        <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;best family length&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">best_family</span><span class="p">),</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_everything</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_list</span> <span class="o">=</span> <span class="n">best_family</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_dictionary_subsets_symbols_counting</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_properties_of_circuits</span><span class="p">()</span>
+
+<div class="viewcode-block" id="LabelsCreatorDDOT.compute_perfect_collection"><a class="viewcode-back" href="../../../../QREM.noise_characterization.tomography.html#QREM.noise_characterization.tomography.LabelsCreatorDDOT.LabelsCreatorDDOT.compute_perfect_collection">[docs]</a>    <span class="k">def</span> <span class="nf">compute_perfect_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                   <span class="n">method_name</span><span class="o">=</span><span class="s1">&#39;bruteforce_randomized&#39;</span><span class="p">,</span>
+                                   <span class="n">method_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find perfect collection of overlapping circuits.</span>
+<span class="sd">        &quot;Perfect&quot; means that for each subset of qubits self._subsets_list[i],</span>
+<span class="sd">         each symbol out of self._number_of_symbols^self._subsets_list[i],</span>
+<span class="sd">         appears in the collection at least once.</span>
+
+<span class="sd">        :param method_name:</span>
+<span class="sd">        possible values:</span>
+
+<span class="sd">        1. &#39;bruteforce&#39; - see self._compute_perfect_collection_bruteforce</span>
+<span class="sd">        2. &#39;bruteforce_randomized&#39; - see self._compute_perfect_collection_bruteforce_randomized</span>
+
+<span class="sd">        :param method_kwargs: kwargs for chosen method, see corresponding methods&#39; descriptions</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">method_name</span> <span class="o">==</span> <span class="s1">&#39;bruteforce&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">method_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">method_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;circuits_in_batch&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                                 <span class="s1">&#39;print_updates&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_perfect_collection_bruteforce</span><span class="p">(</span><span class="o">**</span><span class="n">method_kwargs</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">method_name</span> <span class="o">==</span> <span class="s1">&#39;bruteforce_randomized&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">method_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">method_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;number_of_iterations&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                                 <span class="s1">&#39;circuits_in_batch&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                                 <span class="s1">&#39;print_updates&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                 <span class="s1">&#39;optimized_quantity&#39;</span><span class="p">:</span> <span class="s1">&#39;minimal_amount&#39;</span><span class="p">,</span>
+                                 <span class="s1">&#39;additional_circuits&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_perfect_collection_bruteforce_randomized</span><span class="p">(</span><span class="o">**</span><span class="n">method_kwargs</span><span class="p">)</span>
+
+        <span class="n">absent_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circuits_properties_dictionary</span><span class="p">[</span><span class="s1">&#39;absent_elements_amount&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">absent_elements</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">anf</span><span class="o">.</span><span class="n">cool_print</span><span class="p">(</span><span class="s1">&#39;________WARNING________:&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;The collection is not perfect. &#39;</span>
+                           <span class="s1">&#39;It is missing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">absent_elements</span>
+                           <span class="o">+</span> <span class="s1">&#39; elements!</span><span class="se">\n</span><span class="s1">Try increasing limit on the circuits amount.&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;red&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">QREM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

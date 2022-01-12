@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QREM.functions_qrem package &mdash; QREM 0.56 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="QREM.functions_qrem.generating_artificial_data package" href="QREM.functions_qrem.generating_artificial_data.html" />
+    <link rel="prev" title="QREM.base_classes package" href="QREM.base_classes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> QREM
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">QREM</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="QREM.html">QREM package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="QREM.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="QREM.PyMaLi.html">QREM.PyMaLi package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="QREM.Tutorials.html">QREM.Tutorials package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="QREM.base_classes.html">QREM.base_classes package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">QREM.functions_qrem package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="QREM.noise_characterization.html">QREM.noise_characterization package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="QREM.noise_mitigation.html">QREM.noise_mitigation package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="QREM.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="QREM.html#module-QREM.name_holder">QREM.name_holder module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="QREM.html#module-QREM">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QREM</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">QREM</a> &raquo;</li>
+          <li><a href="QREM.html">QREM package</a> &raquo;</li>
+      <li>QREM.functions_qrem package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/QREM.functions_qrem.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qrem-functions-qrem-package">
+<h1>QREM.functions_qrem package<a class="headerlink" href="#qrem-functions-qrem-package" title="Permalink to this headline"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="QREM.functions_qrem.generating_artificial_data.html">QREM.functions_qrem.generating_artificial_data package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="QREM.functions_qrem.generating_artificial_data.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QREM.functions_qrem.generating_artificial_data.html#module-QREM.functions_qrem.generating_artificial_data.helper_functions">QREM.functions_qrem.generating_artificial_data.helper_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QREM.functions_qrem.generating_artificial_data.html#qrem-functions-qrem-generating-artificial-data-no-clusters-noise-model-module">QREM.functions_qrem.generating_artificial_data.no_clusters_noise_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QREM.functions_qrem.generating_artificial_data.html#module-QREM.functions_qrem.generating_artificial_data">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-QREM.functions_qrem.ancillary_functions">
+<span id="qrem-functions-qrem-ancillary-functions-module"></span><h2>QREM.functions_qrem.ancillary_functions module<a class="headerlink" href="#module-QREM.functions_qrem.ancillary_functions" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.binary_integer_format">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">binary_integer_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_bits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#binary_integer_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.binary_integer_format" title="Permalink to this definition"></a></dt>
+<dd><p>Return binary representation of an integer
+:param integer:
+:param number_of_bits:
+NOTE: number of bits can be greater than minimal needed to represent integer
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.bit_strings">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">bit_strings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reversed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#bit_strings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.bit_strings" title="Permalink to this definition"></a></dt>
+<dd><p>Generate outcome bitstrings for n-qubits.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>number_of_qubits (int): the number of qubits.</p>
+</dd>
+<dt>Returns:</dt><dd><p>list: arrray_to_print list of bitstrings ordered as follows:
+Example: n=2 returns [‘00’, ‘01’, ‘10’, ‘11’].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.calculate_outer_product">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">calculate_outer_product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#calculate_outer_product"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.calculate_outer_product" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.check_if_there_are_common_elements">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">check_if_there_are_common_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lists</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#check_if_there_are_common_elements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.check_if_there_are_common_elements" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.cool_print">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">cool_print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colored_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">stuff_to_print</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\x1b[36m'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#cool_print"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.cool_print" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>colored_string</strong> – is printed with color</p></li>
+<li><p><strong>stuff_to_print</strong> – is printed without color</p></li>
+<li><p><strong>color</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.enumerated_dictionary">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">enumerated_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">some_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#enumerated_dictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.enumerated_dictionary" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.find_significant_digit">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">find_significant_digit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#find_significant_digit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.find_significant_digit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.gate_proper_date_string">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">gate_proper_date_string</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#gate_proper_date_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.gate_proper_date_string" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.get_bell_basis">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">get_bell_basis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#get_bell_basis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.get_bell_basis" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.get_date_string">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">get_date_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#get_date_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.get_date_string" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.get_k_local_subsets">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">get_k_local_subsets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_qubits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locality</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#get_k_local_subsets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.get_k_local_subsets" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.get_module_directory">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">get_module_directory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#get_module_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.get_module_directory" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.get_qubit_indices_from_string">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">get_qubit_indices_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubits_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#get_qubit_indices_from_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.get_qubit_indices_from_string" title="Permalink to this definition"></a></dt>
+<dd><p>Return list of qubit indices from the string of the form “q0q1q22q31”
+:param qubits_string (string): string which has the form of “q” followed by qubit index
+:param (optional) with_q (Boolean): specify whether returned indices</p>
+<blockquote>
+<div><p>should be in form of string with letter</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of qubit indices:</p>
+</dd>
+</dl>
+<p>depending on value of parameter “with_q” the mapping will be one of the following:</p>
+<dl class="simple">
+<dt>if with_q:</dt><dd><p>‘q1q5q13’ -&gt; [‘q1’,’q5’,’q13’]</p>
+</dd>
+<dt>else:</dt><dd><p>‘q1q5q13’ -&gt; [1,5,13]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.get_qubits_key">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">get_qubits_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#get_qubits_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.get_qubits_key" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>from subset of qubit indices get the string that labels this subset</dt><dd><p>using convention ‘q5q6q12…’ etc.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>list_of_qubits</strong> – labels of qubits</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>string label for qubits</p>
+<p>NOTE: this function is “dual” to get_qubit_indices_from_string.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.get_reversed_enumerated_from_dict">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">get_reversed_enumerated_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enumerated_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#get_reversed_enumerated_from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.get_reversed_enumerated_from_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Get inverse of enumerated dictionary.
+:param enumerated_dict:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.get_reversed_enumerated_from_indices">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">get_reversed_enumerated_from_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#get_reversed_enumerated_from_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.get_reversed_enumerated_from_indices" title="Permalink to this definition"></a></dt>
+<dd><p>Given indices, return map which is inverse of enumerate
+:param indices:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.identity_check">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">identity_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#identity_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.identity_check" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.integer_representation">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">integer_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#integer_representation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.integer_representation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.integer_representation_above10">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">integer_representation_above10</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#integer_representation_above10"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.integer_representation_above10" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.is_stochastic">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">is_stochastic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">potentially_stochastic_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stochasticity_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#is_stochastic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.is_stochastic" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>potentially_stochastic_matrix</strong> – </p></li>
+<li><p><strong>stochasticity_type</strong> – string specyfing what type of stochasticity we want to tests</p></li>
+</ul>
+</dd>
+</dl>
+<p>possible options:</p>
+<ul class="simple">
+<li><p>‘left’ - columns are probability distributions</p></li>
+<li><p>‘right’ - rows are probability distributions</p></li>
+<li><p>‘doubly’ or ‘ortho’ - both columns and rows are probability distributions</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.key_dependent_dict">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">key_dependent_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_of_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#key_dependent_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.key_dependent_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a></p>
+<p>This is class used to construct dictionary which creates values of keys in situ, in case there
+user refers to key that is not present.</p>
+<p>COPYRIGHT NOTE
+This code was taken from Reddit thread:
+<a class="reference external" href="https://www.reddit.com/r/Python/comments/27crqg/making_defaultdict_create_defaults_that_are_a/">https://www.reddit.com/r/Python/comments/27crqg/making_defaultdict_create_defaults_that_are_a/</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.lists_difference">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">lists_difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lst2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#lists_difference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.lists_difference" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.lists_intersection">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">lists_intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lst2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#lists_intersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.lists_intersection" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.lists_intersection_multi">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">lists_intersection_multi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lists</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#lists_intersection_multi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.lists_intersection_multi" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.lists_sum">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">lists_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lst2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#lists_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.lists_sum" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.lists_sum_multi">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">lists_sum_multi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lists</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#lists_sum_multi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.lists_sum_multi" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.open_file_pickle">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">open_file_pickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#open_file_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.open_file_pickle" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.print_array_nicely">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">print_array_nicely</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arrray_to_print</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rounding_decimal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#print_array_nicely"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.print_array_nicely" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.query_yes_no">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">query_yes_no</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">question</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#query_yes_no"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.query_yes_no" title="Permalink to this definition"></a></dt>
+<dd><p>Ask a yes/no question via raw_input() and return their answer.</p>
+<p>“question” is a string that is presented to the user.
+“default” is the presumed answer if the user just hits &lt;Enter&gt;.</p>
+<blockquote>
+<div><p>It must be “yes” (the default), “no” or None (meaning
+an answer is required of the user).</p>
+</div></blockquote>
+<p>The “answer” return value is True for “yes” or False for “no”.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.register_names_qubits">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">register_names_qubits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantum_register_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#register_names_qubits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.register_names_qubits" title="Permalink to this definition"></a></dt>
+<dd><p>Register of qubits of size quantum_register_size, with only bits corresponding to qubit_indices
+varying</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qubit_indices</strong> – </p></li>
+<li><p><strong>quantum_register_size</strong> – </p></li>
+<li><p><strong>rev</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.round_matrix">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">round_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix_to_be_rounded</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#round_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.round_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>This function rounds matrix in a nice way.
+“Nice” means that it removes funny Python artifacts such as “-0.”, “0j” etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matrix_to_be_rounded</strong> – </p></li>
+<li><p><strong>decimal</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.sandwich">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">sandwich</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix_to_be_rotated</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unitary_operator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#sandwich"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.sandwich" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.save_results_pickle">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">save_results_pickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary_to_save</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'no'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_cwd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#save_results_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.save_results_pickle" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.spectral_decomposition">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">spectral_decomposition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#spectral_decomposition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.spectral_decomposition" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.thresh">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">thresh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#thresh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.thresh" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.zero_check">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">zero_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">potential_zero_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'numpy'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#zero_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.zero_check" title="Permalink to this definition"></a></dt>
+<dd><p>Functions that checks if matrix is zero.
+:param potential_zero_matrix:
+:param threshold:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.ancillary_functions.zeros_to_dots">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.ancillary_functions.</span></span><span class="sig-name descname"><span class="pre">zeros_to_dots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/ancillary_functions.html#zeros_to_dots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.ancillary_functions.zeros_to_dots" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-QREM.functions_qrem.functions_data_analysis">
+<span id="qrem-functions-qrem-functions-data-analysis-module"></span><h2>QREM.functions_qrem.functions_data_analysis module<a class="headerlink" href="#module-QREM.functions_qrem.functions_data_analysis" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_data_analysis.KeyDependentDictForMarginals">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_data_analysis.</span></span><span class="sig-name descname"><span class="pre">KeyDependentDictForMarginals</span></span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_data_analysis.html#KeyDependentDictForMarginals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_data_analysis.KeyDependentDictForMarginals" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a></p>
+<p>This is class used to store marginal probability distributions in dictionary.
+It is “key dependent” in the sense that if user tries to refer to non-existing value for some
+KEY, then this value is created as potentially_stochastic_matrix marginal distribution which size depends on the KEY
+NOTE: We assume that provided KEY is potentially_stochastic_matrix string denoting  qubits subset
+(see self.value_creating_function)</p>
+<p>COPYRIGHT NOTE
+The main idea of this code was taken from Reddit thread:
+<a class="reference external" href="https://www.reddit.com/r/Python/comments/27crqg/making_defaultdict_create_defaults_that_are_a/">https://www.reddit.com/r/Python/comments/27crqg/making_defaultdict_create_defaults_that_are_a/</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_data_analysis.add_counts_from_dictionaries">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_data_analysis.</span></span><span class="sig-name descname"><span class="pre">add_counts_from_dictionaries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts_dictionaries_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_data_analysis.html#add_counts_from_dictionaries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_data_analysis.add_counts_from_dictionaries" title="Permalink to this definition"></a></dt>
+<dd><p>Merge multiple counts dictionaries.
+This is useful when you have results of multiple implementations of the same experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>counts_dictionaries_list</strong> – list of results of counts dictionaries of the form:
+{‘bitstring”:number of measurements}</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_data_analysis.convert_counts_overlapping_tomography">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_data_analysis.</span></span><span class="sig-name descname"><span class="pre">convert_counts_overlapping_tomography</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_data_analysis.html#convert_counts_overlapping_tomography"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_data_analysis.convert_counts_overlapping_tomography" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_data_analysis.estimate_energy_from_marginals">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_data_analysis.</span></span><span class="sig-name descname"><span class="pre">estimate_energy_from_marginals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marginals_dictionary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_data_analysis.html#estimate_energy_from_marginals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_data_analysis.estimate_energy_from_marginals" title="Permalink to this definition"></a></dt>
+<dd><p>Compute energy of Hamiltonian from dictionary of marginal distributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>weights_dictionary</strong> – </p></li>
+<li><p><strong>marginals_dictionary</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_data_analysis.get_mini_dict">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_data_analysis.</span></span><span class="sig-name descname"><span class="pre">get_mini_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_qubits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_data_analysis.html#get_mini_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_data_analysis.get_mini_dict" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_data_analysis.get_state_from_circuit_name">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_data_analysis.</span></span><span class="sig-name descname"><span class="pre">get_state_from_circuit_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_data_analysis.html#get_state_from_circuit_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_data_analysis.get_state_from_circuit_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_data_analysis.key_dependent_dict_for_marginals">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_data_analysis.</span></span><span class="sig-name descname"><span class="pre">key_dependent_dict_for_marginals</span></span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_data_analysis.html#key_dependent_dict_for_marginals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_data_analysis.key_dependent_dict_for_marginals" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a></p>
+<p>same as KeyDependentDictForMarginals but different name
+TODO FBM: refactor this</p>
+</dd></dl>
+
+</section>
+<section id="module-QREM.functions_qrem.functions_data_visualization">
+<span id="qrem-functions-qrem-functions-data-visualization-module"></span><h2>QREM.functions_qrem.functions_data_visualization module<a class="headerlink" href="#module-QREM.functions_qrem.functions_data_visualization" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_data_visualization.create_undirected_nxgraph_from_partition">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_data_visualization.</span></span><span class="sig-name descname"><span class="pre">create_undirected_nxgraph_from_partition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_data_visualization.html#create_undirected_nxgraph_from_partition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_data_visualization.create_undirected_nxgraph_from_partition" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_data_visualization.print_partition">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_data_visualization.</span></span><span class="sig-name descname"><span class="pre">print_partition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_data_visualization.html#print_partition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_data_visualization.print_partition" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-QREM.functions_qrem.functions_noise_model_analysis">
+<span id="qrem-functions-qrem-functions-noise-model-analysis-module"></span><h2>QREM.functions_qrem.functions_noise_model_analysis module<a class="headerlink" href="#module-QREM.functions_qrem.functions_noise_model_analysis" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_analysis.cut_subset_sizes">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_analysis.</span></span><span class="sig-name descname"><span class="pre">cut_subset_sizes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clusters_neighbourhoods_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_analysis.html#cut_subset_sizes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_analysis.cut_subset_sizes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_analysis.get_neighborhood_treshold_statitsical_pairs">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_analysis.</span></span><span class="sig-name descname"><span class="pre">get_neighborhood_treshold_statitsical_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_qubits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probability_of_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_analysis.html#get_neighborhood_treshold_statitsical_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_analysis.get_neighborhood_treshold_statitsical_pairs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_analysis.rename_clusters">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_analysis.</span></span><span class="sig-name descname"><span class="pre">rename_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_analysis.html#rename_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_analysis.rename_clusters" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-QREM.functions_qrem.functions_noise_model_heuristic">
+<span id="qrem-functions-qrem-functions-noise-model-heuristic-module"></span><h2>QREM.functions_qrem.functions_noise_model_heuristic module<a class="headerlink" href="#module-QREM.functions_qrem.functions_noise_model_heuristic" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.ClusterSizeError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">ClusterSizeError</span></span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#ClusterSizeError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.ClusterSizeError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NameError" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameError</span></code></a></p>
+<p>Class for handling too small max cluster size</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.InfinityException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">InfinityException</span></span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#InfinityException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.InfinityException" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Class for handling infinity</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.cost_function_simple">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">cost_function_simple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#cost_function_simple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.cost_function_simple" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.cost_function_simple_cummulative">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">cost_function_simple_cummulative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#cost_function_simple_cummulative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.cost_function_simple_cummulative" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.evaluate_move_operation">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">evaluate_move_operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#evaluate_move_operation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_move_operation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.evaluate_move_operation_naive">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">evaluate_move_operation_naive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#evaluate_move_operation_naive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_move_operation_naive" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.evaluate_move_operation_naive_cummulative">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">evaluate_move_operation_naive_cummulative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#evaluate_move_operation_naive_cummulative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_move_operation_naive_cummulative" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.evaluate_swap_operation">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">evaluate_swap_operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#evaluate_swap_operation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_swap_operation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.evaluate_swap_operation_naive">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">evaluate_swap_operation_naive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#evaluate_swap_operation_naive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_swap_operation_naive" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.evaluate_swap_operation_naive_cummulative">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">evaluate_swap_operation_naive_cummulative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#evaluate_swap_operation_naive_cummulative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.evaluate_swap_operation_naive_cummulative" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.f_clust">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">f_clust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#f_clust"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.f_clust" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.f_clust_sharp">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">f_clust_sharp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#f_clust_sharp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.f_clust_sharp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.get_S_i">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">get_S_i</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#get_S_i"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.get_S_i" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.get_S_ij_av">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">get_S_ij_av</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#get_S_ij_av"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.get_S_ij_av" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.get_Sc_i">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">get_Sc_i</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">C_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#get_Sc_i"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.get_Sc_i" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.get_initial_partition">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">get_initial_partition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#get_initial_partition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.get_initial_partition" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.make_move_operation">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">make_move_operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_j</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#make_move_operation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.make_move_operation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.make_swap_operation">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">make_swap_operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_C_j</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#make_swap_operation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.make_swap_operation" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.partition_algorithm_v1">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">partition_algorithm_v1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_alg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#partition_algorithm_v1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.partition_algorithm_v1" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.partition_algorithm_v1_cummulative">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">partition_algorithm_v1_cummulative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">correlations_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_maxsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N_alg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">printing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drawing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#partition_algorithm_v1_cummulative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.partition_algorithm_v1_cummulative" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.functions_noise_model_heuristic.return_cluster_index">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.functions_noise_model_heuristic.</span></span><span class="sig-name descname"><span class="pre">return_cluster_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_qubit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/functions_noise_model_heuristic.html#return_cluster_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.functions_noise_model_heuristic.return_cluster_index" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-QREM.functions_qrem.povmtools">
+<span id="qrem-functions-qrem-povmtools-module"></span><h2>QREM.functions_qrem.povmtools module<a class="headerlink" href="#module-QREM.functions_qrem.povmtools" title="Permalink to this headline"></a></h2>
+<p>&#64;authors: Filip Maciejewski, Oskar Słowik, Tomek Rybotycki
+&#64;contact: <a class="reference external" href="mailto:filip&#46;b&#46;maciejewski&#37;&#52;&#48;gmail&#46;com">filip<span>&#46;</span>b<span>&#46;</span>maciejewski<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<p>References:
+[0] Filip B. Maciejewski, Zoltán Zimborás, Michał Oszmaniec,
+“Mitigation of readout noise in near-term quantum devices
+by classical post-processing based on detector tomography”,
+Quantum 4, 257 (2020)</p>
+<p>[0.5] Filip B. Maciejewski, Flavio Baccari, Zoltán Zimborás, Michał Oszmaniec,
+“Modeling and mitigation of cross-talk effects in readout noise
+with applications to the Quantum Approximate Optimization Algorithm”,
+Quantum 5, 464 (2021).</p>
+<p>[2] Zbigniew Puchała, Łukasz Pawela, Aleksandra Krawiec, Ryszard Kukulski, “Strategies for optimal single-shot
+discrimination of quantum measurements”, Phys. Rev. A 98, 042103 (2018), <a class="reference external" href="https://arxiv.org/abs/1804.05856">https://arxiv.org/abs/1804.05856</a></p>
+<p>[3] T. Weissman, E. Ordentlich, G. Seroussi, S. Verdul, and M. J. Weinberger, Technical Report HPL-2003-97R1,
+Hewlett-Packard Labs (2003).</p>
+<p>[4] John Smolin, Jay M. Gambetta, Graeme Smith, “Maximum Likelihood, Minimum Effort”, Phys. Rev. Lett. 108, 070502
+(2012), <a class="reference external" href="https://arxiv.org/abs/1106.5458">https://arxiv.org/abs/1106.5458</a></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.PauliEigenkets">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">PauliEigenkets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#PauliEigenkets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.PauliEigenkets" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.PauliEigenkets.ONE">
+<span class="sig-name descname"><span class="pre">ONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(3,)</span></em><a class="headerlink" href="#QREM.functions_qrem.povmtools.PauliEigenkets.ONE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.PauliEigenkets.X_MINUS">
+<span class="sig-name descname"><span class="pre">X_MINUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(4,)</span></em><a class="headerlink" href="#QREM.functions_qrem.povmtools.PauliEigenkets.X_MINUS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.PauliEigenkets.X_PLUS">
+<span class="sig-name descname"><span class="pre">X_PLUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(1,)</span></em><a class="headerlink" href="#QREM.functions_qrem.povmtools.PauliEigenkets.X_PLUS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.PauliEigenkets.Y_MINUS">
+<span class="sig-name descname"><span class="pre">Y_MINUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#QREM.functions_qrem.povmtools.PauliEigenkets.Y_MINUS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.PauliEigenkets.Y_PLUS">
+<span class="sig-name descname"><span class="pre">Y_PLUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(2,)</span></em><a class="headerlink" href="#QREM.functions_qrem.povmtools.PauliEigenkets.Y_PLUS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.PauliEigenkets.ZERO">
+<span class="sig-name descname"><span class="pre">ZERO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0,)</span></em><a class="headerlink" href="#QREM.functions_qrem.povmtools.PauliEigenkets.ZERO" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.bit_strings">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">bit_strings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rev=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">form=&lt;class</span> <span class="pre">'str'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#bit_strings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.bit_strings" title="Permalink to this definition"></a></dt>
+<dd><p>Generate outcome bitstrings for number_of_qubits-qubits.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>n (int): the number of qubits.</p>
+</dd>
+<dt>Returns:</dt><dd><p>list:  list of bitstrings ordered as follows:
+Example: number_of_qubits=2 returns [‘00’, ‘01’, ‘10’, ‘11’].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.calculate_total_variation_distance">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">calculate_total_variation_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#calculate_total_variation_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.calculate_total_variation_distance" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>Given two vectors calculate Total-Variation distance between them. See Refs. [1] and [2] for the relation
+between TV-distance and operational distance between quantum measurements.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param p</dt>
+<dd class="field-odd"><p>numpy vector</p>
+</dd>
+<dt class="field-even">param q</dt>
+<dd class="field-even"><p>numpy vector</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>Total variation distance between vectors q and p.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.check_if_projector_is_in_computational_basis">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">check_if_projector_is_in_computational_basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">projector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#check_if_projector_is_in_computational_basis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.check_if_projector_is_in_computational_basis" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.computational_basis">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">computational_basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#computational_basis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.computational_basis" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.computational_projectors">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">computational_projectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#computational_projectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.computational_projectors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.counts_dict_to_frequencies_vector">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">counts_dict_to_frequencies_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">count_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#counts_dict_to_frequencies_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.counts_dict_to_frequencies_vector" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>Generates and returns vector of frequencies basing on given counts dict. Mostly used with qiskit data.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>count_dict</strong> – Counts dict. Possibly from qiskit job.</p>
+</dd>
+<dt class="field-even">Return frequencies</dt>
+<dd class="field-even"><p>Frequencies list for possible states in ascending order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.euler_angles_1q">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">euler_angles_1q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unitary_matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#euler_angles_1q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.euler_angles_1q" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.find_closest_prob_vector">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">find_closest_prob_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quasiprobability_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#find_closest_prob_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.find_closest_prob_vector" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>Given quasiprobability vector (here it means: vector which elements sum up to 1 but some of them are
+negative), find the closest probability vector in Euclidean norm (2-norm). Here we use fast algorithm from
+Ref. [4] and use the fact that probability distributions are special case of quantum states (namely,
+diagonal quantum states) and fact that for diagonal matrices 2-norm between them is the same as 2-norm
+between vectors created from their diagonal elements.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param quasiprobability_vector</dt>
+<dd class="field-odd"><p>Quasiprobability vector for which closest probability vector will be found.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>Probability vector closest to quasiprobability_vector in Euclidean norm.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_CBT_norm">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_CBT_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_CBT_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_CBT_norm" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_POVM_choi">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_POVM_choi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">POVM</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_POVM_choi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_POVM_choi" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_classical_part_of_the_noise">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_classical_part_of_the_noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">povm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_classical_part_of_the_noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_classical_part_of_the_noise" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>From given povm get stochastic map describing classical part of the noise.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param povm</dt>
+<dd class="field-odd"><p>POVM from effects of which diagonal parts shall be extracted.</p>
+</dd>
+</dl>
+</dd>
+<dt>Return:</dt><dd><p>List of numpy arrays representing diagonal parts of given POVM.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_coherent_error_bound">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_coherent_error_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">povm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_coherent_error_bound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_coherent_error_bound" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>Get distance between diagonal part of the POVM and the whole POVM. This quantity might be interpreted as a
+measure of “non-classicality” or coherence present in measurement noise. See Ref. [1] for details.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param povm</dt>
+<dd class="field-odd"><p>POVM for which non-classicality will be determined.</p>
+</dd>
+</dl>
+</dd>
+<dt>Return:</dt><dd><p>Coherent error bound for given POVM.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_coherent_part_of_the_noise">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_coherent_part_of_the_noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">povm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_coherent_part_of_the_noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_coherent_part_of_the_noise" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>Get the off-diagonal part of each of POVM’s effects.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param povm</dt>
+<dd class="field-odd"><p>POVM - list of matrices representing POVM’s effects.</p>
+</dd>
+</dl>
+</dd>
+<dt>Return:</dt><dd><p>List of np.ndarrays representing off-diagonal parts of POVM’s effects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_correction_error_bound_from_data">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_correction_error_bound_from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">povm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_probability</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_correction_error_bound_from_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_correction_error_bound_from_data" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Description:</dt><dd><p>Get upper bound for the correction error using classical error-mitigation via “correction matrix”.</p>
+<p>Error arises from three factors - non-classical part of the noise, statistical fluctuations and eventual
+unphysical “first-guess” (quasi-)probability vector after the correction.</p>
+<p>This upper bound tells us quantitatively what is the maximal TV-distance of the corrected probability vector
+from the ideal probability distribution that one would have obtained if there were no noise and the
+infinite-size statistics.</p>
+<p>See Ref. [0] for details.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param povm</dt>
+<dd class="field-odd"><p>POVM representing measurement device.</p>
+</dd>
+<dt class="field-even">param correction_matrix</dt>
+<dd class="field-even"><p>Correction matrix obtained via out Error Mitigator object.</p>
+</dd>
+<dt class="field-odd">param number_of_samples</dt>
+<dd class="field-odd"><p>number of samples (in qiskit language number of “shots”).</p>
+</dd>
+<dt class="field-even">param error_probability</dt>
+<dd class="field-even"><p>probability with which statistical upper bound is not correct. In other word, 1-mu is</p>
+</dd>
+</dl>
+<p>confidence with which we state the upper bound. See Ref. [3] for details.
+:param alpha: distance between eventual unphysical “first-guess” quasiprobability vector and the closest
+physical one. default is 0 (which corresponds to situation in which corrected vector was proper probability
+vector).</p>
+</dd>
+<dt>Return:</dt><dd><p>Upper bound for correction error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_correction_error_bound_from_data_and_statistical_error">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_correction_error_bound_from_data_and_statistical_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">povm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statistical_error_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_correction_error_bound_from_data_and_statistical_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_correction_error_bound_from_data_and_statistical_error" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Description:</dt><dd><p>Get upper bound for the correction error using classical error-mitigation via “correction matrix”.</p>
+<p>Error arises from three factors - non-classical part of the noise, statistical fluctuations and eventual
+unphysical “first-guess” (quasi-)probability vector after the correction.</p>
+<p>This upper bound tells us quantitatively what is the maximal TV-distance of the corrected probability vector
+from the ideal probability distribution that one would have obtained if there were no noise and the
+infinite-size statistics.</p>
+<p>See Ref. [1] for details.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param povm</dt>
+<dd class="field-odd"><p>POVM representing measurement device.</p>
+</dd>
+<dt class="field-even">param correction_matrix</dt>
+<dd class="field-even"><p>Correction matrix obtained via out Error Mitigator object.</p>
+</dd>
+<dt class="field-odd">param statistical_error_bound</dt>
+<dd class="field-odd"><p>Statistical error bound (epsilon in paper).</p>
+</dd>
+</dl>
+<p>confidence with which we state the upper bound. See Ref. [3] for details.
+:param alpha: distance between eventual unphysical “first-guess” quasiprobability vector and the closest
+physical one. default is 0 (which corresponds to situation in which corrected vector was proper probability
+vector).</p>
+</dd>
+<dt>Return:</dt><dd><p>Upper bound for correction error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_correction_error_bound_from_parameters">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_correction_error_bound_from_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">norm_of_correction_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">statistical_error_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">coherent_error_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_correction_error_bound_from_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_correction_error_bound_from_parameters" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>See description of function “get_correction_error_bound_from_data”. This function can be used if one has the
+proper parameters already calculated and wishes to not repeat it (for example, in case of calculating something
+in the loop).</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:param norm_of_correction_matrix : 1-&gt;1 norm of correction matrix (it is not trace norm!), see Ref. [0],
+or definition of np.linalg.norm(X,ord=1)
+:param statistical_error_bound: upper bound for statistical errors. Can be calculated using function
+get_statistical_error_bound.
+:param coherent_error_bound: magnitude of coherent part of the noise. Can be calculated using function
+get_coherent_error_bound.
+:param alpha: distance between eventual unphysical “first-guess” quasi-probability vector and the closest
+physical one. default is 0 (which corresponds to situation in which corrected vector was proper probability
+vector)</p>
+</dd>
+<dt>Return:</dt><dd><p>Upper bound for correction error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_correction_matrix_from_povm">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_correction_matrix_from_povm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">povm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_correction_matrix_from_povm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_correction_matrix_from_povm" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_density_matrix">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_density_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_density_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_density_matrix" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_diagonal_povm_part">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_diagonal_povm_part</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">povm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_diagonal_povm_part"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_diagonal_povm_part" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>From given povm get only diagonal part as  list.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param povm</dt>
+<dd class="field-odd"><p>POVM from effects of which diagonal parts shall be extracted.</p>
+</dd>
+</dl>
+</dd>
+<dt>Return:</dt><dd><p>List of numpy arrays representing diagonal parts of given POVM.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_enumerated_rev_map_from_indices">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_enumerated_rev_map_from_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_enumerated_rev_map_from_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_enumerated_rev_map_from_indices" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_noise_matrix_from_povm">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_noise_matrix_from_povm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">povm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_noise_matrix_from_povm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_noise_matrix_from_povm" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_off_diagonal_from_matrix">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_off_diagonal_from_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_off_diagonal_from_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_off_diagonal_from_matrix" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>Calculates and returns off-diagonal part of given matrix.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param matrix</dt>
+<dd class="field-odd"><p>Matrix for which off-diagonal part shall be calculated.</p>
+</dd>
+</dl>
+</dd>
+<dt>Return:</dt><dd><p>Off-diagonal part of the matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_off_diagonal_povm_part">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_off_diagonal_povm_part</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">povm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_off_diagonal_povm_part"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_off_diagonal_povm_part" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>Get the off-diagonal part of each of POVM’s effects.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param povm</dt>
+<dd class="field-odd"><p>POVM - list of matrices representing POVM’s effects.</p>
+</dd>
+</dl>
+</dd>
+<dt>Return:</dt><dd><p>List of np.ndarrays representing off-diagonal parts of POVM’s effects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_pauli_eigenket">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_pauli_eigenket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_pauli_eigenket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_pauli_eigenket" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_possible_n_qubit_outcomes">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_possible_n_qubit_outcomes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_possible_n_qubit_outcomes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_possible_n_qubit_outcomes" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>Description:</dt><dd><dl class="simple">
+<dt>For given number of qubits number_of_qubits generates a list of possible outcome states</dt><dd><p>(as strings) and returns them in</p>
+</dd>
+</dl>
+<p>ascending order. All states len is number_of_qubits.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> – Number of qubits.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of possible outcomes as strings.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_statistical_error_bound">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_statistical_error_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_measurement_outcomes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">statistical_error_mistake_probability</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_marginals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_statistical_error_bound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_statistical_error_bound" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>Get upper bound for tv-distance of estimated probability distribution from ideal one. See Ref. [3] for
+details.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param number_of_measurement_outcomes</dt>
+<dd class="field-odd"><p>Number of outcomes in probabiility distribution (2^(number_of_qubits) for standard measurement)</p>
+</dd>
+<dt class="field-even">param number_of_samples</dt>
+<dd class="field-even"><p>Number of samples for experiment for which statistical error bound is being calculated.</p>
+</dd>
+<dt class="field-odd">param statistical_error_mistake_probability</dt>
+<dd class="field-odd"><p>Parameter describing infidelity of returned error bound.</p>
+</dd>
+</dl>
+</dd>
+<dt>Return:</dt><dd><p>Statistical error upper bound in total variance distance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_su2_parametrizing_angles">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_su2_parametrizing_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_su2_parametrizing_angles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_su2_parametrizing_angles" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_unitary_change_ket_qubit">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_unitary_change_ket_qubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_unitary_change_ket_qubit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_unitary_change_ket_qubit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.get_unitary_change_state">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">get_unitary_change_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#get_unitary_change_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.get_unitary_change_state" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.is_pauli_x">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">is_pauli_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#is_pauli_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.is_pauli_x" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.is_valid_probability_vector">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">is_valid_probability_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">examined_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#is_valid_probability_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.is_valid_probability_vector" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Description:</dt><dd><p>Checks if given vector is valid probability vector i_index.e. has only positive values that sums to 1.</p>
+</dd>
+<dt>Parameters:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">param examined_vector</dt>
+<dd class="field-odd"><p>Vector of probabilities for which the validity is checked.</p>
+</dd>
+<dt class="field-even">param threshold</dt>
+<dd class="field-even"><p>Error cluster_threshold when determining probabilities sum condition.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>Information whether examined_vector is valid probability vector or not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.ket_to_bra">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">ket_to_bra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ket</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#ket_to_bra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.ket_to_bra" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.operational_distance_POVMs">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">operational_distance_POVMs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'direct'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#operational_distance_POVMs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.operational_distance_POVMs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.permute_matrix">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">permute_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transposition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#permute_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.permute_matrix" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.qubit_swap">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">qubit_swap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transposition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#qubit_swap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.qubit_swap" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.register_names_qubits">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">register_names_qubits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qrs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#register_names_qubits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.register_names_qubits" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.reorder_classical_register">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">reorder_classical_register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#reorder_classical_register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.reorder_classical_register" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.reorder_probabilities">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">reorder_probabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">probabilities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#reorder_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.reorder_probabilities" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.sort_bitstring">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">sort_bitstring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#sort_bitstring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.sort_bitstring" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QREM.functions_qrem.povmtools.sort_things">
+<span class="sig-prename descclassname"><span class="pre">QREM.functions_qrem.povmtools.</span></span><span class="sig-name descname"><span class="pre">sort_things</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stuff_to_sort</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">according_to_what</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QREM/functions_qrem/povmtools.html#sort_things"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QREM.functions_qrem.povmtools.sort_things" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-QREM.functions_qrem">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-QREM.functions_qrem" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="QREM.base_classes.html" class="btn btn-neutral float-left" title="QREM.base_classes package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="QREM.functions_qrem.generating_artificial_data.html" class="btn btn-neutral float-right" title="QREM.functions_qrem.generating_artificial_data package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

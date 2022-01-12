@@ -1,0 +1,221 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QREM.PyMaLi.GeneralTensorCalculator &#8212; QREM 0.56 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for QREM.PyMaLi.GeneralTensorCalculator</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Lock</span>
+
+
+<div class="viewcode-block" id="GeneralTensorCalculator"><a class="viewcode-back" href="../../../QREM.PyMaLi.html#QREM.PyMaLi.GeneralTensorCalculator.GeneralTensorCalculator">[docs]</a><span class="k">class</span> <span class="nc">GeneralTensorCalculator</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+    <span class="c1"># Calculates tensor for given object using function f provided in the constructor.</span>
+<div class="viewcode-block" id="GeneralTensorCalculator.calculate_tensor"><a class="viewcode-back" href="../../../QREM.PyMaLi.html#QREM.PyMaLi.GeneralTensorCalculator.GeneralTensorCalculator.calculate_tensor">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="c1"># Get indices combinations</span>
+        <span class="n">indices_combinations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_indices_combinations</span><span class="p">(</span><span class="n">objects</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+        <span class="c1"># Initialize tensor with empty values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__initialize_tensor</span><span class="p">(</span><span class="n">indices_combinations</span><span class="p">)</span>
+
+        <span class="c1"># Prepare for multiprocessing</span>
+        <span class="n">threads</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Fill tensor dict with values</span>
+        <span class="k">for</span> <span class="n">combination</span> <span class="ow">in</span> <span class="n">indices_combinations</span><span class="p">:</span>
+            <span class="n">thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">count_tensor_value_for_combination</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">combination</span><span class="p">,</span> <span class="n">objects</span><span class="p">,))</span>
+            <span class="n">threads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thread</span><span class="p">)</span>
+            <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="n">threads</span><span class="p">:</span>
+            <span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span></div>
+
+    <span class="c1"># Calculates tensor for given object using function f provided in the constructor, but returns</span>
+    <span class="c1"># results as a list with increasing order.</span>
+<div class="viewcode-block" id="GeneralTensorCalculator.calculate_tensor_to_increasing_list"><a class="viewcode-back" href="../../../QREM.PyMaLi.html#QREM.PyMaLi.GeneralTensorCalculator.GeneralTensorCalculator.calculate_tensor_to_increasing_list">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_tensor_to_increasing_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">tensor_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_tensor</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
+        <span class="n">tensor_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_increasing_objects_dict_from_list</span><span class="p">(</span><span class="n">tensor_dict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tensor_list</span></div>
+
+    <span class="k">def</span> <span class="nf">__get_increasing_objects_dict_from_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">objects_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dict_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="c1"># This may cause problem if the tensor was somehow calculated for dicts, if it&#39;s even possible.</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">dict_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dict_keys</span><span class="p">:</span>
+                <span class="n">objects_list</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_increasing_objects_dict_from_list</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dict_keys</span><span class="p">:</span>
+                <span class="n">objects_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">objects_list</span>
+
+    <span class="c1"># This method has to be public in order to be used in multiprocessing.</span>
+<div class="viewcode-block" id="GeneralTensorCalculator.count_tensor_value_for_combination"><a class="viewcode-back" href="../../../QREM.PyMaLi.html#QREM.PyMaLi.GeneralTensorCalculator.GeneralTensorCalculator.count_tensor_value_for_combination">[docs]</a>    <span class="k">def</span> <span class="nf">count_tensor_value_for_combination</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">combination</span><span class="p">,</span> <span class="n">objects</span><span class="p">):</span>
+
+        <span class="c1"># First count function value for better multiprocessing performance</span>
+        <span class="n">f_arguments</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Note that len of objects should be equal to len of current_combination as it contains index value</span>
+        <span class="c1"># for each object.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)):</span>
+            <span class="n">f_arguments</span> <span class="o">+=</span> <span class="p">[</span><span class="n">objects</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">combination</span><span class="p">[</span><span class="n">i</span><span class="p">]]]</span>
+
+        <span class="c1"># Calculate function value now, so that tensor is locked for less time.</span>
+        <span class="n">function_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">f_arguments</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">combination</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">[</span><span class="n">combination</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">tensor</span><span class="p">[</span><span class="n">combination</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">function_value</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
+
+    <span class="c1"># Get combinations of all possible indices variation.</span>
+    <span class="k">def</span> <span class="nf">__get_indices_combinations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="c1"># Finish if objects list is empty. This should not happen.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">combinations</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Termination condition</span>
+        <span class="c1"># If it&#39;s the last element of the list of objects create and return list of it&#39;s possible indexes</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+                <span class="n">combinations</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">combinations</span>
+
+        <span class="c1"># Recursive call</span>
+        <span class="c1"># If there are still multiple objects take first and make recursive call</span>
+        <span class="n">first_object</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">other_objects_combination</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_indices_combinations</span><span class="p">(</span><span class="n">objects</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+        <span class="c1"># Then add to combinations sum of other_objects_combinations and popped object indices</span>
+        <span class="c1"># Note that order is important here</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first_object</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">combination</span> <span class="ow">in</span> <span class="n">other_objects_combination</span><span class="p">:</span>
+                <span class="n">combinations</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">combination</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">combinations</span>
+
+    <span class="c1"># Initializing tensor as dict of dict of dict ... with zeros. Initialization for each combination is performed</span>
+    <span class="c1"># once at a time.</span>
+    <span class="k">def</span> <span class="nf">__initialize_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices_combination</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Error check.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices_combination</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">combination</span> <span class="ow">in</span> <span class="n">indices_combination</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__initialize_combination_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">combination</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+    <span class="c1"># Initializing tensor with 0 for given path</span>
+    <span class="k">def</span> <span class="nf">__initialize_combination_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">combination</span><span class="p">):</span>
+        <span class="c1"># Error check</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">combination</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Termination condition</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">combination</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tensor</span><span class="p">[</span><span class="n">combination</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Recursive call</span>
+        <span class="n">initialized_index</span> <span class="o">=</span> <span class="n">combination</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tensor</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">initialized_index</span><span class="p">):</span>
+            <span class="n">tensor</span><span class="p">[</span><span class="n">initialized_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__initialize_combination_path</span><span class="p">(</span><span class="n">tensor</span><span class="p">[</span><span class="n">initialized_index</span><span class="p">],</span> <span class="n">combination</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">QREM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Filip B. Maciejewski, Tomasz Rybotycki, Oskar Słowik, Jan Tuziemski, Michał Oszmaniec.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
